@@ -65,7 +65,10 @@ escalation criterion, not the task content, is what's tightly controlled.
 `AgentTask.permissions` is advisory to the adapter, which is responsible for
 actually enforcing it against whatever backend is running (a real `opencode`
 subprocess restricted to a workspace directory, or the fake backend used in
-these examples). Real deployments should back this with OS-level
-enforcement (a container, a restricted user, a read-only bind mount) — see
-`sandboxing.md`. Don't rely on the agent "choosing" to respect a permission
+these examples). Real deployments should back this with plain OS-level
+enforcement — a restricted, unprivileged OS user for the OpenCode process,
+a read-only bind mount for everything outside the workspace — not a
+container runtime; see `sandboxing.md` for why this repo treats a
+container as an opt-in escalation for a stronger threat model, not the
+default. Don't rely on the agent "choosing" to respect a permission
 string; the workspace boundary is what actually has to hold.

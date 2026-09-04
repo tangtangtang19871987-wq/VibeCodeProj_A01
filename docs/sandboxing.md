@@ -37,11 +37,14 @@ as the primary defense:
   `execute` tool when the backend itself is something that can safely run
   shell commands — the sandboxing decision is made once, at backend
   selection, not re-litigated per tool call.
-- **Open SWE** runs every task inside an isolated sandbox (Daytona, Modal,
-  E2B, or local), tied to a thread id so it's resumable — the isolation is
-  the control, not a permission list layered on top of a shared filesystem.
+- **Open SWE** runs every task inside an isolated sandbox — pluggable
+  cloud providers (Daytona, Modal, E2B) or local — tied to a thread id so
+  it's resumable. The isolation is the control, not a permission list
+  layered on top of a shared filesystem; *which* isolation mechanism backs
+  it is a separate, swappable decision. This repo makes a different choice
+  than Open SWE's default on that second point — see below.
 
-## What this repo actually uses
+## What this repo actually uses — and deliberately does not use
 
 `AgentTask.workspace` (`src/contracts.py`) is a `Path` the *calling node*
 creates before the task starts:
@@ -50,10 +53,33 @@ creates before the task starts:
   used read/write within the example's own scope.
 - **Example `08`:** a real disposable temp directory, created and destroyed
   by LangGraph nodes, not by OpenCode.
-- **Production guidance (not implemented here, to keep the repo teaching-sized):**
-  the same `workspace` field should point at a container mount or a
-  restricted-user chroot when the blast radius of a mistake is real — the
-  contract doesn't change, only what backs `workspace` on disk does.
+
+This repo intentionally does not reach for a container runtime (Docker,
+Daytona, or similar) for that isolation, even though several surveyed
+projects default to one. A container is a heavier dependency than the
+problem needs here: it means a container daemon or cloud sandbox API to
+install, configure, and keep working, for tasks whose actual isolation
+requirement is "don't let this touch anything outside one directory, and
+be able to throw the directory away." A plain OS-level boundary gets that
+without the extra moving part:
+
+- A disposable directory (`tempfile.mkdtemp()`, as in example `08`) for
+  the default case.
+- Where the blast radius of a mistake is real, run the OpenCode process as
+  its own unprivileged OS user with write access to nothing but the
+  workspace directory (`chown`/`chmod`, or a read-only bind mount for
+  everything that isn't the workspace) — no container image, registry, or
+  runtime required, just filesystem permissions the OS already enforces.
+- Resource limits (a subprocess timeout, `ulimit`-style caps) cover the
+  "runaway process" case a container's cgroups would otherwise be used for,
+  without adding cgroups as a dependency.
+
+The `AgentTask.workspace` contract doesn't change either way — only what
+backs it on disk does. If a real deployment's threat model genuinely needs
+stronger isolation than an OS user boundary gives (untrusted multi-tenant
+code, for instance), that's a legitimate reason to add a container or a
+cloud sandbox provider — but it should be a deliberate response to that
+requirement, not the default starting point.
 
 ## Wide observation, narrow mutation
 

@@ -69,9 +69,17 @@ system.
 ## Where this repository intentionally stops
 
 This is a teaching repository, not a production framework. It does not
-include: a persistent checkpointer wired up end-to-end, container-based
-sandbox enforcement, observability/tracing integration, or a real
-multi-provider LLM abstraction. Each of those is a reasonable next step for
-a production system built on this pattern, and each is called out at the
-point in `docs/` where it would matter, rather than built here and left
-half-finished.
+include a persistent checkpointer wired up end-to-end, observability/
+tracing integration, or a real multi-provider LLM abstraction. Each of
+those is a reasonable next step for a production system built on this
+pattern, and each is called out at the point in `docs/` where it would
+matter, rather than built here and left half-finished.
+
+Container-based sandboxing is a different case: it's not merely left out
+for scope, it's a deliberate design choice this repo argues against as a
+default (`docs/sandboxing.md`). The bounded, short-lived, single-directory
+tasks this pattern targets don't need a container daemon or cloud sandbox
+API — a disposable OS directory plus a restricted OS user covers the same
+isolation requirement with one less moving dependency. Reach for an actual
+container only when a task's threat model specifically calls for it
+(untrusted multi-tenant code, for instance), not as the starting point.

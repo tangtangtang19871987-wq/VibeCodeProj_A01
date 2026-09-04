@@ -239,6 +239,8 @@ subagent-context mechanism and OpenCode's fail-closed headless invocation.
 - A context compressor/condenser — OpenHands' `condenser` and Deep Agents'
   `SummarizationMiddleware` both already exist; this repo's context
   isolation is about *boundaries*, not *compression*.
-- A general permission/sandboxing framework — disposable OS-level
-  workspaces (temp dirs / containers) plus OpenCode's own permission tiers
-  cover this without a bespoke system.
+- A general permission/sandboxing framework, and — deliberately, unlike
+  several projects surveyed — a container runtime. Disposable OS-level
+  workspaces (plain temp dirs, an unprivileged restricted OS user) plus
+  OpenCode's own permission tiers cover the isolation this repo needs
+  without either (`docs/sandboxing.md`).
