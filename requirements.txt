@@ -1,0 +1,11 @@
+# Core: the only hard dependency for examples 00-09 to run.
+langgraph>=1.0,<2.0
+
+# Used by the bundled broken_project fixtures' test suites (examples
+# 04-06, 08) and by src/verifier.py's run_pytest helper.
+pytest>=8.0
+
+# Optional: only used by examples/01_llm_inside_graph when ANTHROPIC_API_KEY
+# is set. Every example runs without it, using a clearly-labeled
+# deterministic stub instead.
+# anthropic>=0.40

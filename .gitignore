@@ -50,3 +50,6 @@ htmlcov/
 *.tmp
 *.bak
 *.log
+
+# Example-run output (not source — see examples/08_disposable_workspace)
+examples/08_disposable_workspace/promoted/
