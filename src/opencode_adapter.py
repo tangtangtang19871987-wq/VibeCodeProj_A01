@@ -38,12 +38,27 @@ _LOG_FILENAME = "opencode_session.log"
 
 
 class CLIBackend:
-    """Invokes the real `opencode` CLI in non-interactive mode."""
+    """Invokes the real `opencode` CLI in non-interactive mode.
+
+    Deliberately never passes `--continue`, `--session`, or `--fork`
+    (packages/opencode/src/cli/cmd/run.ts — see research/sources.md).
+    Omitting them is what makes every call start a brand-new OpenCode
+    session with empty history: no prior task's conversation, file reads,
+    or shell output is visible to this one. `AgentTask` (src/contracts.py)
+    has no session-id field at all, so there is nothing a caller could pass
+    in even by accident to opt back into continuation — see
+    docs/context_management.md's "session isolation" section for the full
+    argument.
+    """
 
     def execute(self, task: AgentTask) -> AgentResult:
         task.workspace.mkdir(parents=True, exist_ok=True)
         log_path = task.workspace / _LOG_FILENAME
-        cmd = ["opencode", "run", "--format", "json", task.instruction]
+        fixed_args = ["opencode", "run", "--format", "json"]  # never add -c/--continue/--session/--fork here
+        cmd = [*fixed_args, task.instruction]
+        assert not any(a.startswith(("--continue", "--session", "--fork", "-c", "-s")) for a in fixed_args), (
+            "CLIBackend must never continue a prior OpenCode session — see class docstring"
+        )
         try:
             proc = subprocess.run(
                 cmd,

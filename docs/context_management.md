@@ -59,6 +59,48 @@ proven in the wild (see `research/project_comparison.md` for full detail):
   into what's supposed to be stable — is the same discipline this repo
   applies at the LangGraph/OpenCode boundary.
 
+## Session isolation: the other direction
+
+Everything above is about OpenCode's output not leaking into LangGraph.
+The reverse matters just as much: an OpenCode node must not be influenced
+by history it has no business seeing — its own prior sessions, or
+LangGraph's own accumulated thread/checkpoint history. Three separate
+mechanisms enforce this, and all three have to hold; any one alone is not
+enough.
+
+1. **A fresh OpenCode session every call, no exceptions.** OpenCode's CLI
+   supports continuing a previous session (`--continue`/`-c`,
+   `--session`/`-s`, `--fork` — `research/sources.md`). `CLIBackend`
+   (`src/opencode_adapter.py`) never passes any of them — every
+   `OpenCodeAdapter.run()` call starts a brand-new session with empty
+   history, and an `assert` in `CLIBackend.execute()` is a tripwire against
+   ever adding one back by accident. This is also why `AgentTask`
+   (`src/contracts.py`) has no `session_id` field at all: there's no
+   argument slot for a caller to accidentally hand OpenCode a stale
+   session to continue. If a real task genuinely needs multi-turn memory
+   of *its own* earlier attempts (example `06`'s retry loop), that memory
+   is threaded explicitly through `AgentTask.instruction` (the verifier's
+   own failure text, folded in by a deterministic node) — never through
+   OpenCode's session store.
+2. **A workspace is scoped to one logical task, never shared across
+   unrelated ones.** OpenCode can read anything sitting in its workspace
+   directory, so stale files from a *different* task in the same directory
+   are a second history-leak vector even with a fresh session — it might
+   read an old note, a half-applied fix, or a previous task's log and let
+   that quietly bias its investigation. The rule: a workspace may be
+   reused across repeated attempts at the *same* task (example `06`
+   reuses one workspace across its retry loop on purpose — that's the
+   task's own evolving state, not contamination), but a genuinely
+   different task always gets a fresh one (`tempfile.mkdtemp()`, as in
+   examples `04`, `08`, `09`). Never point two unrelated `AgentTask`s at
+   the same workspace.
+3. **`AgentTask.context` is built fresh by the calling node, never copied
+   from LangGraph's own accumulated state.** A node with access to a
+   checkpointed thread's full history should still hand OpenCode only the
+   two or three fields relevant to *this* task — see "Practical guidance"
+   below. Otherwise the LangGraph side becomes the history-leak vector
+   instead of OpenCode's session store.
+
 ## What this is *not*
 
 This is not a context-compression system. Summarization/condensing (Deep
