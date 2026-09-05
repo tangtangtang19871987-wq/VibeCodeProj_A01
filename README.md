@@ -79,7 +79,7 @@ examples/
 
 src/
     contracts.py          — AgentTask / AgentResult / VerificationResult
-    opencode_adapter.py    — the only place that invokes OpenCode (real CLI or an honest fake backend)
+    opencode_adapter.py    — the only place that invokes OpenCode (SDK, CLI, or an honest fake backend)
     verifier.py            — deterministic, OpenCode-independent success checks
 ```
 
@@ -93,16 +93,26 @@ python examples/09_domain_workflow_with_agent_escape_hatch/main.py
 ```
 
 Every example runs out of the box with no external services, API keys, or
-the real OpenCode CLI installed:
+real OpenCode installation:
 
 - `examples/01` falls back to a clearly-labeled deterministic stub if
   `ANTHROPIC_API_KEY` isn't set.
 - `examples/03` onward default to `src/opencode_adapter.py`'s `FakeBackend`
   — an explicit, honest test double (see its docstring), not a
-  reimplementation of OpenCode. Set `OPENCODE_ADAPTER_BACKEND=cli` (with
-  the real `opencode` CLI on `PATH` and a model configured) to run any of
-  them against the real thing with zero code changes — that portability is
-  the entire point of `src/opencode_adapter.py` existing.
+  reimplementation of OpenCode. To run any of them against the real thing,
+  with zero code changes — that portability is the entire point of
+  `src/opencode_adapter.py` existing:
+  - `OPENCODE_ADAPTER_BACKEND=sdk` — talks to an already-running
+    `opencode serve` through the official `opencode-ai` Python client
+    (`pip install --pre opencode-ai`; also set
+    `AgentTask.context['provider_id']`/`['model_id']` or
+    `OPENCODE_PROVIDER`/`OPENCODE_MODEL`). This is the preferred backend
+    when a server is available — structured responses instead of parsed
+    CLI text — and `OPENCODE_ADAPTER_BACKEND=auto` (the default) already
+    picks it automatically whenever a server is reachable.
+  - `OPENCODE_ADAPTER_BACKEND=cli` — shells out to the `opencode` CLI
+    (needs the binary on `PATH` and a model configured), no server
+    required.
 
 ## What this repository is not
 

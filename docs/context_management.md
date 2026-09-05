@@ -68,20 +68,23 @@ LangGraph's own accumulated thread/checkpoint history. Three separate
 mechanisms enforce this, and all three have to hold; any one alone is not
 enough.
 
-1. **A fresh OpenCode session every call, no exceptions.** OpenCode's CLI
-   supports continuing a previous session (`--continue`/`-c`,
-   `--session`/`-s`, `--fork` — `research/sources.md`). `CLIBackend`
-   (`src/opencode_adapter.py`) never passes any of them — every
-   `OpenCodeAdapter.run()` call starts a brand-new session with empty
-   history, and an `assert` in `CLIBackend.execute()` is a tripwire against
-   ever adding one back by accident. This is also why `AgentTask`
-   (`src/contracts.py`) has no `session_id` field at all: there's no
-   argument slot for a caller to accidentally hand OpenCode a stale
-   session to continue. If a real task genuinely needs multi-turn memory
-   of *its own* earlier attempts (example `06`'s retry loop), that memory
-   is threaded explicitly through `AgentTask.instruction` (the verifier's
-   own failure text, folded in by a deterministic node) — never through
-   OpenCode's session store.
+1. **A fresh OpenCode session every call, no exceptions.** Both real
+   backends in `src/opencode_adapter.py` get this independently:
+   `CLIBackend` never passes `--continue`/`-c`, `--session`/`-s`, or
+   `--fork` (`research/sources.md`), with an `assert` in
+   `CLIBackend.execute()` as a tripwire against ever adding one back by
+   accident; `SDKBackend` calls `client.session.create()` itself at the
+   start of every `execute()` and never accepts an externally supplied
+   session id — its docstring says so explicitly, and it's the more
+   visible of the two guarantees, since you get back a real `Session`
+   object with a fresh id each time rather than relying on the *absence*
+   of a flag. Either way, `AgentTask` (`src/contracts.py`) has no
+   `session_id` field at all: there's no argument slot for a caller to
+   accidentally hand OpenCode a stale session to continue. If a real task
+   genuinely needs multi-turn memory of *its own* earlier attempts
+   (example `06`'s retry loop), that memory is threaded explicitly through
+   `AgentTask.instruction` (the verifier's own failure text, folded in by
+   a deterministic node) — never through OpenCode's session store.
 2. **A workspace is scoped to one logical task, never shared across
    unrelated ones.** OpenCode can read anything sitting in its workspace
    directory, so stale files from a *different* task in the same directory

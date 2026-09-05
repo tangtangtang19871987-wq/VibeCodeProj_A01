@@ -9,3 +9,9 @@ pytest>=8.0
 # is set. Every example runs without it, using a clearly-labeled
 # deterministic stub instead.
 # anthropic>=0.40
+
+# Optional: only used by src/opencode_adapter.py's SDKBackend, the
+# preferred way to talk to a real, already-running `opencode serve`
+# server (see docs/context_management.md and research/sources.md). Every
+# example runs without it via the fake backend.
+# opencode-ai>=0.1

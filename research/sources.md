@@ -39,6 +39,29 @@ that substitution is noted inline.
   (full file/bash access), `plan` (read-only, bash gated behind a permission
   prompt), `general` (a subagent reachable via `@general` for open-ended
   search) — an in-product example of "wide observation, narrow mutation."
+- **Official Python client:** `opencode-ai` on PyPI
+  (https://github.com/sst/opencode-sdk-python), generated from
+  `packages/sdk/openapi.json` by Stainless (the same generator family
+  Anthropic's own SDKs use). Installed and introspected directly in this
+  environment (`pip install --pre opencode-ai`) rather than taken from
+  docs, since `opencode.ai` itself is unreachable here: `Opencode(base_url=...)`
+  defaults to `http://localhost:54321` or `OPENCODE_BASE_URL`, and talks to
+  an already-running `opencode serve` — it does not start one itself.
+  Relevant methods verified by inspecting the installed package's
+  signatures and Pydantic models: `client.session.create()` (a fresh
+  `Session` with its own `id`), `client.session.chat(id, provider_id=,
+  model_id=, parts=[{"type": "text", "text": ...}])` (blocks until the
+  assistant's turn completes, requires an explicit provider/model — no
+  default), and `client.session.messages(id)` (the full
+  `[{info: Message, parts: [Part, ...]}, ...]` transcript, used the same
+  way `run.ts`'s stdout was: written to disk, never inlined into a
+  result — see `docs/context_management.md`). `src/opencode_adapter.py`'s
+  `SDKBackend` is built directly against these introspected shapes,
+  cross-checked with mocks against the real `opencode_ai.types` classes
+  (no live `opencode serve` was available in this environment to test
+  against end-to-end).
+  An earlier version of this research incorrectly stated no Python SDK
+  existed; corrected here.
 
 ## Deep Agents (langchain-ai/deepagents)
 

@@ -54,6 +54,22 @@ creates before the task starts:
 - **Example `08`:** a real disposable temp directory, created and destroyed
   by LangGraph nodes, not by OpenCode.
 
+**This guarantee is backend-dependent — read `SDKBackend`'s docstring in
+`src/opencode_adapter.py` before relying on it.** `CLIBackend` gets
+workspace scoping for free (`subprocess.run(..., cwd=task.workspace)`).
+`SDKBackend` does not: the `opencode-ai` Python client (as of
+v0.1.0-alpha.36) has no per-session directory parameter at all — a server's
+working directory is fixed for that `opencode serve` process's lifetime.
+`SDKBackend.execute()` checks the server's actual cwd against
+`task.workspace` on every call and fails closed on a mismatch rather than
+silently running against the wrong directory, but the operational
+consequence is real: using `SDKBackend` with per-task disposable
+workspaces (this section's whole point) means running **one `opencode
+serve` process per workspace**, not one shared long-lived server. If your
+deployment genuinely needs one shared server across many tasks, `CLIBackend`
+currently gives you the disposable-workspace property this doc argues for;
+`SDKBackend` doesn't, yet.
+
 This repo intentionally does not reach for a container runtime (Docker,
 Daytona, or similar) for that isolation, even though several surveyed
 projects default to one. A container is a heavier dependency than the

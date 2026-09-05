@@ -10,7 +10,9 @@ every example from `03` onward:
 2. **What context is provided** — `AgentTask.context`, a small explicit
    dict (see `context_management.md`).
 3. **What workspace is available** — `AgentTask.workspace`, a `Path` the
-   caller creates and owns (see `sandboxing.md`).
+   caller creates and owns (see `sandboxing.md` — and its callout that this
+   guarantee is currently backend-dependent: `SDKBackend` cannot enforce it
+   by itself the way `CLIBackend` does).
 4. **What resources/permissions are allowed** — `AgentTask.permissions`, a
    plain string profile (`"read_only"` / `"read_write"` / `"read_write_exec"`)
    the adapter maps onto real flags/env for the backend in use.
