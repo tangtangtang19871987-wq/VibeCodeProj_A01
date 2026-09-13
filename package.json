@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "tsx scripts/e2e.ts",
     "seed": "pnpm --filter @lams/daemon run seed",
     "arch:check": "depcruise --config .dependency-cruiser.cjs packages apps"
   },
@@ -21,6 +22,7 @@
     "@types/node": "^22.10.5",
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",
+    "@playwright/test": "^1.49.1",
     "concurrently": "^9.1.2",
     "dependency-cruiser": "^16.9.0",
     "eslint": "^9.18.0",

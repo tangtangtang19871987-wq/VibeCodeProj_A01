@@ -1,3 +1,7 @@
+import type { MemoryDetail, MemoryKind, MemoryListItem, MemoryStatus } from "./memory-types.js";
+
+export * from "./memory-types.js";
+
 export type HealthReport = {
   ok: boolean;
   checks: {
@@ -28,10 +32,37 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
   if (!res.ok && res.status !== 503) {
-    throw new Error(`Request to ${path} failed: ${res.status} ${res.statusText}`);
+    const body = await res.text();
+    throw new Error(`Request to ${path} failed: ${res.status} ${res.statusText} — ${body}`);
   }
   return (await res.json()) as T;
 }
+
+export type MemoryListParams = {
+  q?: string;
+  status?: MemoryStatus[];
+  kind?: MemoryKind[];
+  scope?: string;
+  includeDeleted?: boolean;
+};
+
+function toQueryString(params: MemoryListParams): string {
+  const sp = new URLSearchParams();
+  if (params.q) sp.set("q", params.q);
+  if (params.status?.length) sp.set("status", params.status.join(","));
+  if (params.kind?.length) sp.set("kind", params.kind.join(","));
+  if (params.scope) sp.set("scope", params.scope);
+  if (params.includeDeleted) sp.set("includeDeleted", "true");
+  const s = sp.toString();
+  return s ? `?${s}` : "";
+}
+
+export type CreateMemoryInput = {
+  kind: MemoryKind;
+  scope: { level: string; id?: string };
+  status?: MemoryStatus;
+  version: { title: string; content: string; summary?: string; tags?: string[] };
+};
 
 export const api = {
   health: () => request<HealthReport>("/api/v1/health"),
@@ -41,4 +72,32 @@ export const api = {
       method: "POST",
       body: JSON.stringify(input),
     }),
+
+  listMemories: (params: MemoryListParams) =>
+    request<{ items: MemoryListItem[]; nextCursor?: string }>(
+      `/api/v1/memories${toQueryString(params)}`,
+    ),
+  getMemory: (id: string) => request<MemoryDetail>(`/api/v1/memories/${id}`),
+  createMemory: (input: CreateMemoryInput) =>
+    request<{ memory: unknown; version: unknown }>("/api/v1/memories", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  addVersion: (
+    id: string,
+    input: { title: string; content: string; summary?: string; tags?: string[]; changeReason?: string },
+  ) =>
+    request(`/api/v1/memories/${id}/versions`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  reviewAction: (
+    id: string,
+    input: { action: string; reason?: string; targetMemoryId?: string },
+  ) =>
+    request(`/api/v1/memories/${id}/reviews`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  deleteMemory: (id: string) => request(`/api/v1/memories/${id}`, { method: "DELETE" }),
 };

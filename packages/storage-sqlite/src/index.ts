@@ -3,3 +3,6 @@ export * from "./migrator.js";
 export * from "./schema.js";
 export * from "./health.js";
 export * from "./repositories/sqlite-project-repository.js";
+export * from "./repositories/sqlite-memory-repository.js";
+export * from "./repositories/sqlite-provenance-review-repository.js";
+export * from "./repositories/sqlite-fts-search.js";

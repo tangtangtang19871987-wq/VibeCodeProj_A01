@@ -1,10 +1,15 @@
-import { HealthService, ProjectService } from "@lams/application";
+import { HealthService, MemoryService, ProjectService } from "@lams/application";
 import {
   FsArtifactDirectoryHealthAdapter,
   openDatabase,
   runMigrations,
+  SqliteFtsSearchAdapter,
   SqliteHealthAdapter,
+  SqliteMemoryRelationRepository,
+  SqliteMemoryRepository,
   SqliteProjectRepository,
+  SqliteProvenanceRepository,
+  SqliteReviewRepository,
   type SqliteConnection,
 } from "@lams/storage-sqlite";
 import type { LamsConfig } from "./config.js";
@@ -20,6 +25,7 @@ export type AppContext = {
   conn: SqliteConnection;
   healthService: HealthService;
   projectService: ProjectService;
+  memoryService: MemoryService;
   close(): void;
 };
 
@@ -34,11 +40,25 @@ export function createContext(config: LamsConfig): AppContext {
   const projectRepo = new SqliteProjectRepository(conn.db);
   const projectService = new ProjectService(projectRepo);
 
+  const memoryRepo = new SqliteMemoryRepository(conn.db);
+  const provenanceRepo = new SqliteProvenanceRepository(conn.db);
+  const reviewRepo = new SqliteReviewRepository(conn.db);
+  const relationRepo = new SqliteMemoryRelationRepository(conn.db);
+  const ftsSearch = new SqliteFtsSearchAdapter(conn);
+  const memoryService = new MemoryService(
+    memoryRepo,
+    provenanceRepo,
+    reviewRepo,
+    relationRepo,
+    ftsSearch,
+  );
+
   return {
     config,
     conn,
     healthService,
     projectService,
+    memoryService,
     close: () => conn.close(),
   };
 }

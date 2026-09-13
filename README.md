@@ -16,10 +16,17 @@ LAMS development.
 
 ## Status
 
-Milestone 0 (architecture skeleton) is complete: a runnable daemon with a
-health endpoint, SQLite + FTS5 storage, and a served web UI shell. Milestone
-1 (the memory vertical slice — create/version/review/search memories) is in
-progress. See `docs/adr/` and the PRD's milestone list for what's next.
+Milestones 0 and 1 are complete:
+
+- **Milestone 0** — architecture skeleton: a runnable daemon with a health
+  endpoint, SQLite + FTS5 storage, and a served web UI shell.
+- **Milestone 1** — memory vertical slice: create/version/review/search
+  memories end to end, with full provenance, review-action, and lineage
+  history, through both the REST API and the Memory Explorer UI.
+
+Milestone 2 (sessions and retrieval observability — recall traces, the
+Session/Retrieval Inspectors) is next. See `docs/adr/` and the PRD's
+milestone list for details.
 
 ## Requirements
 
@@ -82,7 +89,9 @@ React, the MCP SDK, or SQLite details directly — this is enforced by
 | `pnpm typecheck` | TypeScript strict-mode check across the workspace |
 | `pnpm lint` | ESLint |
 | `pnpm test` | Vitest unit/integration tests (no external services required) |
+| `pnpm test:e2e` | Playwright UI smoke tests against a real built daemon |
 | `pnpm arch:check` | Enforce the architectural dependency rules above |
+| `pnpm --filter @lams/daemon run seed` | Populate demo data (the PRD Section 27 scenario) into the configured data dir |
 
 ## Design principles (short version)
 
