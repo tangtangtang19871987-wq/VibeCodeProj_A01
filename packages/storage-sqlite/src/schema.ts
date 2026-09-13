@@ -106,6 +106,83 @@ export interface MemoryFtsRow {
   rank: number;
 }
 
+export interface SessionRow {
+  id: string;
+  external_session_id: string | null;
+  harness: string;
+  agent_name: string | null;
+  project_id: string;
+  title: string | null;
+  task_summary: string | null;
+  status: string;
+  started_at: string;
+  ended_at: string | null;
+  outcome_result: string | null;
+  outcome_summary: string | null;
+  outcome_metric: string | null;
+  metadata: string | null;
+}
+
+export interface SessionEventRow {
+  id: string;
+  session_id: string;
+  type: string;
+  payload_schema_version: number;
+  payload: string;
+  created_at: string;
+}
+
+export interface RecallTraceRow {
+  id: string;
+  session_id: string;
+  query: string;
+  intent: string | null;
+  scope_filter: string;
+  kind_filter: string | null;
+  status_filter: string;
+  strategy: string;
+  strategy_version: string;
+  max_items: number;
+  budget_max_items: number;
+  budget_max_chars: number;
+  candidate_count: number;
+  selected_count: number;
+  returned_count: number;
+  returned_chars: number;
+  estimated_tokens: number | null;
+  latency_ms: number;
+  created_at: string;
+}
+
+export interface RecallCandidateRow {
+  id: string;
+  recall_trace_id: string;
+  memory_id: string;
+  memory_version_id: string;
+  eligible: number;
+  raw_score: number;
+  score_components: string;
+  final_score: number;
+  rank: number;
+  selected: number;
+  returned: number;
+  exclusion_reasons: string;
+  status_at_query_time: string;
+  reason_codes: string;
+}
+
+export interface DeliveryEventRow {
+  id: string;
+  session_id: string;
+  recall_trace_id: string | null;
+  memory_id: string;
+  memory_version_id: string | null;
+  stage: string;
+  evidence_level: string;
+  note: string | null;
+  created_at: string;
+}
+
 export interface Database {
   settings: SettingsRow;
   projects: ProjectRow;
@@ -116,4 +193,9 @@ export interface Database {
   review_actions: ReviewActionRow;
   memory_relations: MemoryRelationRow;
   memory_fts: MemoryFtsRow;
+  sessions: SessionRow;
+  session_events: SessionEventRow;
+  recall_traces: RecallTraceRow;
+  recall_candidates: RecallCandidateRow;
+  delivery_events: DeliveryEventRow;
 }

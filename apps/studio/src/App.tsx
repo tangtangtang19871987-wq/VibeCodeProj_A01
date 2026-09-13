@@ -4,6 +4,9 @@ import { Dashboard } from "./pages/Dashboard.js";
 import { ComingSoon } from "./pages/ComingSoon.js";
 import { MemoryExplorer } from "./pages/MemoryExplorer.js";
 import { MemoryDetail } from "./pages/MemoryDetail.js";
+import { Sessions } from "./pages/Sessions.js";
+import { SessionInspector } from "./pages/SessionInspector.js";
+import { RetrievalInspector } from "./pages/RetrievalInspector.js";
 
 export function App() {
   return (
@@ -12,23 +15,16 @@ export function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/memories" element={<MemoryExplorer />} />
         <Route path="/memories/:id" element={<MemoryDetail />} />
-        <Route
-          path="/sessions"
-          element={
-            <ComingSoon
-              title="Session Inspector"
-              milestone="Milestone 2"
-              explanation="Session timelines appear here once sessions and recall observability are implemented."
-            />
-          }
-        />
+        <Route path="/sessions" element={<Sessions />} />
+        <Route path="/sessions/:id" element={<SessionInspector />} />
+        <Route path="/recalls/:id" element={<RetrievalInspector />} />
         <Route
           path="/review-queue"
           element={
             <ComingSoon
               title="Review Queue"
-              milestone="Milestone 1"
-              explanation="Draft memories awaiting human review will appear here."
+              milestone="a future milestone"
+              explanation="A dedicated one-by-one review queue is planned; for now, approve/reject/deprecate/supersede/merge all work from a memory's detail page in the Memory Explorer."
             />
           }
         />

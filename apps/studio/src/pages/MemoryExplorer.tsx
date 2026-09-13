@@ -140,6 +140,7 @@ export function StatusBadge({ status }: { status: MemoryStatus }) {
 
 function CreateMemoryPanel() {
   const queryClient = useQueryClient();
+  const projects = useQuery({ queryKey: ["projects"], queryFn: api.listProjects });
   const [kind, setKind] = useState<MemoryKind>("fact");
   const [scopeLevel, setScopeLevel] = useState("project");
   const [scopeId, setScopeId] = useState("");
@@ -175,19 +176,45 @@ function CreateMemoryPanel() {
         }}
       >
         <div className="inline-form">
-          <select value={kind} onChange={(e) => setKind(e.target.value as MemoryKind)}>
+          <select
+            aria-label="kind"
+            value={kind}
+            onChange={(e) => setKind(e.target.value as MemoryKind)}
+          >
             {ALL_KINDS.map((k) => (
               <option key={k} value={k}>
                 {k}
               </option>
             ))}
           </select>
-          <select value={scopeLevel} onChange={(e) => setScopeLevel(e.target.value)}>
+          <select
+            aria-label="scope level"
+            value={scopeLevel}
+            onChange={(e) => {
+              setScopeLevel(e.target.value);
+              setScopeId("");
+            }}
+          >
             <option value="project">project</option>
             <option value="agent">agent</option>
             <option value="session">session</option>
           </select>
-          <input placeholder="scope id (e.g. ilt-agent)" value={scopeId} onChange={(e) => setScopeId(e.target.value)} />
+          {scopeLevel === "project" ? (
+            <select aria-label="scope project" value={scopeId} onChange={(e) => setScopeId(e.target.value)}>
+              <option value="">select a project…</option>
+              {projects.data?.projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.key})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              placeholder={`${scopeLevel} id`}
+              value={scopeId}
+              onChange={(e) => setScopeId(e.target.value)}
+            />
+          )}
         </div>
         <input placeholder="title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <textarea placeholder="content" value={content} onChange={(e) => setContent(e.target.value)} rows={3} />

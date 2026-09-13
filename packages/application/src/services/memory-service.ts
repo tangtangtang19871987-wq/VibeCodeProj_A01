@@ -102,6 +102,14 @@ export class MemoryService {
     return this.memories.list(filter);
   }
 
+  getById(memoryId: string): Promise<Memory | null> {
+    return this.memories.getById(memoryId);
+  }
+
+  getVersion(versionId: string): Promise<MemoryVersion | null> {
+    return this.memories.getVersion(versionId);
+  }
+
   async search(
     query: string,
     filter: Omit<MemoryListFilter, "cursor"> = {},

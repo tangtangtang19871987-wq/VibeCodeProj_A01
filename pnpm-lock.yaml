@@ -124,6 +124,9 @@ importers:
       '@lams/domain':
         specifier: workspace:*
         version: link:../domain
+      '@lams/retrieval':
+        specifier: workspace:*
+        version: link:../retrieval
     devDependencies:
       typescript:
         specifier: ^5.7.3
@@ -134,6 +137,16 @@ importers:
       ulidx:
         specifier: ^2.4.1
         version: 2.4.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  packages/retrieval:
+    dependencies:
+      '@lams/domain':
+        specifier: workspace:*
+        version: link:../domain
     devDependencies:
       typescript:
         specifier: ^5.7.3

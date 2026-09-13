@@ -1,5 +1,5 @@
 {
-  "name": "@lams/application",
+  "name": "@lams/retrieval",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,8 +16,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@lams/domain": "workspace:*",
-    "@lams/retrieval": "workspace:*"
+    "@lams/domain": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

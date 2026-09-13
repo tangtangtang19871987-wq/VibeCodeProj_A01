@@ -7,6 +7,8 @@ import type { AppContext } from "./context.js";
 import { healthRoutes } from "./routes/health.js";
 import { memoryRoutes } from "./routes/memories.js";
 import { projectRoutes } from "./routes/projects.js";
+import { recallRoutes } from "./routes/recalls.js";
+import { sessionRoutes } from "./routes/sessions.js";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 // apps/daemon/{src,dist}/.. -> apps/daemon -> apps -> <repo root>
@@ -26,6 +28,8 @@ export async function buildApp(ctx: AppContext): Promise<FastifyInstance> {
   await healthRoutes(app, ctx);
   await projectRoutes(app, ctx);
   await memoryRoutes(app, ctx);
+  await sessionRoutes(app, ctx);
+  await recallRoutes(app, ctx);
 
   // ADR 0007: in production, serve the prebuilt studio UI from the same
   // Fastify instance/port as the API. In development the UI runs under its

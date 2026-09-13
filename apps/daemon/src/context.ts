@@ -1,15 +1,24 @@
-import { HealthService, MemoryService, ProjectService } from "@lams/application";
+import {
+  HealthService,
+  MemoryService,
+  ProjectService,
+  RetrievalService,
+  SessionService,
+} from "@lams/application";
 import {
   FsArtifactDirectoryHealthAdapter,
   openDatabase,
   runMigrations,
+  SqliteDeliveryRepository,
   SqliteFtsSearchAdapter,
   SqliteHealthAdapter,
   SqliteMemoryRelationRepository,
   SqliteMemoryRepository,
   SqliteProjectRepository,
   SqliteProvenanceRepository,
+  SqliteRecallRepository,
   SqliteReviewRepository,
+  SqliteSessionRepository,
   type SqliteConnection,
 } from "@lams/storage-sqlite";
 import type { LamsConfig } from "./config.js";
@@ -26,6 +35,10 @@ export type AppContext = {
   healthService: HealthService;
   projectService: ProjectService;
   memoryService: MemoryService;
+  sessionService: SessionService;
+  retrievalService: RetrievalService;
+  recallRepo: SqliteRecallRepository;
+  deliveryRepo: SqliteDeliveryRepository;
   close(): void;
 };
 
@@ -53,12 +66,30 @@ export function createContext(config: LamsConfig): AppContext {
     ftsSearch,
   );
 
+  const sessionRepo = new SqliteSessionRepository(conn.db);
+  const sessionService = new SessionService(sessionRepo);
+
+  const recallRepo = new SqliteRecallRepository(conn.db);
+  const deliveryRepo = new SqliteDeliveryRepository(conn.db);
+  const retrievalService = new RetrievalService(
+    memoryRepo,
+    provenanceRepo,
+    ftsSearch,
+    sessionRepo,
+    recallRepo,
+    deliveryRepo,
+  );
+
   return {
     config,
     conn,
     healthService,
     projectService,
     memoryService,
+    sessionService,
+    retrievalService,
+    recallRepo,
+    deliveryRepo,
     close: () => conn.close(),
   };
 }

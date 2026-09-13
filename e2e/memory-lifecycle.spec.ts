@@ -14,13 +14,24 @@ import { expect, test } from "@playwright/test";
  * needed for this test.
  */
 test("create, approve, and edit a memory through the UI", async ({ page }) => {
-  const uniqueTitle = `E2E test memory ${Date.now()}`;
+  const unique = Date.now();
+  const uniqueTitle = `E2E test memory ${unique}`;
+  const projectKey = `e2e-lifecycle-${unique}`;
+
+  // Create a project to scope the memory to.
+  await page.goto("/");
+  await page.getByPlaceholder("key (e.g. ilt-agent)").fill(projectKey);
+  await page.getByPlaceholder("display name").fill("E2E Lifecycle Project");
+  await page.getByRole("button", { name: "Create project" }).click();
+  await expect(page.getByText(projectKey, { exact: false })).toBeVisible();
 
   await page.goto("/memories");
   await expect(page.getByRole("heading", { name: "Memory Explorer" })).toBeVisible();
 
   // Create a draft memory.
-  await page.getByPlaceholder("scope id (e.g. ilt-agent)").fill("e2e-project");
+  await page
+    .getByLabel("scope project")
+    .selectOption({ label: `E2E Lifecycle Project (${projectKey})` });
   await page.getByPlaceholder("title").fill(uniqueTitle);
   await page.getByPlaceholder("content").fill("Created by the Playwright smoke test.");
   await page.getByRole("button", { name: "Create draft memory" }).click();

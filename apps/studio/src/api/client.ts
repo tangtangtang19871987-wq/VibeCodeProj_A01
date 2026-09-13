@@ -1,6 +1,10 @@
 import type { MemoryDetail, MemoryKind, MemoryListItem, MemoryStatus } from "./memory-types.js";
+import type { AgentSession, SessionEvent, SessionStatus } from "./session-types.js";
+import type { DeliveryEvent, MemoryPacket, RecallCandidate, RecallTrace } from "./recall-types.js";
 
 export * from "./memory-types.js";
+export * from "./session-types.js";
+export * from "./recall-types.js";
 
 export type HealthReport = {
   ok: boolean;
@@ -100,4 +104,42 @@ export const api = {
       body: JSON.stringify(input),
     }),
   deleteMemory: (id: string) => request(`/api/v1/memories/${id}`, { method: "DELETE" }),
+
+  listSessions: (params: { projectId?: string; status?: SessionStatus[] } = {}) => {
+    const sp = new URLSearchParams();
+    if (params.projectId) sp.set("projectId", params.projectId);
+    if (params.status?.length) sp.set("status", params.status.join(","));
+    const qs = sp.toString();
+    return request<{ sessions: AgentSession[] }>(`/api/v1/sessions${qs ? `?${qs}` : ""}`);
+  },
+  getSession: (id: string) =>
+    request<{ session: AgentSession; events: SessionEvent[] }>(`/api/v1/sessions/${id}`),
+  openSession: (input: {
+    harness: string;
+    projectId: string;
+    agentName?: string;
+    taskSummary?: string;
+  }) =>
+    request<{ session: AgentSession }>("/api/v1/sessions", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+
+  recall: (input: {
+    sessionId: string;
+    query: string;
+    intent?: string;
+    kinds?: MemoryKind[];
+    maxItems?: number;
+    maxChars?: number;
+    includeDrafts?: boolean;
+  }) =>
+    request<{ packet: MemoryPacket; trace: RecallTrace }>("/api/v1/recalls", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  getRecallCandidates: (traceId: string) =>
+    request<{ trace: RecallTrace; candidates: RecallCandidate[]; deliveryEvents: DeliveryEvent[] }>(
+      `/api/v1/recalls/${traceId}/candidates`,
+    ),
 };

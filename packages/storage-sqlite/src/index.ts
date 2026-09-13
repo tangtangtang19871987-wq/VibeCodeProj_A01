@@ -6,3 +6,5 @@ export * from "./repositories/sqlite-project-repository.js";
 export * from "./repositories/sqlite-memory-repository.js";
 export * from "./repositories/sqlite-provenance-review-repository.js";
 export * from "./repositories/sqlite-fts-search.js";
+export * from "./repositories/sqlite-session-repository.js";
+export * from "./repositories/sqlite-recall-repository.js";

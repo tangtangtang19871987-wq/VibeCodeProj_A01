@@ -16,17 +16,22 @@ LAMS development.
 
 ## Status
 
-Milestones 0 and 1 are complete:
+Milestones 0, 1, and 2 are complete:
 
 - **Milestone 0** — architecture skeleton: a runnable daemon with a health
   endpoint, SQLite + FTS5 storage, and a served web UI shell.
 - **Milestone 1** — memory vertical slice: create/version/review/search
   memories end to end, with full provenance, review-action, and lineage
   history, through both the REST API and the Memory Explorer UI.
+- **Milestone 2** — sessions and retrieval observability: a deterministic
+  FTS + scoring retrieval pipeline (`packages/retrieval`) with transparent
+  score components and reason codes, a hard character budget, full
+  recall-trace/candidate/delivery-event persistence, and a Session
+  Inspector + Retrieval Inspector in the UI. Every recall — even an empty
+  one — persists a complete, inspectable trace.
 
-Milestone 2 (sessions and retrieval observability — recall traces, the
-Session/Retrieval Inspectors) is next. See `docs/adr/` and the PRD's
-milestone list for details.
+Milestone 3 (the five-tool MCP surface so real agent harnesses share this
+memory) is next. See `docs/adr/` and the PRD's milestone list for details.
 
 ## Requirements
 
@@ -68,7 +73,8 @@ apps/
   studio/    # React + Vite web UI
 packages/
   domain/         # Entities, value objects, and pure policy functions — no framework deps
-  application/     # Use cases and port interfaces — depends only on domain
+  retrieval/       # Pure scoring/ranking/eligibility functions for recall — depends only on domain
+  application/     # Use cases and port interfaces — depends only on domain (+ retrieval's pure functions)
   storage-sqlite/  # SQLite schema, migrations, FTS5, repository implementations
 docs/
   adr/       # Architecture decision records

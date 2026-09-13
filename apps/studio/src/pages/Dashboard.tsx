@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api/client.js";
 
 export function Dashboard() {
   const health = useQuery({ queryKey: ["health"], queryFn: api.health });
   const projects = useQuery({ queryKey: ["projects"], queryFn: api.listProjects });
+  const sessions = useQuery({ queryKey: ["sessions"], queryFn: () => api.listSessions() });
   const queryClient = useQueryClient();
   const [key, setKey] = useState("");
   const [name, setName] = useState("");
@@ -23,10 +25,30 @@ export function Dashboard() {
       <section className="panel">
         <h1>Dashboard</h1>
         <p className="muted">
-          What is happening in this memory system. Milestone 1 adds memory
-          counts by kind/status, the review queue size, and recall
-          activity — this view will grow as those land.
+          What is happening in this memory system. Memory counts by
+          kind/status and a proper review queue size are planned next — for
+          now, browse everything from the Memory Explorer.
         </p>
+      </section>
+
+      <section className="panel">
+        <h2>Recent sessions</h2>
+        {sessions.data?.sessions.length ? (
+          <ul className="plain-list">
+            {sessions.data.sessions.slice(0, 5).map((s) => (
+              <li key={s.id}>
+                <Link to={`/sessions/${s.id}`}>{s.taskSummary ?? s.id}</Link>{" "}
+                <span className="muted">
+                  {s.harness} · {s.status} · {new Date(s.startedAt).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">
+            No sessions yet. Open one from the Sessions page to run a recall.
+          </p>
+        )}
       </section>
 
       <section className="panel">

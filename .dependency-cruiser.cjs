@@ -36,10 +36,25 @@ module.exports = {
     {
       name: "application-no-storage-dep",
       comment:
-        "packages/application must depend only on packages/domain, never on packages/storage-sqlite (dependency inversion: storage implements application's ports).",
+        "packages/application must depend only on packages/domain (and packages/retrieval's pure functions), never on packages/storage-sqlite (dependency inversion: storage implements application's ports).",
       severity: "error",
       from: { path: "^packages/application" },
       to: { path: "^packages/storage-sqlite" },
+    },
+    {
+      name: "retrieval-no-framework-or-storage-deps",
+      comment:
+        "packages/retrieval holds pure scoring/ranking functions (Section 11) with no framework, MCP, or storage dependency, so retrieval strategies stay unit-testable without a database.",
+      severity: "error",
+      from: { path: "^packages/retrieval" },
+      to: { path: FRAMEWORK_MODULES, dependencyTypes: ["npm", "npm-dev"] },
+    },
+    {
+      name: "retrieval-no-cross-package-deps",
+      comment: "packages/retrieval may depend only on packages/domain.",
+      severity: "error",
+      from: { path: "^packages/retrieval" },
+      to: { path: "^packages/(?!domain|retrieval)" },
     },
   ],
   options: {
