@@ -16,7 +16,7 @@ LAMS development.
 
 ## Status
 
-Milestones 0, 1, and 2 are complete:
+Milestones 0 through 3 are complete:
 
 - **Milestone 0** — architecture skeleton: a runnable daemon with a health
   endpoint, SQLite + FTS5 storage, and a served web UI shell.
@@ -29,9 +29,17 @@ Milestones 0, 1, and 2 are complete:
   recall-trace/candidate/delivery-event persistence, and a Session
   Inspector + Retrieval Inspector in the UI. Every recall — even an empty
   one — persists a complete, inspectable trace.
+- **Milestone 3** — MCP daemon integration: exactly the five tools defined
+  in the PRD (`memory_session`, `memory_recall`, `memory_get`,
+  `memory_remember`, `memory_feedback`), served over Streamable HTTP at
+  `/mcp` and, via a thin forwarding shim, over stdio for harnesses that
+  need it. See [`examples/`](./examples/) for OpenCode, Claude Code, and
+  generic client setup. A real MCP client test (`apps/daemon/src/mcp.e2e.test.ts`)
+  proves two independent clients share one memory universe end to end.
 
-Milestone 3 (the five-tool MCP surface so real agent harnesses share this
-memory) is next. See `docs/adr/` and the PRD's milestone list for details.
+Milestone 4 (governance/transfer: a dedicated Review Queue, lineage
+navigation, export/backup/import) is next. See `docs/adr/` and the PRD's
+milestone list for details.
 
 ## Requirements
 
@@ -76,6 +84,9 @@ packages/
   retrieval/       # Pure scoring/ranking/eligibility functions for recall — depends only on domain
   application/     # Use cases and port interfaces — depends only on domain (+ retrieval's pure functions)
   storage-sqlite/  # SQLite schema, migrations, FTS5, repository implementations
+  mcp-adapter/     # The five MCP tools, mapped onto application services — no storage/Fastify/React deps
+adapters/
+  stdio-shim/      # Business-logic-free stdio <-> Streamable HTTP forwarder (ADR 0005)
 docs/
   adr/       # Architecture decision records
 legacy/

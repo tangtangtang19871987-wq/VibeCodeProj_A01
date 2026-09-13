@@ -56,6 +56,32 @@ module.exports = {
       from: { path: "^packages/retrieval" },
       to: { path: "^packages/(?!domain|retrieval)" },
     },
+    {
+      name: "mcp-adapter-no-fastify-react-or-storage-deps",
+      comment:
+        "packages/mcp-adapter maps MCP tool calls onto application services (Section 8.2); it may use the MCP SDK itself, but never Fastify, React, or a concrete storage package directly.",
+      severity: "error",
+      from: { path: "^packages/mcp-adapter" },
+      to: {
+        path: "^(fastify|@fastify/.*|react|react-dom|react-router-dom|better-sqlite3|kysely|vite|@vitejs/.*)$",
+        dependencyTypes: ["npm", "npm-dev"],
+      },
+    },
+    {
+      name: "mcp-adapter-no-storage-dep",
+      comment: "packages/mcp-adapter must depend only on packages/domain and packages/application.",
+      severity: "error",
+      from: { path: "^packages/mcp-adapter" },
+      to: { path: "^packages/storage-sqlite" },
+    },
+    {
+      name: "stdio-shim-no-business-logic",
+      comment:
+        "ADR 0005: the stdio shim only forwards JSON-RPC messages between stdio and the daemon's HTTP endpoint — it must not depend on any @lams/* package that carries domain/application logic.",
+      severity: "error",
+      from: { path: "^adapters/stdio-shim" },
+      to: { path: "^(packages/domain|packages/application|packages/retrieval|packages/mcp-adapter|packages/storage-sqlite)" },
+    },
   ],
   options: {
     doNotFollow: { path: "node_modules" },

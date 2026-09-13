@@ -183,6 +183,18 @@ export interface DeliveryEventRow {
   created_at: string;
 }
 
+export interface MemoryFeedbackRow {
+  id: string;
+  session_id: string;
+  recall_trace_id: string | null;
+  memory_id: string;
+  event_type: string;
+  evidence_level: string;
+  note: string | null;
+  outcome_metric: string | null;
+  created_at: string;
+}
+
 export interface Database {
   settings: SettingsRow;
   projects: ProjectRow;
@@ -198,4 +210,5 @@ export interface Database {
   recall_traces: RecallTraceRow;
   recall_candidates: RecallCandidateRow;
   delivery_events: DeliveryEventRow;
+  memory_feedback: MemoryFeedbackRow;
 }

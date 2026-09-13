@@ -1,4 +1,5 @@
 import {
+  FeedbackService,
   HealthService,
   MemoryService,
   ProjectService,
@@ -10,6 +11,7 @@ import {
   openDatabase,
   runMigrations,
   SqliteDeliveryRepository,
+  SqliteFeedbackRepository,
   SqliteFtsSearchAdapter,
   SqliteHealthAdapter,
   SqliteMemoryRelationRepository,
@@ -37,6 +39,7 @@ export type AppContext = {
   memoryService: MemoryService;
   sessionService: SessionService;
   retrievalService: RetrievalService;
+  feedbackService: FeedbackService;
   recallRepo: SqliteRecallRepository;
   deliveryRepo: SqliteDeliveryRepository;
   close(): void;
@@ -80,6 +83,9 @@ export function createContext(config: LamsConfig): AppContext {
     deliveryRepo,
   );
 
+  const feedbackRepo = new SqliteFeedbackRepository(conn.db);
+  const feedbackService = new FeedbackService(feedbackRepo, deliveryRepo);
+
   return {
     config,
     conn,
@@ -88,6 +94,7 @@ export function createContext(config: LamsConfig): AppContext {
     memoryService,
     sessionService,
     retrievalService,
+    feedbackService,
     recallRepo,
     deliveryRepo,
     close: () => conn.close(),

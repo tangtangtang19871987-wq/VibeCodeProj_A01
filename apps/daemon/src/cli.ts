@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { runStdioShim } from "@lams/stdio-shim";
 import { loadConfig } from "./config.js";
 import { createContext } from "./context.js";
 
@@ -33,10 +34,9 @@ async function main() {
       return;
     }
     case "mcp-stdio": {
-      console.error(
-        "mcp-stdio is not implemented yet (planned for Milestone 3, ADR 0005).",
-      );
-      process.exitCode = 1;
+      const config = loadConfig();
+      const daemonUrl = `http://${config.host}:${config.port}/mcp`;
+      await runStdioShim(daemonUrl);
       return;
     }
     case "stop":

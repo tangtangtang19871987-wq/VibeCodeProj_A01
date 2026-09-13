@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AppContext } from "./context.js";
 import { healthRoutes } from "./routes/health.js";
+import { mcpRoutes } from "./routes/mcp.js";
 import { memoryRoutes } from "./routes/memories.js";
 import { projectRoutes } from "./routes/projects.js";
 import { recallRoutes } from "./routes/recalls.js";
@@ -30,6 +31,7 @@ export async function buildApp(ctx: AppContext): Promise<FastifyInstance> {
   await memoryRoutes(app, ctx);
   await sessionRoutes(app, ctx);
   await recallRoutes(app, ctx);
+  await mcpRoutes(app, ctx);
 
   // ADR 0007: in production, serve the prebuilt studio UI from the same
   // Fastify instance/port as the API. In development the UI runs under its

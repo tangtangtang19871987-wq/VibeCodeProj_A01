@@ -8,3 +8,4 @@ export * from "./repositories/sqlite-provenance-review-repository.js";
 export * from "./repositories/sqlite-fts-search.js";
 export * from "./repositories/sqlite-session-repository.js";
 export * from "./repositories/sqlite-recall-repository.js";
+export * from "./repositories/sqlite-feedback-repository.js";
