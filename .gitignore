@@ -50,3 +50,24 @@ htmlcov/
 *.tmp
 *.bak
 *.log
+
+# Node / TypeScript
+node_modules/
+dist/
+*.tsbuildinfo
+pnpm-lock.yaml.bak
+
+# LAMS local data
+.lams-data/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Vite / build
+apps/studio/dist/
+.vite/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/

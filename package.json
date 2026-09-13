@@ -1,0 +1,38 @@
+{
+  "name": "local-agent-memory-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local Agent Memory Studio (LAMS) - a local-first, inspectable memory daemon for AI agents.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "build": "pnpm -r --filter=./packages/* --filter=./apps/* run build",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "pnpm --filter @lams/daemon run seed",
+    "arch:check": "depcruise --config .dependency-cruiser.cjs packages apps"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "concurrently": "^9.1.2",
+    "dependency-cruiser": "^16.9.0",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild"
+    ]
+  }
+}
