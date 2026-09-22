@@ -126,6 +126,10 @@ def solve(
     """
     cfg = cfg or ILTConfig()
     torch.manual_seed(cfg.seed)
+    # solve() runs its own optimisation, so it must hold a gradient scope even
+    # when called from inside torch.no_grad() (e.g. during evaluation).
+    grad_ctx = torch.enable_grad()
+    grad_ctx.__enter__()
 
     params = (
         (cfg.init_scale * (2.0 * target - 1.0)).clone()
@@ -166,6 +170,7 @@ def solve(
 
     with torch.no_grad():
         mask = _binarize(params)
+    grad_ctx.__exit__(None, None, None)
 
     return ILTResult(
         mask=mask,

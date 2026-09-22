@@ -1,0 +1,61 @@
+# X-04/X-05: two-stage training (WGAN-GP pretrain -> GRPO finetune), CPU scale.
+#
+# The METHOD follows the paper exactly (Eqs. 5-10). Only the SCALE differs; every
+# deviation is listed in the output summary.json and in docs/gap_ledger.md.
+experiment_id: train_scaled
+paper_reference: "Sec. 3.3 (Eqs. 5-10), Sec. 4.1 configuration; Table 2 PT vs PT+RL"
+seed: 0
+threads: 4
+kernel_dir: /home/user/openopc/openilt/kernel
+
+canvas: 256          # 256 px x 8 nm = 2048 nm, the same physical field as the paper
+pixel_nm: 8.0
+n_train: 64
+n_val: 8
+gt_iterations: 100
+epe_tolerance: 3     # the paper's stricter training threshold
+eval_group_size: 8
+log_every: 5
+grad_clip: 1.0
+
+generator:
+  latent_dim: 256    # paper
+  style_dim: 256
+  base_channels: 16
+  n_style_blocks: 2
+  n_local_blocks: 1
+  mapping_layers: 4
+discriminator:
+  base_channels: 16
+  levels: 3
+
+pretrain:
+  epochs: 30         # paper: 50, at vastly larger scale
+  batch_size: 8      # paper: 16
+  lr_discriminator: 0.0002      # paper
+  betas_discriminator: [0.5, 0.999]   # paper
+  lr_generator: 0.0001
+  n_critic: 5
+  lambda_rec: 100.0  # lambda_1, not given by the paper (G-020)
+  lambda_gp: 10.0    # lambda_2, not given by the paper (G-020)
+  rec_loss: l1       # paper says "e.g. l1 or l2" (G-020)
+  latent_dim: 256
+
+refine:              # the short low-resolution ILT loop used for the reward
+  downsample: 2      # paper: 8 (from 2048); 8x from 256 would break the optics
+  iterations: 100    # paper
+  step_size: 0.2
+  mask_steepness: 8.0
+
+grpo:
+  group_size: 8      # paper: K=16
+  latent_dim: 256    # paper
+  lambda_pg: 500.0   # paper
+  lambda_imit: 1.0   # paper
+  smoothing_kernel: 25   # paper: 25x25 average pooling
+  advantage: teacher_relative   # paper Eqs. 6-7 (see G-012)
+  logprob_reduction: mean
+  epe_tolerance: 3   # paper
+rl_steps: 60
+rl_lr: 0.0001        # paper: 1e-4
+rl_lr_min: 0.0000001 # paper: cosine to 1e-7

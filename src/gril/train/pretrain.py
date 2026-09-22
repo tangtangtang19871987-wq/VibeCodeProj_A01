@@ -48,7 +48,11 @@ def gradient_penalty(
     grads = torch.autograd.grad(
         outputs=scores.sum(), inputs=interp, create_graph=True, retain_graph=True
     )[0]
-    norms = grads.flatten(1).norm(dim=1)
+    # sqrt(sum(g^2) + eps), NOT .norm(): the Euclidean norm has an infinite
+    # gradient at exactly zero, and an untrained critic can produce a genuinely
+    # zero gradient for some interpolate, which turns the whole loss into NaN on
+    # the very first step. The epsilon keeps the derivative finite.
+    norms = torch.sqrt(grads.flatten(1).pow(2).sum(dim=1) + 1e-12)
     return ((norms - 1.0) ** 2).mean()
 
 

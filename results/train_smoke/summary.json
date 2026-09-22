@@ -1,0 +1,96 @@
+{
+  "experiment_id": "train_smoke",
+  "config": {
+    "experiment_id": "train_smoke",
+    "paper_reference": "Sec. 3.3 (Eqs. 5-10), Sec. 4.1 configuration; Table 2 PT vs PT+RL",
+    "seed": 0,
+    "threads": 4,
+    "kernel_dir": "/home/user/openopc/openilt/kernel",
+    "canvas": 256,
+    "pixel_nm": 8.0,
+    "n_train": 8,
+    "n_val": 2,
+    "gt_iterations": 10,
+    "epe_tolerance": 3,
+    "eval_group_size": 2,
+    "log_every": 1,
+    "grad_clip": 1.0,
+    "generator": {
+      "latent_dim": 256,
+      "style_dim": 256,
+      "base_channels": 16,
+      "n_style_blocks": 2,
+      "n_local_blocks": 1,
+      "mapping_layers": 4
+    },
+    "discriminator": {
+      "base_channels": 16,
+      "levels": 3
+    },
+    "pretrain": {
+      "epochs": 2,
+      "batch_size": 8,
+      "lr_discriminator": 0.0002,
+      "betas_discriminator": [
+        0.5,
+        0.999
+      ],
+      "lr_generator": 0.0001,
+      "n_critic": 5,
+      "lambda_rec": 100.0,
+      "lambda_gp": 10.0,
+      "rec_loss": "l1",
+      "latent_dim": 256
+    },
+    "refine": {
+      "downsample": 2,
+      "iterations": 10,
+      "step_size": 0.2,
+      "mask_steepness": 8.0
+    },
+    "grpo": {
+      "group_size": 2,
+      "latent_dim": 256,
+      "lambda_pg": 500.0,
+      "lambda_imit": 1.0,
+      "smoothing_kernel": 25,
+      "advantage": "teacher_relative",
+      "logprob_reduction": "mean",
+      "epe_tolerance": 3
+    },
+    "rl_steps": 2,
+    "rl_lr": 0.0001,
+    "rl_lr_min": 1e-07
+  },
+  "provenance": {
+    "git_commit": "b0d33f891afebe8297de40e6348487b35d3bf3c1",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  },
+  "pretrain_seconds": 5.984407186508179,
+  "rl_seconds": 12.421275615692139,
+  "metrics": {
+    "PT": {
+      "epe_best_mean": 34.0,
+      "epe_sample_mean": 34.0,
+      "diversity": 0.0
+    },
+    "PT+RL": {
+      "epe_best_mean": 34.0,
+      "epe_sample_mean": 34.0,
+      "diversity": 7.62939453125e-06
+    }
+  },
+  "deviations_from_paper": [
+    "synthetic layouts instead of LithoBench (G-041, unreachable)",
+    "ground-truth masks from our own ILT solver",
+    "resolution 256x256 at 8.0 nm/px (paper: 2048x2048 at 1 nm/px)",
+    "RL refine downsample 2 (paper: 8; 8x here would be smaller than the 35x35 optical kernel and physically invalid)",
+    "far fewer epochs and designs: 4 CPU cores, no GPU (G-040)"
+  ]
+}

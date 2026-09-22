@@ -137,3 +137,32 @@ def test_float32_float64_agreement(focus_kernels):
     a = aerial_image(mask.float(), focus_kernels, 1.0, NUM_KERNELS).double()
     b = aerial_image(mask.double(), focus_kernels, 1.0, NUM_KERNELS)
     assert ((a - b).norm() / b.norm()) < 1e-5
+
+
+def test_canvas_smaller_than_kernel_is_rejected(focus_kernels):
+    """A canvas below the kernel size would make the FFT corner blocks overlap.
+
+    That corrupts the aerial image silently, so it must raise instead.
+    """
+    with pytest.raises(ValueError, match="smaller than"):
+        aerial_image(torch.zeros(32, 32), focus_kernels, 1.0, NUM_KERNELS)
+
+
+def test_multiresolution_consistency(focus_kernels):
+    """The kernels span a fixed PHYSICAL extent of the canvas.
+
+    Coarsening the pixel grid at constant physical size therefore preserves the
+    optics. This is what makes the paper's 8x-downsampled RL reward loop sound.
+    """
+    torch.manual_seed(0)
+    mask = torch.zeros(512, 512)
+    mask[100:300, 150:360] = 1.0
+    mask[350:420, 60:480] = 1.0
+    full = aerial_image(mask, focus_kernels, 1.0, NUM_KERNELS)
+    for factor in (2, 4):
+        low = aerial_image(
+            torch.nn.functional.avg_pool2d(mask[None, None], factor)[0, 0],
+            focus_kernels, 1.0, NUM_KERNELS,
+        )
+        ref = torch.nn.functional.avg_pool2d(full[None, None], factor)[0, 0]
+        assert (low - ref).abs().max() / full.max() < 0.01

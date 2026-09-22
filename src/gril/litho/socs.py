@@ -39,6 +39,17 @@ def _apply_kernel_corners(spectrum: torch.Tensor, kernel: torch.Tensor, num_kern
     hh, hw = kh // 2, kw // 2
     kernel = kernel.to(spectrum.device)
     b, _, height, width = spectrum.shape
+    # The four corner blocks span rows [0, hh] and [height-hh, height-1]. If the
+    # canvas is smaller than the kernel these overlap, and the later writes
+    # silently clobber the earlier ones -- producing a plausible-looking but
+    # physically wrong image. Fail loudly instead.
+    if height < kh or width < kw:
+        raise ValueError(
+            f"Canvas {height}x{width} is smaller than the {kh}x{kw} optical kernel; "
+            "the FFT corner blocks would overlap and the aerial image would be "
+            "silently wrong. Use a canvas of at least the kernel size (the public "
+            "ICCAD13 kernels are 35x35, so >=64 px is recommended)."
+        )
 
     out = torch.zeros(
         (b, num_kernels, height, width), dtype=spectrum.dtype, device=spectrum.device

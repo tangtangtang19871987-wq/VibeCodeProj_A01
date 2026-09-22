@@ -40,6 +40,14 @@ class GeneratorConfig:
     n_local_blocks: int = 2
     mapping_layers: int = 4
     head_downsample: int = 1       # "optional head downsample"; 1 = off
+    #: Scale applied to the style code w. Implements the paper's Sec. 3.2.2
+    #: statement that z is treated as a reparameterised Gaussian whose scale (or
+    #: truncation in w) is controlled "to anneal diversity across training
+    #: stages". With an under-trained generator the logit spread across latents
+    #: can fall far below the 0.5 binarisation threshold, so every sampled mask
+    #: binarises identically, every advantage is 0, and the policy gradient
+    #: vanishes. This knob is the paper's own remedy.
+    style_scale: float = 1.0
 
 
 class StyleMapping(nn.Module):
@@ -178,7 +186,7 @@ class StyleAwareGenerator(nn.Module):
 
     def forward(self, design: torch.Tensor, z: torch.Tensor) -> torch.Tensor:
         cfg = self.cfg
-        w = self.mapping(z)
+        w = self.mapping(z) * cfg.style_scale
 
         z0 = design
         if cfg.head_downsample > 1:

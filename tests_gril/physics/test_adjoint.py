@@ -65,15 +65,15 @@ def test_analytic_adjoint_is_exact(focus_kernels, dose):
 def test_finite_difference_directional_derivative(focus_kernels):
     """Central finite differences in float64 along random directions."""
     torch.manual_seed(0)
-    mask = torch.rand(32, 32, dtype=torch.float64)
-    weight = torch.randn(32, 32, dtype=torch.float64)
+    mask = torch.rand(48, 48, dtype=torch.float64)
+    weight = torch.randn(48, 48, dtype=torch.float64)
     a = mask.clone().requires_grad_(True)
     (aerial_image(a, focus_kernels, 1.0, NUM_KERNELS) * weight).sum().backward()
 
     eps = 1e-6
     for seed in range(4):
         torch.manual_seed(100 + seed)
-        v = torch.randn(32, 32, dtype=torch.float64)
+        v = torch.randn(48, 48, dtype=torch.float64)
         v /= v.norm()
         with torch.no_grad():
             lp = (aerial_image(mask + eps * v, focus_kernels, 1.0, NUM_KERNELS) * weight).sum()
@@ -86,8 +86,8 @@ def test_finite_difference_directional_derivative(focus_kernels):
 
 def test_gradient_batched_equals_single(focus_kernels):
     torch.manual_seed(0)
-    batch = torch.rand(2, 32, 32, dtype=torch.float64)
-    weight = torch.randn(2, 32, 32, dtype=torch.float64)
+    batch = torch.rand(2, 48, 48, dtype=torch.float64)
+    weight = torch.randn(2, 48, 48, dtype=torch.float64)
     b = batch.clone().requires_grad_(True)
     (aerial_image(b, focus_kernels, 1.0, NUM_KERNELS) * weight).sum().backward()
     for i in range(2):
