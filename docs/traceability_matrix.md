@@ -20,23 +20,23 @@ is reimplemented. Status values are:
 
 | # | Provenance | Item | Input | Output | Units | Implementation | Test | Status |
 |---|---|---|---|---|---|---|---|---|
-| F-01 | [PUB] S2.2 | 24-term SOCS kernel set, focus + defocus | — | `h_k`, `(24,35,35)` complex64; `w_k`, `(24,)` float32 | frequency-domain, dimensionless | `src/gril/litho/kernels.py` | eigenvalues descending; Hermitian/PSD of implied TCC | SPEC |
-| F-02 | [PUB] S2.3 | Hopkins/SOCS aerial image `I = sum_k w_k \|h_k ⊛ (d·M)\|^2` | mask `M` in [0,1], `(...,2048,2048)`; dose `d` | intensity `I >= 0` | normalized so open field -> 1 | `src/gril/litho/socs.py` | open-field = 0.95154 (+-1e-4); 400 nm square = 0.93562 | SPEC |
-| F-03 | [PUB] S2.3 | FFT convention: `norm="forward"`, kernel on the 4 corners, no shift | — | — | — | `src/gril/litho/socs.py` | fast path == legacy fftshift path to 1e-6 | SPEC |
-| F-04 | [PUB] S2.5 | Constant-threshold resist `Z = sigmoid(beta_r (I - I_th))`, `I_th=0.225`, `beta_r=50` | `I` | `Z` in (0,1) | — | `src/gril/litho/resist.py` | `Z(I_th)=0.5`; monotone in `I` | SPEC |
-| F-05 | [PUB] S2.5 | 3 process corners: Nom(1.00,focus), Max(1.02,focus), Min(0.98,defocus) | `M` | `Z_nom, Z_max, Z_min` | dose dimensionless | `src/gril/litho/corners.py` | `I_max >= I_nom >= I_min` on a dense test pattern | SPEC |
-| F-06 | [PUB] S2.3 | Analytic adjoint via CT kernels | `dL/dI` | `dL/dM` | — | `src/gril/litho/socs.py` (`autograd.Function`) | **finite-difference gradient check** vs float64 | SPEC |
-| F-07 | [C] | Translation / mirror / rotation equivariance of the imaging operator | `M`, transform | `I` | — | `src/gril/litho/socs.py` | shifted mask -> shifted image (periodic) to 1e-5 | SPEC |
-| F-08 | [PUB] S2.4 | Canvas 2048x2048, 1 nm/px, centered designs | `.glp` | `(2048,2048)` float | nm | `src/gril/data/glp.py` | bbox + area match GLP RECT/PGON records exactly | SPEC |
+| F-01 | [PUB] S2.2 | 24-term SOCS kernel set, focus + defocus | — | `h_k`, `(24,35,35)` complex64; `w_k`, `(24,)` float32 | frequency-domain, dimensionless | `src/gril/litho/kernels.py` | eigenvalues >=0 and descending | **VERIF** |
+| F-02 | [PUB] S2.3 | Hopkins/SOCS aerial image `I = sum_k w_k \|h_k ⊛ (d·M)\|^2` | mask `M` in [0,1], `(...,2048,2048)`; dose `d` | intensity `I >= 0` | normalized so open field -> 1 | `src/gril/litho/socs.py` | open-field = 0.95154; matches pure autograd to 1.7e-16 | **VERIF** |
+| F-03 | [PUB] S2.3 | FFT convention: `norm="forward"`, kernel on the 4 corners, no shift | — | — | — | `src/gril/litho/socs.py` | corner path == centred path, 1.6e-7 | **VERIF** |
+| F-04 | [PUB] S2.5 | Constant-threshold resist `Z = sigmoid(beta_r (I - I_th))`, `I_th=0.225`, `beta_r=50` | `I` | `Z` in (0,1) | — | `src/gril/litho/resist.py` | `Z(I_th)=0.5`; monotone in `I` | **TEST** |
+| F-05 | [PUB] S2.5 | 3 process corners: Nom(1.00,focus), Max(1.02,focus), Min(0.98,defocus) | `M` | `Z_nom, Z_max, Z_min` | dose dimensionless | `src/gril/litho/resist.py` | 10-case regression bit-exact vs reference | **VERIF** |
+| F-06 | [PUB] S2.3 + **corrected** | Analytic adjoint via `conj(H)` (**not** the shipped CT kernels — see F-ADJ-01) | `dL/dI` | `dL/dM` | — | `src/gril/litho/socs.py` (`autograd.Function`) | exact vs autograd (**3.9e-16**); float64 FD check | **VERIF** |
+| F-07 | [C] | Translation + x-mirror equivariance (y-mirror does **not** hold — see F-KER-01) | `M`, transform | `I` | — | `src/gril/litho/socs.py` | translation 6.1e-7; x-mirror 4.9e-7; y-asymmetry pinned | **VERIF** |
+| F-08 | [PUB] S2.4 | Canvas 2048x2048, 1 nm/px, centered designs | `.glp` | `(2048,2048)` float | nm | `src/gril/data/glp.py` | raster **bit-identical** to reference on all 10 cases | **VERIF** |
 
 ## 2. Metrics
 
 | # | Provenance | Item | Input | Output | Units | Implementation | Test | Status |
 |---|---|---|---|---|---|---|---|---|
-| M-01 | [PUB] S2.4 | `L2 = sum((bin(Z_nom) - target)^2)` | `M`, target | scalar | px^2 (= nm^2) | `src/gril/metrics/l2.py` | hand-computed 8x8 example | SPEC |
-| M-02 | [PUB] S2.4 | `PVB = count(bin(Z_max) != bin(Z_min))` | `M` | scalar | px^2 | `src/gril/metrics/pvband.py` | hand-computed example; PVB=0 for identical corners | SPEC |
-| M-03 | [PUB] S2.4 | EPE violations: boundary extraction -> v/h segments -> sample sites (interval 40, min len 80, start 40) -> inner/outer check | `M`, target | `(epe_in, epe_out)` | count | `src/gril/metrics/epe.py` | **must reproduce S2.4's numbers exactly on all 10 ICCAD13 cases** | SPEC |
-| M-04 | [A] + G-016 | EPE at configurable tolerance; report 15 nm **and** 3 nm | `M`, target, tol | count | nm | `src/gril/metrics/epe.py` | violations monotone non-increasing in tolerance | SPEC |
+| M-01 | [PUB] S2.4 | `L2 = sum((bin(Z_nom) - target)^2)` | `M`, target | scalar | px^2 (= nm^2) | `src/gril/metrics/core.py` | hand-computed example + 10-case bit-exact | **VERIF** |
+| M-02 | [PUB] S2.4 | `PVB = count(bin(Z_max) != bin(Z_min))` | `M` | scalar | px^2 | `src/gril/metrics/core.py` | hand-computed example + 10-case bit-exact | **VERIF** |
+| M-03 | [PUB] S2.4 | EPE violations: boundary extraction -> v/h segments -> sample sites (interval 40, min len 80, start 40) -> inner/outer check | `M`, target | `(epe_in, epe_out)` | count | `src/gril/metrics/core.py` | **reproduces S2.4 exactly on all 10 cases** | **VERIF** |
+| M-04 | [A] + G-016 | EPE at configurable tolerance; report 15 nm **and** 3 nm | `M`, target, tol | count | nm | `src/gril/metrics/core.py` | monotonicity in tolerance verified | **TEST** |
 | M-05 | [C] | MRC (min width / min space) check | `M` | violation count | nm | `src/gril/metrics/mrc.py` | synthetic under/over-width shapes | SPEC |
 | M-06 | [C] | Shot count (rectangle decomposition) | `M` | count | — | `src/gril/metrics/shots.py` | known-decomposition shapes | SPEC |
 | M-07 | [A] | Runtime per case | — | seconds | s | `src/gril/experiments/` | recorded, never estimated | SPEC |

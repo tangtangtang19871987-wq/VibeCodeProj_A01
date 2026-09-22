@@ -50,3 +50,10 @@ htmlcov/
 *.tmp
 *.bak
 *.log
+
+# Reproduction work
+data/.openilt/
+data/kernel/
+data/benchmark/
+data/config/
+results/**/raw/

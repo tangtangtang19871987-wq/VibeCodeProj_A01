@@ -1,0 +1,10 @@
+# Pinned to the exact versions verified in this session (see docs/environment_audit.md).
+torch==2.9.1
+numpy==2.4.6
+scipy==1.17.1
+opencv-python-headless==5.0.0.93
+matplotlib==3.11.2
+PyYAML==6.0.1
+pydantic==2.13.5
+pytest==9.1.1
+tqdm==4.70.1
