@@ -132,43 +132,51 @@ def run(config_path: str) -> dict:
     bs = pcfg.batch_size
 
     # ---------------- Stage 1: WGAN-GP pretraining (paper Eq. 5) --------------
-    print("\n=== Stage 1: generative pretraining (WGAN-GP + reconstruction) ===", flush=True)
+    # Resume support: a long CPU run can be interrupted (this one was, by a
+    # container restart). If the stage-1 checkpoint is present, reuse it rather
+    # than repeating ~20 minutes of pretraining.
+    pt_ckpt = os.path.join(out_dir, "generator_pt.pt")
+    resumed_pretrain = os.path.exists(pt_ckpt) and not cfg.get("overwrite", False)
     t0 = time.time()
     step = 0
-    for epoch in range(pcfg.epochs):
-        perm = torch.randperm(n)
-        for i in range(0, n - bs + 1, bs):
-            idx = perm[i : i + bs]
-            d_stats = critic_step(critic, gen, designs[idx], gt[idx], pcfg, opt_d)
-            step += 1
-            # Log EVERY step. Logging only on generator steps means that when the
-            # dataset yields fewer than n_critic batches the history stays empty
-            # and the printed metrics are the "missing" default, which reads as
-            # NaN and looks exactly like divergence.
-            record = {"epoch": epoch, "step": step, **d_stats}
-            if step % pcfg.n_critic == 0:
-                record.update(generator_step(critic, gen, designs[idx], gt[idx], pcfg, opt_g))
-            history["pretrain"].append(record)
-        if step < pcfg.n_critic:
-            print(
-                f"  WARNING: only {step} critic steps so far and n_critic="
-                f"{pcfg.n_critic}; the generator has not been updated yet.",
-                flush=True,
-            )
-        if (epoch + 1) % cfg["log_every"] == 0:
-            last = history["pretrain"][-1] if history["pretrain"] else {}
-            recs = [r for r in history["pretrain"] if "g_rec" in r]
-            g_rec = recs[-1]["g_rec"] if recs else None
-            print(
-                f"  epoch {epoch+1}/{pcfg.epochs} "
-                f"d_loss {last.get('d_loss', float('nan')):.3f} "
-                f"g_rec {'n/a' if g_rec is None else f'{g_rec:.4f}'} "
-                f"W {last.get('wasserstein', float('nan')):.3f}",
-                flush=True,
-            )
+    if resumed_pretrain:
+        gen.load_state_dict(torch.load(pt_ckpt, weights_only=False))
+        print(f"\n=== Stage 1: RESUMED from {pt_ckpt} (pretraining skipped) ===", flush=True)
+    else:
+        print("\n=== Stage 1: generative pretraining (WGAN-GP + reconstruction) ===", flush=True)
+        for epoch in range(pcfg.epochs):
+            perm = torch.randperm(n)
+            for i in range(0, n - bs + 1, bs):
+                idx = perm[i : i + bs]
+                d_stats = critic_step(critic, gen, designs[idx], gt[idx], pcfg, opt_d)
+                step += 1
+                # Log EVERY step. Logging only on generator steps means that when
+                # the dataset yields fewer than n_critic batches the history stays
+                # empty and the printed metrics are the "missing" default, which
+                # reads as NaN and looks exactly like divergence.
+                record = {"epoch": epoch, "step": step, **d_stats}
+                if step % pcfg.n_critic == 0:
+                    record.update(generator_step(critic, gen, designs[idx], gt[idx], pcfg, opt_g))
+                history["pretrain"].append(record)
+            if step < pcfg.n_critic:
+                print(
+                    f"  WARNING: only {step} critic steps so far and n_critic="
+                    f"{pcfg.n_critic}; the generator has not been updated yet.",
+                    flush=True,
+                )
+            if (epoch + 1) % cfg["log_every"] == 0:
+                last = history["pretrain"][-1] if history["pretrain"] else {}
+                recs = [r for r in history["pretrain"] if "g_rec" in r]
+                g_rec = recs[-1]["g_rec"] if recs else None
+                print(
+                    f"  epoch {epoch+1}/{pcfg.epochs} "
+                    f"d_loss {last.get('d_loss', float('nan')):.3f} "
+                    f"g_rec {'n/a' if g_rec is None else f'{g_rec:.4f}'} "
+                    f"W {last.get('wasserstein', float('nan')):.3f}",
+                    flush=True,
+                )
+        torch.save(gen.state_dict(), pt_ckpt)
     pretrain_seconds = time.time() - t0
-
-    torch.save(gen.state_dict(), os.path.join(out_dir, "generator_pt.pt"))
     print("Evaluating PT model ...", flush=True)
     metrics_pt = evaluate(gen, val_designs, litho, eval_cfg, tol, refine_kwargs)
     print(f"  PT: {metrics_pt}", flush=True)
@@ -229,6 +237,7 @@ def run(config_path: str) -> dict:
         "config": cfg,
         "provenance": provenance(),
         "pretrain_seconds": pretrain_seconds,
+        "pretrain_resumed_from_checkpoint": resumed_pretrain,
         "rl_seconds": rl_seconds,
         "metrics": {"PT": metrics_pt, "PT+RL": metrics_ptrl},
         "deviations_from_paper": [
