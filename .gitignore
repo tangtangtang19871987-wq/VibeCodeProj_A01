@@ -57,3 +57,10 @@ data/kernel/
 data/benchmark/
 data/config/
 results/**/raw/
+
+# Regenerable training artifacts (rebuilt by scripts/ or the runners).
+# Raw numerical results (*.json) and final optimised masks ARE tracked --
+# see results/README.md.
+results/**/gt.pt
+results/**/generator_*.pt
+results/train_smoke/
