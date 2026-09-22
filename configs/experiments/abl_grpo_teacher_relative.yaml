@@ -2,7 +2,7 @@
 #
 # The METHOD follows the paper exactly (Eqs. 5-10). Only the SCALE differs; every
 # deviation is listed in the output summary.json and in docs/gap_ledger.md.
-experiment_id: train_scaled
+experiment_id: abl_grpo_teacher_relative
 paper_reference: "Sec. 3.3 (Eqs. 5-10), Sec. 4.1 configuration; Table 2 PT vs PT+RL"
 seed: 0
 threads: 1
@@ -53,7 +53,7 @@ grpo:
   lambda_pg: 500.0   # paper
   lambda_imit: 1.0   # paper
   smoothing_kernel: 25   # paper: 25x25 average pooling
-  advantage: teacher_relative   # paper Eqs. 6-7 (see G-012)
+  advantage: teacher_relative   # ablation X-07
   logprob_reduction: mean
   epe_tolerance: 3   # paper
 rl_steps: 60
