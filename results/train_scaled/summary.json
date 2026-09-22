@@ -63,7 +63,7 @@
     "rl_lr_min": 1e-07
   },
   "provenance": {
-    "git_commit": "c0a5c49cb0bfaf7a0d09663e9035989a14790b23",
+    "git_commit": "cbf5ff43d3eb93888161fb294b94e7abf3480c6e",
     "torch": "2.9.1+cu128",
     "cuda_available": false,
     "device": "cpu",
@@ -72,19 +72,19 @@
     "cpu_count": 4,
     "threads": 1
   },
-  "pretrain_seconds": 0.007631778717041016,
+  "pretrain_seconds": 0.007566928863525391,
   "pretrain_resumed_from_checkpoint": true,
-  "rl_seconds": 2553.6841003894806,
+  "rl_seconds": 2185.857528448105,
   "metrics": {
     "PT": {
-      "epe_best_mean": 29.25,
-      "epe_sample_mean": 29.609375,
+      "epe_best_mean": 134.75,
+      "epe_sample_mean": 135.59375,
       "diversity": 0.0016133444649832588
     },
     "PT+RL": {
-      "epe_best_mean": 30.375,
-      "epe_sample_mean": 30.484375,
-      "diversity": 0.000789914812360491
+      "epe_best_mean": 134.5,
+      "epe_sample_mean": 135.640625,
+      "diversity": 0.0013277190072195871
     }
   },
   "deviations_from_paper": [

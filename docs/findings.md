@@ -164,42 +164,78 @@ canvas made the two identical, which is the worst case for noticing.
 
 ---
 
-## F-RL-01 — At this scale, RL finetuning made the sampler WORSE (negative result)
+## F-RL-01 — At this scale, GRPO finetuning is a null result, not an improvement
 
-**Reported as measured. Not tuned away.**
+**Reported as measured, in two stages, because the first measurement had a bug.**
 
-### Result (before the F-UNIT-01 fix; to be re-measured after)
+### Stage 1 result (pre F-UNIT-01 fix — since retracted)
+
+An earlier run, before the EPE-units bug (F-UNIT-01) was found and fixed, showed
+best-of-K EPE getting WORSE (29.25 -> 30.38) under an EPE tolerance that was
+silently 8x too loose (effectively 24 nm instead of the intended 3 nm). That
+number is **retracted as the headline result** because the tolerance it was
+measured under was wrong, but the run is kept in `git log` for the record and
+the mechanism it revealed (see below) still held after the fix.
+
+### Stage 2 result (post F-UNIT-01 fix — current)
+
+Same generator checkpoint, same 60-step GRPO run, re-executed with the corrected
+per-pixel tolerance conversion (3 nm at 8 nm/px canvas -> 1 px, the tightest
+tolerance representable at this resolution):
 
 | Model | best-of-K EPE | sample-mean EPE | binarised diversity |
 |---|---|---|---|
-| PT (WGAN-GP only) | **29.25** | 29.61 | **0.00161** |
-| PT + GRPO | **30.38** | 30.48 | **0.00079** |
+| PT (WGAN-GP only) | 134.75 | 135.59 | 0.00161 |
+| PT + GRPO | 134.50 | 135.64 | 0.00133 |
+| **Change** | **-0.19%** | **+0.04%** | **-17.4%** |
 
-The paper reports the opposite direction (Table 2: StdContact-Avg 9.0 -> 6.5).
+### Honest reading
 
-### What the traces show
-Across 60 RL steps the reward standard deviation within a group of K=8 was
-frequently **exactly 0.00** — all eight candidates produced identical rewards, so
-the teacher-relative advantage collapsed to zero and the policy gradient carried
-no signal (visible as `pg -0.0000` at step 45). Diversity roughly **halved**,
-from 0.00161 to 0.00079.
+This is a **null result, not a regression and not an improvement**. Best-of-K
+EPE moved by 0.19%, well within run-to-run noise at `K=8`; sample-mean EPE moved
+in the opposite direction by a comparable amount. Neither is a signal.
 
-### Mechanism (why this is expected at 60 steps)
-The policy loss `L_pg = -A_k * log pi(M_k)` maximises the log-probability of the
+What *is* a signal, and reproduces the mechanism identified before the fix:
+**diversity fell 17.4%** (0.00161 -> 0.00133). Reward trace: `reward_std == 0`
+on 12 of 60 steps (20%) -- one designs-worth of group in five had every one of
+its K=8 candidates score identically after refinement, at which point the
+teacher-relative advantage is exactly zero and that step's policy-gradient term
+vanishes (`pg -0.0000` is visible in the log at step 25). Reward itself is
+noisy and non-monotonic across the run (best `-24.0` at step 3, worst `-195.4`,
+ending at `-109.9`), consistent with a training signal too weak to consistently
+overcome per-step noise at this scale.
+
+### Mechanism (unchanged by the fix)
+
+`L_pg = -A_k * log pi(M_k)` maximises the log-probability of the
 **already-binarised** action whenever `A_k > 0`. That sharpens the per-pixel
-Bernoulli distribution, which **reduces** sample diversity. In the paper's regime
-(20 epochs over ~120k designs) there is ample signal to offset this with genuine
-quality improvement. In 60 steps on 64 synthetic layouts there is not: the
-sharpening dominates, diversity shrinks, group rewards collapse to identical
-values, and learning stalls.
+Bernoulli distribution, which mechanically reduces sample diversity. Whether
+this is offset by a genuine quality gain depends on how much real training
+signal survives the group-reward collapse described above. At the paper's scale
+(20 epochs, ~120k designs, K=16) there is evidently enough. At 60 steps on 64
+synthetic layouts there is not: the diversity cost is visible and consistent
+across both the pre-fix and post-fix runs; the quality benefit is not.
 
 ### Honest attribution
-This is a **scale-limited negative result**, not evidence against the paper. The
-run is ~4 orders of magnitude smaller than the paper's, uses synthetic layouts
-instead of LithoBench, and (before F-UNIT-01) used a reward computed at the wrong
-tolerance. What it does establish positively is that **the multi-candidate
-premise itself reproduces**: even in the PT-only model, best-of-K EPE (29.25)
-beats the sample mean (29.61), which is the entire justification for sampling
-rather than regressing a single mask.
 
-No hyperparameter was adjusted to turn this result positive.
+**Not evidence against the paper.** The run is ~4 orders of magnitude smaller
+than the paper's along every axis that matters for RL sample efficiency (steps,
+designs, group size), uses synthetic layouts rather than LithoBench, and a
+reward computed on a CPU-only low-resolution proxy. What this experiment
+establishes is narrower and still useful: (1) the GRPO implementation runs
+end-to-end, is numerically stable, and its teacher stays frozen and
+gradient-free, all verified independently by unit tests; (2) at this compute
+budget it does not show the paper's reported improvement, in either direction;
+(3) the diversity-reduction mechanism of the policy loss is real and
+measurable, and would need to be outweighed by real reward signal at greater
+scale for the paper's result to emerge -- which this experiment cannot supply.
+
+The positive finding from the PT-only model stands independently of the RL
+result: **best-of-K EPE beats the sample mean at every measurement in this
+project** (both the pre-fix 29.25 vs 29.61 and the post-fix 134.75 vs 135.59),
+which is the paper's core premise for sampling multiple candidates rather than
+regressing a single mask, and it reproduces at this reduced scale.
+
+No hyperparameter was adjusted between the two runs. The only change was the
+EPE-unit bug fix in F-UNIT-01, applied uniformly to both PT and PT+RL
+evaluation.
