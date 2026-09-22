@@ -59,6 +59,21 @@ Written up in `docs/findings.md`:
 
 ---
 
+## Final ICCAD13 baseline (all 10 cases, 300 iterations)
+
+| Metric | No-OPC (mask=target) | Our ILT | Paper "Ours" (150 it) |
+|---|---|---|---|
+| mean EPE @15nm | 69.6 | **2.6** | 1.6 |
+| mean EPE @3nm | 112.3 | 55.4 | 25.2 |
+| mean PV Band (nm²) | 37476 | 42794 | 39080.7 |
+
+8 of 10 cases match the paper's EPE@15nm exactly (cases 1, 2, 4, 6, 7, 8, 9, 10
+all match; only cases 3 and 5 differ). This is with an **independently reimplemented
+solver** never tuned against the paper's numbers (G-015: the paper does not
+specify its own solver). Full per-case breakdown and the PV-Band caveat (our
+solver does not optimise the process window, G-015) are in
+`REPRODUCTION_REPORT.md`.
+
 ## Quick start
 
 ```bash
