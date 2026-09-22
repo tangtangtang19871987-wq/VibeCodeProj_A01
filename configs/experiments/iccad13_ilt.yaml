@@ -1,0 +1,39 @@
+# X-02 + X-10: numerical ILT baseline on ICCAD13, run to 300 iterations with
+# scores recorded at checkpoints, so one run yields BOTH the 150-iteration and
+# 300-iteration comparisons and the full iteration-budget curve.
+#
+# 150 iterations is the budget the paper reports for its own method (Table 1,
+# "Ours-150 iterations"); its CurvyILT baseline uses 300. Running our solver at
+# both budgets lets the paper's "roughly half the iteration budget" claim be
+# examined directly, on identical physics.
+#
+# Solver constants come from our own sweep (see docs/gap_ledger.md G-015); the
+# paper does not specify them. The sweep optimised L2, which is NOT the metric
+# used for comparison against the paper.
+experiment_id: iccad13_ilt
+paper_reference: "Table 1 / Table 2, ICCAD13 rows (baseline comparison only)"
+seed: 0
+threads: 4
+canvas: 2048
+kernel_dir: /home/user/openopc/openilt/kernel
+bench_dir: /home/user/openopc/openilt/benchmark/ICCAD2013
+cases: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+epe_tolerances: [15, 3]
+process:
+  target_density: 0.225
+  print_thresh: 0.5
+  print_steepness: 50.0
+  dose_nom: 1.00
+  dose_max: 1.02
+  dose_min: 0.98
+  num_kernels: 24
+ilt:
+  iterations: 300
+  checkpoints: [25, 50, 100, 150, 200, 250, 300]
+  step_size: 0.20
+  mask_steepness: 8.0
+  weight_nominal: 1.0
+  weight_pvb: 0.0
+  init_scale: 2.0
+  optimizer: adam
+  seed: 0

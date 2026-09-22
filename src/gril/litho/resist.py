@@ -45,14 +45,26 @@ class LithoModel:
         self.focus: KernelSet = load_kernel_set(kernel_dir, defocus=False, device=self.device)
         self.defocus: KernelSet = load_kernel_set(kernel_dir, defocus=True, device=self.device)
 
-    def aerial(self, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Return ``(I_nom, I_max, I_min)`` aerial intensities."""
+    def aerial_nominal(self, mask: torch.Tensor) -> torch.Tensor:
+        """Nominal-corner aerial intensity only.
+
+        The ILT objective usually needs just this corner; computing it alone is
+        ~3x cheaper than :meth:`aerial`, which matters a lot on CPU.
+        """
+        return aerial_image(mask, self.focus, self.cfg.dose_nom, self.cfg.num_kernels)
+
+    def aerial_outer(self, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """``(I_max, I_min)`` for the two outer process corners."""
         c, n = self.cfg, self.cfg.num_kernels
         return (
-            aerial_image(mask, self.focus, c.dose_nom, n),
             aerial_image(mask, self.focus, c.dose_max, n),
             aerial_image(mask, self.defocus, c.dose_min, n),
         )
+
+    def aerial(self, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Return ``(I_nom, I_max, I_min)`` aerial intensities."""
+        i_max, i_min = self.aerial_outer(mask)
+        return self.aerial_nominal(mask), i_max, i_min
 
     def __call__(self, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Return ``(Z_nom, Z_max, Z_min)`` resist images in ``(0, 1)``."""

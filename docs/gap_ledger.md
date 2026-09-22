@@ -1,156 +1,93 @@
 # Gap Ledger
 
-Every piece of information that is missing, uncertain, or assumed. Nothing here is
-silently resolved: each row states the assumption actually used in code, the
-alternatives considered, and how sensitive the result is.
+**Updated after the primary PDF was supplied.** G-001 is closed; most Tier-1 rows
+are now resolved from the paper. What remains open is (a) what the paper itself
+does not state, (b) one place where the paper **contradicts itself**, and (c) the
+hard environment limits of this host.
 
-**Confidence scale:** High = verified against a public artifact executed in this
-session. Medium = consistent across the literature/protocol, low risk. Low =
-plausible guess. **None = we do not know and the code must expose it as a knob.**
+**Confidence:** High = verified against a public artifact executed here, or read
+verbatim from the paper. Medium = stated by the paper but under-specified.
+Low = our reconstruction. **None = unknown.**
 
 ---
 
-## TIER-0 GAPS — these dominate everything else
+## CLOSED
 
-### G-001 — The primary paper was never read
+| ID | Item | Resolution |
+|---|---|---|
+| **G-001** | Primary paper unobtainable | **CLOSED.** User supplied `2602.19027v1` (7 pp). All equations, both tables, and the full configuration are now in `docs/paper_summary.md`. |
+| **G-002** | Table 1 / Table 2 numbers unknown | **CLOSED.** Both tables transcribed in full, per ICCAD13 case, including all baselines. |
+| **G-011** | Latent dimension | **CLOSED.** `z`-dim = **256** (Sec. 4.1). |
+| **G-013** | Policy log-probability definition | **CLOSED.** Eq. 8: pixels are independent Bernoulli with prob `sigmoid(Y_k)`; BCE is the surrogate for `-log P`; `M_k` is **detached**. Our reconstruction was correct. |
+| **G-014** | Loss weights | **CLOSED.** `lambda_pg = 500`, `lambda_imit = 1` (Sec. 4.1). Imitation is **LpLoss with p=2** and **25x25 stride-1 average-pool smoothing**. |
+| **G-016** | EPE tolerance | **CLOSED.** Table 1 uses **15 nm**; Table 2 is a **3 nm** stress test. The paper's stated rationale: 15 nm is "overly permissive even at the 45 nm node", and targeting 0 EPE gives vanishing/unstable policy gradients. Our decision to parameterize the tolerance and report both was right. |
+| **G-017** | Ground-truth masks for pretraining | **CLOSED (as a fact).** LithoBench reference masks — which the paper itself calls **sub-optimal** (Sec. 3.1). Still **unobtainable here** (see G-041). |
+| **G-018** | Dataset and split | **CLOSED.** Pretrain on MetalSet (14,824) + ViaSet (104,773); test on StdMetal (271), StdContact (165), ICCAD13 (10). **ICCAD13 is explicitly out-of-distribution.** |
+| **G-019** | K, downsample, RL ILT steps | **CLOSED.** `K=16`, downsample factor **8**, **100** ILT iterations, upsample by custom low-res pooling + **bicubic**, binarize at 0.5. |
+
+---
+
+## OPEN — the paper does not say
+
+### G-012 — **The paper contradicts itself on the RL baseline**
 | | |
 |---|---|
-| **Missing** | The full text of arXiv 2602.19027: all equations, the algorithm boxes, Tables 1-2, all figures, every hyperparameter, the exact ILT solver. |
-| **Why it matters** | This is the reproduction target. Without it there is no authoritative statement of *any* formula. Tier-L2 (numerical agreement with the paper) is **impossible**, because the target numbers are unknown. |
-| **Sources searched** | arxiv.org (html+abs+pdf), export.arxiv.org, ar5iv, alphaxiv, Semantic Scholar API, HuggingFace papers, OpenReview, paperswithcode, dl.acm.org, spie.org, research.nvidia.com — **all HTTP 403 / EGRESS_BLOCKED**. Plus 4 WebSearch queries and a GitHub code/repo search for official code. Full log: `docs/source_inventory.md`. |
-| **Current assumption** | Reconstruct the method from the abstract-level facts [A] plus standard, well-documented formulations of each named component (WGAN-GP, GRPO, AdaIN, MOSAIC-style gradient ILT). Label the result a **faithful reimplementation**, never an exact reproduction. |
-| **Alternatives** | (a) User supplies the PDF — **collapses this gap and most of the ones below**. (b) Egress policy amended to allow arxiv.org. (c) Proceed as reimplementation. |
-| **Sensitivity experiment** | Not applicable — this gap is binary. Once the PDF arrives, every [B]-tagged row below becomes checkable in a single pass. |
+| **Issue** | Sec. 3.3.2 presents the **teacher-relative** baseline `A_k = R_k - R_k^T` (Eqs. 6-7) as the paper's contribution, and argues explicitly *against* the group mean (outlier sensitivity, weak advantages, rollout coupling). Sec. 4.1 then states the configuration used "a self-critical baseline given by **the group mean**." |
+| **Why it matters** | These are different algorithms, and this is the paper's headline algorithmic contribution. Which one produced Tables 1-2 cannot be determined from the text. |
+| **Current assumption** | Implement **both**, config-selected: `advantage: teacher_relative \| group_mean`. Default `teacher_relative` (what Sec. 3.3.2 argues for and what Eqs. 6-7 define). |
+| **Sensitivity experiment** | **X-07** runs both under an identical budget and reports the difference — turning a paper defect into a measured result. |
+| **Confidence** | **None** as to the paper's intent; **High** that both are implemented faithfully to their respective definitions. |
+
+### G-015 — ILT solver internals still unspecified
+| | |
+|---|---|
+| **Missing** | The paper never defines its ILT solver. It cites CurvyILT [4] (Yang & Ren, ISPD'25) for the solver *and* the morphological MRC handling, giving no mask parameterization, step size, optimizer, loss weights, or convergence rule. |
+| **Sources searched** | The paper (nothing); no public code for [4] found. |
+| **Current assumption** | MOSAIC/GAN-OPC/CurvyILT-lineage reconstruction in `src/gril/ilt/solver.py`: `M = sigmoid(beta_m * P)`, nominal-corner L2 vs the target, optional PV-band term, Adam. **Constants tuned by our own sweep and logged**, never tuned to match the paper's numbers. |
+| **Sensitivity experiment** | X-02 step-size/steepness sweep (run); X-10 iteration-budget curve. |
+| **Confidence** | **Medium** for the family (the paper's Eq. 1-2 physics is fixed and verified), **Low** for the constants. |
+
+### G-010 — Generator sizing
+| **Missing** | Channel widths, number of Style ResBlocks `n`, MLP depth for `f_phi`, and the "optional head downsample" choice. Fig. 3 fixes the **topology** (3-level pyramid, AdaIN at Level 2 only, element-wise-addition fusion, Local ResBlocks, UpConv, optional final bicubic) but no sizes. |
+|---|---|
+| **Current assumption** | Topology exactly per Fig. 3; widths config-exposed. |
+| **Confidence** | **High** on topology, **None** on sizing. |
+
+### G-020 — Pretraining loss details
+| **Missing** | `l_rec` is "e.g. l1 or l2" — never pinned. `lambda_1` (reconstruction) and `lambda_2` (gradient penalty) are **never given**. |
+|---|---|
+| **Current assumption** | `l_rec = l1`, `lambda_1 = 100`, `lambda_2 = 10` (the standard WGAN-GP value). All config-exposed. |
+| **Confidence** | **Low.** |
+
+### G-021 — MRC rule values
+| **Missing** | Curvilinear MRC rules are cited to [17] (a Siemens technical report) only; no numeric width/space/curvature limits appear. |
+|---|---|
+| **Current assumption** | Morphological opening with a configurable structuring-element size; default off, reported when on. |
 | **Confidence** | **None.** |
 
-### G-002 — Paper's Table 1 / Table 2 numbers unknown
-| | |
-|---|---|
-| **Missing** | Per-case L2, PV Band, EPE, runtime for the proposed method and all baselines. |
-| **Why it matters** | `REPRODUCTION_REPORT.md` cannot have a "paper result" column. Every comparison degenerates to "our measured value" with no reference. |
-| **Sources searched** | 3 targeted WebSearch queries naming Table 1, ICCAD13, and the baseline names; all returned prose only. |
-| **Current assumption** | Report our own measured numbers, and compare against **baselines we implement and run ourselves** (no-OPC, plain ILT, deterministic-warm-start ILT) so that *relative* claims — the paper's ">20% EPE improvement" and "half the iteration budget" — are still testable in-house. |
-| **Alternatives** | Wait for the PDF. |
-| **Sensitivity experiment** | E-REL-01: measure relative EPE improvement of (PT+RL warm start + ILT) vs (plain ILT) under an identical iteration budget. This tests the paper's *claim shape* without needing its absolute numbers. |
-| **Confidence** | **None.** |
-
 ---
 
-## TIER-1 GAPS — method details
+## OPEN — environment limits of this host (not paper gaps)
 
-### G-010 — Generator architecture specifics
-| | |
-|---|---|
-| **Missing** | Depth, channel widths, number of resolution levels, normalization, activation, up/downsampling operators, output head. Digest says "multi-scale path" with a Style ResBlock at "Level 2" [B] but gives no channel counts. |
-| **Why it matters** | Determines capacity and whether the AdaIN-only-at-coarse-level claim behaves as described. |
-| **Sources searched** | S1.2 only. No official code found. |
-| **Current assumption** | A U-Net with 4 resolution levels, base width 64, doubling per level, GroupNorm elsewhere and AdaIN in the coarse Style ResBlocks, SiLU activation, bilinear upsample + 3x3 conv. **All exposed in config**, none hard-coded. |
-| **Alternatives** | GAN-OPC's original generator topology; a plain conditional U-Net with concatenated noise. |
-| **Sensitivity experiment** | E-ABL-ARCH: sweep base width and the level at which AdaIN is injected; measure sample diversity and post-ILT EPE. |
-| **Confidence** | **Low.** |
+### G-040 — No GPU
+The paper runs on **8x A100 80GB**, PyTorch 2.3.0 + CUDA 12.4, DDP/NCCL. This
+host has **4 CPU cores, no GPU**, and the user has directed that no GPU/CUDA path
+be used. Measured here: **3.80 s/iter** at 2048x2048, **0.015 s/iter** at 256x256.
+Paper-scale pretraining (50 epochs x ~120k layouts at 2048^2) is **not reachable**.
+Consequence: the "3x speedup" / "2x throughput" claims are **not evaluable**, and
+the "Ours" rows of Tables 1-2 **cannot be reproduced**.
 
-### G-011 — Latent / style dimension
-| **Missing** | `dim(z)`, `dim(w)`, mapping-MLP depth. | 
-|---|---|
-| **Current assumption** | `dim(z)=256` [B], `dim(w)=256`, 4-layer mapping MLP [C]. Config-exposed. |
-| **Sensitivity experiment** | E-ABL-Z: sweep `dim(z)` in {32, 128, 256}; measure pairwise mask diversity. |
-| **Confidence** | **Low** (the 256 is [B]). |
-
-### G-012 — GRPO objective form
-| | |
-|---|---|
-| **Missing** | The actual policy-gradient expression. GRPO normally uses a group-normalized advantage `A_k = (R_k - mean(R))/std(R)` with a PPO-style clipped ratio and a KL term to a reference policy. The digest instead describes a **teacher-relative** advantage `A_k = R_k - R_k^T` with a **BCE surrogate** for the log-probability and *no* clipping or KL term mentioned [B]. These are materially different algorithms. |
-| **Why it matters** | This is the paper's central contribution. Getting it wrong means not reproducing the paper. |
-| **Sources searched** | S1.2; S1.3 contradicts it (uses group_size=4 + ratio clipping). |
-| **Current assumption** | Implement **both** behind one config switch: `advantage: {teacher_relative, group_normalized}` and `ratio_clip: {none, ppo}`. Default to the digest's description (`teacher_relative`, no clip) since it is the only source that claims to describe *this* paper, while making the standard-GRPO variant a one-line change. |
-| **Alternatives** | Canonical GRPO (group-normalized + clip + KL); plain REINFORCE with baseline. |
-| **Sensitivity experiment** | E-ABL-GRPO: train all three variants under an identical budget; compare final selected EPE and reward variance. This is a *designed* experiment, not a workaround. |
-| **Confidence** | **Low.** |
-
-### G-013 — Pixel-wise log-probability of a mask
-| | |
-|---|---|
-| **Missing** | How a policy log-prob is defined over a megapixel binary mask. |
-| **Why it matters** | Without it the policy gradient is undefined. |
-| **Current assumption** | Treat each pixel as an independent Bernoulli with parameter `sigma(Y)`; `log pi(M|Z,z) = sum_pixels [M log sigma(Y) + (1-M) log(1-sigma(Y))]`, i.e. the negative BCE. This is consistent with the digest's "BCE surrogate" phrasing [B] and is the only standard construction that makes the stated reward-weighted objective well-typed [C]. Mean-reduce (not sum) to keep the scale sane, with the reduction config-exposed. |
-| **Sensitivity experiment** | E-ABL-LOGP: sum vs mean reduction, and the effect of `lambda_pg` rescaling that this induces. |
-| **Confidence** | **Low-Medium.** |
-
-### G-014 — lambda_pg = 500, lambda_imit = 1
-| **Why it matters** | A 500:1 ratio is extreme; it is only sane if the log-prob is mean-reduced. Strongly coupled to G-013. |
-|---|---|
-| **Current assumption** | Use [B]'s values as defaults *together with* mean-reduction, and verify empirically that neither term dominates. If one does, report that and sweep. |
-| **Sensitivity experiment** | E-ABL-LAMBDA: 2-D sweep over `lambda_pg` x `lambda_imit`; record the ratio of gradient norms of the two terms. |
-| **Confidence** | **Low.** |
-
-### G-015 — The "fast batched ILT solver"
-| | |
-|---|---|
-| **Missing** | Algorithm, parameterization, step size, momentum, schedule, stopping rule. The digest explicitly lists this as a paper limitation [B]. |
-| **Why it matters** | It sets both the reward and the headline runtime claim. |
-| **Current assumption** | MOSAIC/GAN-OPC-lineage gradient ILT: sigmoid-relaxed mask variable `M = sigma(beta_m * P)`, litho via 24-kernel SOCS, resist via `sigma(beta_r*(I - I_th))`, loss `||Z_resist - Z_target||_2^2` (+ optional PVB term), Adam. Exposed: `step_size`, `beta_m`, `beta_r`, `iters`, `corner weights`. This lineage is the documented public standard for ICCAD13 [C]. |
-| **Sensitivity experiment** | E-ABL-ILT: step size and iteration-count sweep; report the iteration/quality curve, which is exactly what the "half the iteration budget" claim needs. |
-| **Confidence** | **Medium** for the family, **Low** for the constants. |
-
-### G-016 — EPE at "3 nm tolerance" vs ICCAD13's 15 nm
-| | |
-|---|---|
-| **Missing** | Whether the paper redefines the EPE check, or only tightens the threshold. |
-| **Why it matters** | The public ICCAD13 checker uses `EPE_CONSTRAINT=15` (S2.4). The paper reports EPE violations under a **3 nm** tolerance [A]. Numbers under the two settings are not comparable. |
-| **Current assumption** | Keep the reference sampling scheme (interval 40, min segment 80, start offset 40) **exactly** as in S2.4 and expose the tolerance as a parameter, reporting **both** 15 nm and 3 nm. |
-| **Alternatives** | The paper may sample EPE sites differently. Unknowable without G-001. |
-| **Sensitivity experiment** | E-SENS-EPE: report the full EPE-violation-vs-tolerance curve for 1..15 nm, so any future threshold can be read off. |
-| **Confidence** | **Medium** on the mechanism, **None** on matching the paper. |
-
-### G-017 — Ground-truth masks for pretraining
-| | |
-|---|---|
-| **Missing** | Which `M_gt` the reconstruction loss targets. LithoBench ships reference ILT masks; we cannot download it (S3). |
-| **Current assumption** | Generate `M_gt` **in-house** by running our own converged ILT solver on each training layout, and document that these are self-produced, not the paper's. This mirrors how GAN-OPC built its training set [C]. |
-| **Sensitivity experiment** | E-SENS-GT: vary the ILT budget used to make `M_gt` (50/200/500 iters) and measure the effect on pretraining quality. |
-| **Confidence** | **Medium** as a method, **None** as a match to the paper's data. |
-
-### G-018 — Training layouts / dataset split
-| **Missing** | LithoBench splits, counts, augmentation, crop size. |
-|---|---|
-| **Current assumption** | ICCAD13's 10 cases are **evaluation only** (never trained on). Training uses a **synthetic M1-like layout generator** with a fixed seed, documented and checksummed, with a held-out validation split. |
-| **Sensitivity experiment** | E-SENS-DATA: train-set size sweep. |
-| **Confidence** | **None** as a match to the paper. |
-
-### G-019 — K=16, 8x downsample, ~100 RL ILT steps
-| **Current assumption** | Use [B]'s values as config defaults. On this CPU-only host the *executed* runs use smaller `K` and resolution; every result records what was actually used. |
-|---|---|
-| **Sensitivity experiment** | E-ABL-K: K in {1,2,4,8,16} vs final EPE and vs total compute — directly tests the paper's multi-candidate premise. |
-| **Confidence** | **Low.** |
-
-### G-020 — WGAN variant and discriminator
-| **Missing** | WGAN vs WGAN-GP, `n_critic`, gradient-penalty weight, discriminator architecture. Abstract says "WGAN" [A]; digest says "WGAN-GP" [B]. |
-|---|---|
-| **Current assumption** | WGAN-GP (gp weight 10, `n_critic` 5) as the default, with weight-clipping WGAN available by config. |
-| **Sensitivity experiment** | E-ABL-GAN: GP vs clipping, on pretraining stability. |
-| **Confidence** | **Low-Medium.** |
-
----
-
-## TIER-2 GAPS — resolved with high confidence from public artifacts
-
-These are recorded for completeness; they are **not** open risks.
-
-| ID | Item | Resolution | Confidence |
-|---|---|---|---|
-| G-030 | Optical model | 24-term SOCS, 35x35 complex kernels, focus + defocus, from S2.2. Verified: eigenvalues descending, open-field intensity 0.95154. | **High** |
-| G-031 | Process corners | Nominal (dose 1.00, focus), Max (dose 1.02, focus), Min (dose 0.98, defocus) — from `config/lithoiccad13.txt` (S2.5). | **High** |
-| G-032 | Resist model | Constant-threshold, `I_th = 0.225`, sigmoid steepness 50, print threshold 0.5 (S2.5). | **High** |
-| G-033 | FFT convention | `norm="forward"` (1/N^2 on forward), kernel applied to the four FFT corners (low frequencies), no fftshift in the fast path. Verified against the legacy shifted path in S2.3. | **High** |
-| G-034 | Canvas / sampling | 2048x2048 at 1 nm/pixel; designs centered. Verified by parsing all 10 GLP files. | **High** |
-| G-035 | L2 and PV Band | `L2 = sum((binarize(printed_nom) - target)^2)`; `PVB = count(binary_max != binary_min)` (S2.4). | **High** |
-| G-036 | Adjoint / gradient | Analytic adjoint using conjugate-transpose kernels, per S2.3, cross-checked in this repo by finite differences (`tests/physics`). | **High** |
+### G-041 — LithoBench unobtainable
+MetalSet/ViaSet/StdMetal/StdContact are the paper's training and primary test
+sets. The host is unreachable under this session's egress policy. Consequence:
+all StdMetal / StdContact rows are **not reproducible here**; training data is
+substituted by a documented, seeded synthetic generator, and that substitution is
+stated wherever it affects a number.
 
 ---
 
 ## Standing rule
 
-If an item in this ledger is later resolved by the primary PDF, the row must be
-updated **and** the corresponding `REPRODUCTION_SPEC.md` section and traceability
-matrix entry re-derived. Resolving a gap by tuning until numbers match the paper
-is explicitly forbidden by this project's ground rules.
+Resolving a gap by tuning until numbers match the paper is forbidden. Solver
+constants were selected by a sweep on an objective (L2) that is **not** the
+reported comparison metric, before any comparison to the paper's tables.

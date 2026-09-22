@@ -1,124 +1,185 @@
-# Paper Summary — arXiv 2602.19027
+# Paper Summary — arXiv 2602.19027v1
 
-> **READ THIS FIRST.** The primary PDF/HTML of this paper was **never retrieved**
-> in this session (arXiv and every mirror are blocked by the organization egress
-> proxy — see `docs/source_inventory.md` for the 10 logged retrieval failures).
->
-> Everything below is reconstructed from secondary sources. Each statement is
-> tagged with its source ID and a confidence level:
-> - **[A]** = stated in the abstract, corroborated across >=2 independent WebSearch
->   summaries of the arXiv abstract page (S1.1). Reliable at abstract granularity.
-> - **[B]** = from the third-party LLM digest (S1.2). **Unverified.** Plausible but
->   could be hallucinated. Never treat as a paper fact.
-> - **[C]** = my own inference from the surrounding literature, explicitly labeled
->   as an engineering assumption, not a paper claim.
->
-> **No equation in this paper has been read.** Not one. Every formula in
-> `REPRODUCTION_SPEC.md` is therefore a reconstruction from the named method
-> (WGAN-GP, GRPO, AdaIN, MOSAIC-style ILT), not a transcription.
-
-## Bibliographic facts [A]
+**Source status: PRIMARY SOURCE OBTAINED.** The user supplied the PDF
+(`2602.19027v1`, 7 pages, 22 references, cs.LG, 22 Feb 2026). Gap **G-001 is
+closed**. Everything below is read directly from the paper; equation numbers are
+the paper's own. Where the paper is silent or self-contradictory, that is stated
+explicitly rather than filled in.
 
 - **Title:** Pushing the Limits of Inverse Lithography with Generative Reinforcement Learning
-- **Authors:** Haoyu Yang, Haoxing Ren (NVIDIA)
-- **Venue:** 63rd Design Automation Conference (DAC'26). Also SPIE Advanced
-  Lithography + Patterning 2026, presentation 13980-26.
-- **arXiv:** 2602.19027v1, February 2026. Reference count reported as 22 [B].
+- **Authors:** Haoyu Yang, Haoxing Ren (NVIDIA Corp., Austin, TX)
+- **Venue:** DAC'26 (PDF carries a placeholder "Conference'17" template header)
 
-## Problem statement [A]
+## 1. Problem and claim
 
-ILT mask synthesis has a highly non-convex objective, so solvers stall in poor
-local minima. Prior generative warm-starts train *deterministic* image-to-image
-translators that imitate a sub-optimal mask dataset, which gives limited help in
-escaping those traps during refinement.
+ILT is highly non-convex; solvers stall in poor local minima. Prior GenAI
+warm-starts train deterministic image-to-image translators on sub-optimal
+datasets (LithoBench is explicitly called sub-optimal, Sec. 3.1), which gives
+little help escaping traps. The paper reformulates mask synthesis as
+**conditional sampling**, generating multiple candidates, refining each with a
+**batched ILT solver**, and selecting the best (Fig. 1c).
 
-## Core idea [A]
+Headline results (abstract + Sec. 4): on LithoBench, reduced EPE violations at a
+3 nm tolerance and roughly **2x throughput**; on ICCAD13, **>20% EPE improvement**
+with **3x speedup** over the SOTA numerical solver.
 
-Reformulate mask synthesis as **conditional sampling** rather than deterministic
-regression. A generator learns a *distribution* over masks conditioned on the
-design and proposes **multiple candidates**.
+## 2. Forward model (Sec. 2) — matches our implementation exactly
 
-Training is two-stage [A]:
-1. **Pretrain** the generator with **WGAN** plus a **reconstruction loss**.
-2. **Fine-tune** with **Group Relative Policy Optimization (GRPO)** using an
-   **ILT-guided imitation loss**.
+    I = sum_{i=1}^{k} alpha_i * || M (x) h_i ||^2                        (Eq. 1)
 
-At inference [A]: sample a small batch of masks, run **fast batched ILT
-refinement**, evaluate lithography metrics (EPE, process window), and **select
-the best candidate**.
+`alpha_i`, `h_i` are eigenvalues/eigenvectors of the transmission cross
+coefficient matrix — i.e. **SOCS**, exactly what `src/gril/litho/socs.py`
+implements. Resist is **constant thresholding** (Eq. 2):
 
-## Reported results [A]
+    Z_ij = 1 if I_ij > I_th else 0
 
-- **>20% reduction in EPE violations** on ICCAD13 contest cases.
-- **2-3x speedup** over the state-of-the-art numerical ILT solver.
-- On **LithoBench**, reduced EPE violations under a **3 nm tolerance** and roughly
-  doubled throughput versus a strong numerical ILT baseline [A].
-- Achieved while using roughly **half the ILT iteration budget** [A/B].
+Metrics are **EPE violations** and **PV Band area** (Definitions 1 and 2).
 
-> The **per-case tables (Table 1, Table 2) were not obtained.** Three targeted
-> searches failed to surface any per-benchmark L2 / PVB / EPE / runtime numbers.
-> This is the single hardest blocker for tier-L2 reproduction.
+**Important:** the paper adopts a **curvilinear mask assumption** with MRC rules
+from ref. [17], and enforces **MRC-cleanness by morphological operations** as in
+CurvyILT [4]. Sec. 4.1: "We perform morphological opening and cleanup to ensure
+curvilinear MRC compliance before printability evaluation."
 
-## Architecture, as described by the unverified digest [B]
+## 3. Generator (Sec. 3.2)
 
-**All of this is [B]. Treat as a hypothesis to be validated, not a specification.**
+Mask distribution conditioned on the design:
 
-- **Style-aware U-Net generator** `G`. Inputs: design `Z` (full resolution) and a
-  noise vector `z`. Output: mask logits `Y`.
-- A **style mapping MLP** maps `z -> w`. Claimed `z`-dim = **256**.
-- A **Style ResBlock at the coarse level (Level 2)** applies **AdaIN** with style
-  code `w`. Style is injected **only at the coarse level**, so design topology
-  (content, from `Z`) is preserved while geometry/style varies. The digest quotes
-  this as section 3.2.1.
-- Claimed rationale: features anchored to `Z` + style entering only via AdaIN
-  keeps samples design-consistent and off the off-manifold artifacts of direct
-  pixel-space sampling.
+    M ~ P_{M|Z} ≈ (G(Z, ·))_# N                                         (Eq. 3)
 
-### Pretraining [A for the loss family, B for details]
+`Z` = Manhattan design vector, `q ~ N` = noise.
 
-`WGAN-GP` adversarial loss + `lambda_1 * l_rec(M_hat, M_gt)` against ground-truth masks.
+**Style-aware architecture (Fig. 3), three levels:**
+- An **input pyramid** `{Z_0, Z_1, Z_2}` built by downsampling (optional head downsample).
+- **Level 2 (coarsest)**: stride-2 downsamples -> **Style ResBlocks x n** -> UpConv -> "Low Mask".
+- **Levels 1 and 0**: coarse-to-fine. Fuse the **upsampled output of the previous
+  level** with **downsampled features at the current resolution** by
+  **element-wise addition**, refine with **Local ResBlocks**, then UpConv.
+- Optional final **bicubic** interpolation restores the original resolution.
+- **Style ResBlock detail:** `x -> AdaIN(w) -> Conv -> AdaIN(w) -> Conv -> (+x) -> y`.
 
-### RL fine-tuning [B]
+AdaIN (Eq. 4):
 
-For each layout: sample `K` latents, generate `{Y_k}`, binarize
-`M_k = 1[Y_k > 0.5]`, downsample, run a short low-resolution ILT refinement,
-upsample to `M_k^ILT`.
+    AdaIN(x; w) = gamma(w) ⊙ (x - mu(x)) / (sigma(x) + eps) + beta(w)
 
-- **Reward:** `R_k = -EPE(M_k^ILT, Z)` — negative EPE after refinement.
-- **Advantage:** `A_k = R_k - R_k^T`, a **teacher-relative** baseline where the
-  frozen pretrained generator `G_T` supplies `R_k^T` on the same latent. The
-  digest claims this gives better-aligned credit assignment than a group-mean
-  baseline and "anchors progress to a known-good policy".
-- **Imitation loss:** distills `M_k^ILT` back into `G` via a smoothed L2 term.
-- Claimed weights: `lambda_pg = 500`, `lambda_imit = 1`.
-- Claimed RL ILT loop: **8x downsample**, **~100 iterations**, **K = 16**.
-- `G_T` frozen; only `G` updated.
+`w = f_phi(z)`, `z ~ N(0, I)`, `f_phi` a lightweight MLP; `mu`, `sigma` are
+per-channel statistics. Style is injected **only at Level 2**, so content comes
+from `Z` and style from `w`.
 
-### Inference [A]
+## 4. Stage 1 — generative pretraining (Sec. 3.3.1)
 
-Sample `K` masks -> batched fast ILT -> evaluate EPE -> select best `M*`.
+    min_G max_D  E_{M~P_{M|Z}}[D(M,Z)] - E_{Z,q}[D(G(Z,q),Z)]
+                 + lambda_1 E[ l_rec(G(Z,q), M) ]
+                 - lambda_2 E[ (|| grad_{M_hat} D(M_hat, Z) ||_2 - 1)^2 ]   (Eq. 5)
 
-## Claimed ablation data point [B]
+WGAN with **gradient penalty**; `M_hat = eps*M + (1-eps)*G(Z,q)`, `eps ~ U(0,1)`;
+`l_rec` is "e.g. l1 or l2" — **the paper does not say which** (see G-020).
 
-`StdContact` average EPE at the 3 nm threshold: **PT 9.0 -> PT+RL 6.5**. This is a
-single number from an unverified digest and is the only per-experiment figure
-recovered from any source.
+## 5. Stage 2 — reinforcement finetuning (Sec. 3.3.2)
 
-## Limitations the digest attributes to the paper [B]
+Draw `{q_k}_{k=1..K}`, generate logits `Y_k = G(Z, q_k)`, binarize
+`M_k = 1[Y_k > 0.5]`. Each `M_k` goes through a **few-step, low-resolution ILT
+loop**, is upsampled to full resolution as `M_k^ILT`, and
 
-- Fast batched ILT solver details (algorithm, step size, convergence) are not
-  fully specified in the paper.
-- Lithography model parameters (SOCS coefficients, process window) are not fully
-  specified. **This one is largely moot for ICCAD13**, because the contest fixes
-  the optical model and the 24-kernel SOCS set is public (S2.2) [C].
-- No ablation on the RL-loop ILT resolution / iteration count.
-- Only EPE is used in the reward; multi-objective reward is future work.
+    R_k = -EPE(M_k^ILT, Z)
 
-## Relationship to the authors' prior work [C]
+**Teacher-relative advantage** (Eqs. 6, 7) — the paper's stated contribution:
 
-Haoyu Yang is the author of **GAN-OPC** (DAC'18, ILT-guided GAN mask synthesis),
-**DAMO**, **ILILT** (ICML'24), and **LithoBench** (NeurIPS'23). This paper is the
-direct successor to the GAN-OPC line, replacing the deterministic generator with a
-conditional sampler and adding RL fine-tuning. That lineage is why the ICCAD13
-24-kernel SOCS model and the L2/PVB/EPE protocol (S2.3-S2.5) are almost certainly
-the exact evaluation stack used — but this is **inference, not a paper fact**.
+    A_k = R_k - R_k^T,   R_k^T = -EPE(M_{k,T}^ILT, Z),  M_{k,T}^ILT = G_T(Z, q_k)
+
+`G_T` is the **frozen pretrained model**. The paper explicitly rejects the
+original GRPO group-mean baseline `R_k - (1/K) sum_j R_j`, citing high reward
+variance, outlier sensitivity of the group mean, weak advantages, and rollout
+coupling.
+
+**Policy loss** (Eq. 8) — pixels treated as independent Bernoulli with
+probability `sigmoid(Y_k)`, BCE used as a surrogate for `-log P`:
+
+    L_pg = -E_{q_k}[ A_k * ( -BCE(Y_k, M_k) ) ]
+
+with `M_k` **detached** so gradients flow only through `Y_k`.
+
+**Imitation loss** (Eq. 9):
+
+    L_imit = E_{q_k}[ || Y_k - S(M_k^ILT) ||_2^2 ]
+
+`S(·)` is "a mild low-pass smoothing ... e.g. **25x25 stride-1 average pooling**".
+
+**Total** (Eq. 10): `L_FT = lambda_pg * L_pg + lambda_imit * L_imit`.
+
+## 6. Experimental configuration (Sec. 4.1) — verbatim
+
+| Item | Value |
+|---|---|
+| Datasets | LithoBench: MetalSet **14,824**; ViaSet **104,773**; StdMetal **271**; StdContact **165**. ICCAD13: **10**. |
+| Split | **Pretrain on MetalSet + ViaSet; test on StdMetal, StdContact, ICCAD13.** ICCAD13 is explicitly **out-of-distribution** (no aligned training set). |
+| Framework | PyTorch **2.3.0**, CUDA **12.4** |
+| Hardware | **single DGX node, 8x A100 80GB**, DDP (NCCL) |
+| Pretraining | **50 epochs**; discriminator **Adam(2e-4, betas 0.5/0.999)**; generator **Prodigy** + cosine annealing; **batch 16**, 16 workers |
+| RL finetuning | **E=20 epochs**, **batch 8** (one design per step), **K=16**, **z-dim 256**, **lr 1e-4 (Prodigy)**, cosine to **1e-7** |
+| Reward loop | short ILT at **downsample factor 8**, **100 iterations**, upsample via custom low-res pooling + **bicubic**, binarize at **0.5** |
+| Imitation | LpLoss with **p=2**, **25x25** smoothing |
+| Weights | **lambda_pg = 500**, **lambda_imit = 1** |
+| EPE thresholds | **15 nm** (Table 1) and **3 nm** stress test (Table 2). Rationale given: 15 nm is "overly permissive even at the 45 nm node"; targeting 0 EPE gives vanishing/unstable policy gradients. |
+| Iteration budget | **Ours 150 iterations vs CurvyILT 300 iterations** |
+
+## 7. Results
+
+### Table 1 — 15 nm EPE threshold
+
+| Benchmark | DAC'22 EPE/PV | DAC'23 EPE/PV | ISPD'25-300it EPE/PV | **Ours-150it EPE/PV** |
+|---|---|---|---|---|
+| StdContact-Avg | – | 8.6 / 39997.0 | 3.8 / 36172.0 | **2.0 / 39186.4** |
+| StdMetal-Avg | – | 0.0 / 24928.0 | 0.0 / 21631.0 | **0.0 / 21029.2** |
+| ICCAD13-1 | 7 / 47015 | 3 / 47015 | 3 / 44447 | **3 / 47459** |
+| ICCAD13-2 | 3 / 37555 | 0 / 37555 | 0 / 36914 | **0 / 33965** |
+| ICCAD13-3 | 62 / 69361 | 22 / 69361 | 15 / 70580 | **13 / 74370** |
+| ICCAD13-4 | 2 / 21514 | 0 / 21514 | 0 / 21584 | **0 / 21985** |
+| ICCAD13-5 | 1 / 49683 | 0 / 49683 | 0 / 47870 | **0 / 47781** |
+| ICCAD13-6 | 2 / 44127 | 0 / 44127 | 0 / 42288 | **0 / 42987** |
+| ICCAD13-7 | 0 / 36961 | 0 / 36961 | 0 / 34389 | **0 / 36062** |
+| ICCAD13-8 | 0 / 20985 | 0 / 20985 | 0 / 18649 | **0 / 18312** |
+| ICCAD13-9 | 2 / 54948 | 0 / 54948 | 0 / 54387 | **0 / 52970** |
+| ICCAD13-10 | 0 / 16581 | 0 / 16581 | 0 / 15014 | **0 / 14916** |
+| ICCAD13-Avg | 7.9 / 39873 | 2.5 / 39873 | 1.8 / 38612.2 | **1.6 / 39080.7** |
+
+### Table 2 — 3 nm stress test (ISPD'25 300 it vs ours 150 it)
+
+| Benchmark | ISPD'25 EPE/PV | Ours (PT) EPE/PV | Ours (PT+RL) EPE/PV |
+|---|---|---|---|
+| StdContact-Avg | 40.4 / 32969.6 | 9.0 / 39160.4 | **6.5 / 39907.5** |
+| StdMetal-Avg | 11.4 / 19083.8 | 7.2 / 21507.6 | **6.7 / 21029.2** |
+| ICCAD13-1 | 51 / 44446 | 47 / 48098 | 47 / 47459 |
+| ICCAD13-2 | 34 / 36940 | 39 / 40330 | 29 / 36948 |
+| ICCAD13-3 | 107 / 70545 | 97 / 68814 | 86 / 74370 |
+| ICCAD13-4 | 8 / 21577 | 7 / 24624 | 6 / 22647 |
+| ICCAD13-5 | 29 / 47861 | 15 / 51175 | 16 / 50921 |
+| ICCAD13-6 | 28 / 42287 | 21 / 44333 | 21 / 43866 |
+| ICCAD13-7 | 7 / 34409 | 3 / 35633 | 1 / 37091 |
+| ICCAD13-8 | 13 / 18644 | 10 / 19283 | 8 / 19496 |
+| ICCAD13-9 | 49 / 54393 | 34 / 56981 | 38 / 55105 |
+| ICCAD13-10 | 2 / 15013 | 0 / 15970 | 0 / 16256 |
+| ICCAD13-Avg | 32.8 / 38611.5 | 27.3 / 40524.1 | **25.2 / 40415.9** |
+
+Figure 4 shows one design (`HA_X1__1_0`): golden CurvyILT mask EPE=36 vs five
+posterior samples at EPE 7, 5, 2, 6, 11 — i.e. sample quality varies widely and a
+good *initial* mask does not guarantee the best *refined* mask (Sec. 4.4).
+
+## 8. Where the paper is silent or inconsistent
+
+These are carried into `docs/gap_ledger.md`; they are **not** filled in silently.
+
+1. **Internal contradiction on the RL baseline.** Sec. 3.3.2 presents the
+   teacher-relative baseline `A_k = R_k - R_k^T` as the contribution and argues
+   at length against the group mean. Sec. 4.1 then states the configuration used
+   "a self-critical baseline given by **the group mean**." These are different
+   algorithms. (**G-012**, now a documented paper defect rather than a gap in our
+   knowledge.)
+2. **The ILT solver is never specified.** It is CurvyILT [4] (Yang & Ren, ISPD'25)
+   by reference only: no step size, optimizer, mask parameterization, loss
+   weights, or convergence rule appears in this paper. (**G-015**)
+3. `l_rec` is "e.g. l1 or l2" — unspecified. `lambda_1`, `lambda_2` are never given. (**G-020**)
+4. Generator channel widths, number of Style ResBlocks `n`, and MLP depth are not given. (**G-010**)
+5. The **MRC rule values** are by reference to [17] only.
+6. No ablation on the RL-loop resolution or iteration count.
+7. The "3x speedup" and "2x throughput" claims are wall-clock on 8xA100 and are
+   not decomposable from the paper.
