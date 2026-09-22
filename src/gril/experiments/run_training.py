@@ -62,7 +62,7 @@ def build_ground_truth(layouts: np.ndarray, litho: LithoModel, iters: int, cache
     return out
 
 
-def evaluate(generator, designs, litho, cfg, tolerance, refine_kwargs) -> dict:
+def evaluate(generator, designs, litho, cfg, tolerance, refine_kwargs, pixel_nm) -> dict:
     """Sample K per design, refine, and report best/mean EPE and sampler diversity."""
     generator.eval()
     best_epes, mean_epes, diversities = [], [], []
@@ -83,7 +83,7 @@ def evaluate(generator, designs, litho, cfg, tolerance, refine_kwargs) -> dict:
             epes = []
             for j in range(k):
                 b_nom, _, _ = litho.binary(refined[j, 0])
-                ein, eout = epe_violations(b_nom, design.view(*d.shape[-2:]), tolerance)
+                ein, eout = epe_violations(b_nom, design.view(*d.shape[-2:]), tolerance, pixel_nm)
                 epes.append(ein + eout)
             best_epes.append(min(epes))
             mean_epes.append(sum(epes) / len(epes))
@@ -178,7 +178,7 @@ def run(config_path: str) -> dict:
         torch.save(gen.state_dict(), pt_ckpt)
     pretrain_seconds = time.time() - t0
     print("Evaluating PT model ...", flush=True)
-    metrics_pt = evaluate(gen, val_designs, litho, eval_cfg, tol, refine_kwargs)
+    metrics_pt = evaluate(gen, val_designs, litho, eval_cfg, tol, refine_kwargs, pixel_nm)
     print(f"  PT: {metrics_pt}", flush=True)
 
     # ---------------- Stage 2: GRPO finetuning (paper Eqs. 6-10) -------------
@@ -205,7 +205,7 @@ def run(config_path: str) -> dict:
             vals = []
             for j in range(refined.shape[0]):
                 b_nom, _, _ = litho.binary(refined[j, 0])
-                ein, eout = epe_violations(b_nom, tgt2d, rcfg.epe_tolerance)
+                ein, eout = epe_violations(b_nom, tgt2d, rcfg.epe_tolerance, pixel_nm)
                 vals.append(-(ein + eout))
             return torch.tensor(vals, dtype=torch.float32)
 
@@ -229,7 +229,7 @@ def run(config_path: str) -> dict:
 
     torch.save(gen.state_dict(), os.path.join(out_dir, "generator_ptrl.pt"))
     print("Evaluating PT+RL model ...", flush=True)
-    metrics_ptrl = evaluate(gen, val_designs, litho, eval_cfg, tol, refine_kwargs)
+    metrics_ptrl = evaluate(gen, val_designs, litho, eval_cfg, tol, refine_kwargs, pixel_nm)
     print(f"  PT+RL: {metrics_ptrl}", flush=True)
 
     summary = {

@@ -16,13 +16,15 @@ specifies its solver, citing CurvyILT (ISPD'25) by reference only (G-015).
 A gap between our baseline and the paper's numbers is therefore expected and
 is **not** evidence for or against the paper's claims.
 
-> **Partial run:** 1/10 ICCAD13 cases complete (1). Remaining cases pending.
+> **Partial run:** 3/10 ICCAD13 cases complete (1, 2, 3). Remaining cases pending.
 
 ## Table A — 15 nm EPE threshold (paper Table 1)
 
 | Case | Paper DAC'22 | Paper DAC'23 | Paper ISPD'25 (300 it) | Paper Ours (150 it) | **This repo, ILT 150 it** | **This repo, ILT 300 it** |
 |---|---|---|---|---|---|---|
 | 1 | 7 | 3 | 3 | 3 | 3 | 3 |
+| 2 | 3 | 0 | 0 | 0 | 0 | 0 |
+| 3 | 62 | 22 | 15 | 13 | 25 | 22 |
 
 ### PV Band (nm²), same runs
 
@@ -38,12 +40,16 @@ tuned until the numbers flatter the comparison.
 | Case | Paper ISPD'25 | Paper Ours | **This repo, 150 it** | **This repo, 300 it** |
 |---|---|---|---|---|
 | 1 | 44447 | 47459 | 50940 | 51337 |
+| 2 | 36914 | 33965 | 38989 | 39506 |
+| 3 | 70580 | 74370 | 78433 | 81018 |
 
 ## Table B — 3 nm EPE threshold (paper Table 2)
 
 | Case | Paper ISPD'25 | Paper Ours (PT) | Paper Ours (PT+RL) | **This repo, ILT 150 it** | **This repo, ILT 300 it** |
 |---|---|---|---|---|---|
 | 1 | 51 | 47 | 47 | 68 | 65 |
+| 2 | 34 | 39 | 29 | 69 | 66 |
+| 3 | 107 | 97 | 86 | 114 | 110 |
 
 ## Table C — iteration-budget curve (our solver)
 
@@ -52,24 +58,24 @@ showing what our own solver gains from 150 -> 300 iterations on identical physic
 
 | Iterations | mean L2 | mean PVB | mean EPE@15nm | mean EPE@3nm |
 |---|---|---|---|---|
-| 25 | 44875 | 49006 | 8.0 | 88.0 |
-| 50 | 36328 | 49821 | 3.0 | 67.0 |
-| 100 | 35046 | 50719 | 3.0 | 69.0 |
-| 150 | 34454 | 50940 | 3.0 | 68.0 |
-| 200 | 34188 | 51076 | 3.0 | 66.0 |
-| 250 | 33976 | 51235 | 3.0 | 66.0 |
-| 300 | 33786 | 51337 | 3.0 | 65.0 |
+| 25 | 54704 | 50568 | 20.0 | 95.3 |
+| 50 | 44074 | 53272 | 10.3 | 82.3 |
+| 100 | 41920 | 55469 | 9.7 | 86.3 |
+| 150 | 41058 | 56121 | 9.3 | 83.7 |
+| 200 | 40535 | 56573 | 9.3 | 81.3 |
+| 250 | 40107 | 56960 | 9.0 | 81.3 |
+| 300 | 39778 | 57287 | 8.3 | 80.3 |
 
 ## Table D — aggregates over completed cases
 
 | Metric | No OPC (mask = target) | Our ILT (300 it) | Paper Ours (150 it) |
 |---|---|---|---|
-| mean L2 (nm²) | 116184 | 33786 | not reported |
-| mean PV Band (nm²) | 45874 | 51337 | 39080.7 |
-| mean EPE @15nm | 86.0 | 3.0 | 1.6 |
-| mean EPE @3nm | 129.0 | 65.0 | 25.2 |
+| mean L2 (nm²) | 131611 | 39778 | not reported |
+| mean PV Band (nm²) | 38519 | 57287 | 39080.7 |
+| mean EPE @15nm | 98.3 | 8.3 | 1.6 |
+| mean EPE @3nm | 127.0 | 80.3 | 25.2 |
 
-Total solver wall-clock over 1 cases: **15.6 min** on 4 CPU cores (934 s/case, 3.11 s/iteration at 2048x2048).
+Total solver wall-clock over 3 cases: **66.6 min** on 4 CPU cores (1332 s/case, 3.11 s/iteration at 2048x2048).
 
 ## Verdict per paper claim
 

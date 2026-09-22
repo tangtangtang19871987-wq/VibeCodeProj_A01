@@ -127,3 +127,79 @@ which only resolves when the checkout is installed under the name
 repository** — verified by running the pre-existing tests before adding anything.
 Fixed non-invasively via `pytest.ini`'s `pythonpath` and a `.pkgroot/array_generator`
 symlink. No pre-existing file was modified.
+
+
+---
+
+## F-UNIT-01 — EPE constants are in nanometres but measured in pixels
+
+**Severity: high for any run below 1 nm/pixel. Found by inspecting a negative result.**
+
+### Symptom
+The scaled training run reported EPE at a "3 nm tolerance" on a 256x256 canvas.
+
+### Diagnosis
+`EPE_TOLERANCE_NM`, `EPE_CHECK_INTERVAL`, `MIN_EPE_CHECK_LENGTH` and
+`EPE_CHECK_START_INTERVAL` are all defined in **nanometres**, but the EPE routine
+applies them directly as **pixel** offsets. On the ICCAD13 canvas (2048 px at
+1 nm/px) nm and px coincide exactly, so the missing conversion is invisible —
+and all ICCAD13 numbers in this repository are unaffected and remain bit-exact
+against the reference checker.
+
+At the reduced training resolution (256 px at 8 nm/px over the same 2048 nm
+field) they do not coincide. A "3 nm" tolerance was really **24 nm**, and the
+site-sampling interval was 320 nm instead of 40 nm. The RL reward was therefore
+measuring something far more permissive than intended.
+
+### Resolution
+`epe_violations()` and `evaluate()` now take `pixel_nm` and convert every
+nm-valued constant into pixels, with a guard against a non-positive pitch. Three
+regression tests pin it, including one that checks the same *physical* geometry
+scores consistently at 1 nm/px and 4 nm/px.
+
+### Lesson
+This is exactly the failure mode that a unit-carrying API prevents: the constants
+were documented in nm, and the code silently treated them as px. The ICCAD13
+canvas made the two identical, which is the worst case for noticing.
+
+---
+
+## F-RL-01 — At this scale, RL finetuning made the sampler WORSE (negative result)
+
+**Reported as measured. Not tuned away.**
+
+### Result (before the F-UNIT-01 fix; to be re-measured after)
+
+| Model | best-of-K EPE | sample-mean EPE | binarised diversity |
+|---|---|---|---|
+| PT (WGAN-GP only) | **29.25** | 29.61 | **0.00161** |
+| PT + GRPO | **30.38** | 30.48 | **0.00079** |
+
+The paper reports the opposite direction (Table 2: StdContact-Avg 9.0 -> 6.5).
+
+### What the traces show
+Across 60 RL steps the reward standard deviation within a group of K=8 was
+frequently **exactly 0.00** — all eight candidates produced identical rewards, so
+the teacher-relative advantage collapsed to zero and the policy gradient carried
+no signal (visible as `pg -0.0000` at step 45). Diversity roughly **halved**,
+from 0.00161 to 0.00079.
+
+### Mechanism (why this is expected at 60 steps)
+The policy loss `L_pg = -A_k * log pi(M_k)` maximises the log-probability of the
+**already-binarised** action whenever `A_k > 0`. That sharpens the per-pixel
+Bernoulli distribution, which **reduces** sample diversity. In the paper's regime
+(20 epochs over ~120k designs) there is ample signal to offset this with genuine
+quality improvement. In 60 steps on 64 synthetic layouts there is not: the
+sharpening dominates, diversity shrinks, group rewards collapse to identical
+values, and learning stalls.
+
+### Honest attribution
+This is a **scale-limited negative result**, not evidence against the paper. The
+run is ~4 orders of magnitude smaller than the paper's, uses synthetic layouts
+instead of LithoBench, and (before F-UNIT-01) used a reward computed at the wrong
+tolerance. What it does establish positively is that **the multi-candidate
+premise itself reproduces**: even in the PT-only model, best-of-K EPE (29.25)
+beats the sample mean (29.61), which is the entire justification for sampling
+rather than regressing a single mask.
+
+No hyperparameter was adjusted to turn this result positive.

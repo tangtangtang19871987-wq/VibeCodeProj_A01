@@ -25,6 +25,13 @@ MIN_EPE_CHECK_LENGTH = 80
 #: Offset of the first measurement site from a segment end, nm.
 EPE_CHECK_START_INTERVAL = 40
 
+# All four constants above are in NANOMETRES. The measurement itself happens in
+# pixels, so every one of them must be divided by the canvas pixel pitch. On the
+# ICCAD13 canvas (2048 px at 1 nm/px) the two coincide, which is exactly why a
+# missing conversion is easy to miss -- on a 256 px canvas at 8 nm/px a "3 nm"
+# tolerance silently becomes 24 nm. Callers at reduced resolution MUST pass
+# pixel_nm.
+
 
 def l2_loss(printed_nom: torch.Tensor, target: torch.Tensor) -> float:
     """Squared error between the printed nominal image and the target, in nm^2.
@@ -112,7 +119,10 @@ def _check_sites(
 
 
 def epe_violations(
-    printed_nom: torch.Tensor, target: torch.Tensor, tolerance: int = EPE_TOLERANCE_NM
+    printed_nom: torch.Tensor,
+    target: torch.Tensor,
+    tolerance: float = EPE_TOLERANCE_NM,
+    pixel_nm: float = 1.0,
 ) -> tuple[int, int]:
     """Count (inner, outer) edge-placement-error violations.
 
@@ -123,13 +133,26 @@ def epe_violations(
     target:
         Binary ``{0,1}`` design target, ``(H, W)``.
     tolerance:
-        EPE tolerance in nm. The contest uses 15; the paper reports 3 (G-016).
+        EPE tolerance **in nanometres**. The contest uses 15; the paper's stress
+        test uses 3 (G-016).
+    pixel_nm:
+        Canvas pixel pitch in nm. 1.0 for the ICCAD13 2048x2048 canvas; 8.0 for a
+        256x256 canvas covering the same 2048 nm field. The tolerance and the
+        site-sampling geometry are all converted from nm to pixels with this, so
+        results are comparable across resolutions.
 
     Returns
     -------
     (inner, outer)
         Counts of sites pulled in / pushed out beyond ``tolerance``.
     """
+    if pixel_nm <= 0:
+        raise ValueError(f"pixel_nm must be positive, got {pixel_nm}")
+    tol_px = max(1, int(round(tolerance / pixel_nm)))
+    interval_px = max(1, int(round(EPE_CHECK_INTERVAL / pixel_nm)))
+    min_len_px = MIN_EPE_CHECK_LENGTH / pixel_nm
+    start_px = max(1, int(round(EPE_CHECK_START_INTERVAL / pixel_nm)))
+
     vposes, hposes = _segments(target)
     inner = outer = 0
     for poses, axis, coord in ((vposes, "v", 0), (hposes, "h", 1)):
@@ -137,19 +160,19 @@ def epe_violations(
             seg = poses[idx]
             lo, hi = seg[coord, 0], seg[coord, 1]
             centre = ((seg[:, 0] + seg[:, 1]) / 2).int().float().unsqueeze(0)
-            if (hi - lo) <= MIN_EPE_CHECK_LENGTH:
+            if (hi - lo) <= min_len_px:
                 sample = centre
             else:
                 mid = centre[0, coord]
                 vals = torch.cat(
                     (
-                        torch.arange(lo + EPE_CHECK_START_INTERVAL, mid + 1, EPE_CHECK_INTERVAL),
-                        torch.arange(hi - EPE_CHECK_START_INTERVAL, mid, -EPE_CHECK_INTERVAL),
+                        torch.arange(lo + start_px, mid + 1, interval_px),
+                        torch.arange(hi - start_px, mid, -interval_px),
                     )
                 ).unique()
                 sample = seg[:, 0].repeat(vals.shape[0], 1)
                 sample[:, coord] = vals
-            i, o = _check_sites(printed_nom, sample, target, axis, tolerance)
+            i, o = _check_sites(printed_nom, sample, target, axis, tol_px)
             inner += i
             outer += o
     return inner, outer
@@ -163,7 +186,7 @@ class Scores:
     pvb: float
     epe_in: int
     epe_out: int
-    tolerance: int
+    tolerance: float
 
     @property
     def epe(self) -> int:
@@ -172,13 +195,17 @@ class Scores:
 
 
 def evaluate(
-    mask: torch.Tensor, target: torch.Tensor, litho, tolerance: int = EPE_TOLERANCE_NM
+    mask: torch.Tensor,
+    target: torch.Tensor,
+    litho,
+    tolerance: float = EPE_TOLERANCE_NM,
+    pixel_nm: float = 1.0,
 ) -> Scores:
     """Score a binary mask against a target using the three-corner litho model."""
     with torch.no_grad():
         binary = (mask >= 0.5).to(target.dtype)
         b_nom, b_max, b_min = litho.binary(binary)
-        ein, eout = epe_violations(b_nom, target, tolerance)
+        ein, eout = epe_violations(b_nom, target, tolerance, pixel_nm)
         return Scores(
             l2=l2_loss(b_nom, target),
             pvb=pv_band(b_max, b_min),

@@ -50,13 +50,13 @@ def provenance() -> dict:
     }
 
 
-def score_mask(mask, target, litho, tolerances) -> dict:
-    """Score a binary mask; returns L2, PV Band, and EPE at each tolerance."""
+def score_mask(mask, target, litho, tolerances, pixel_nm: float = 1.0) -> dict:
+    """Score a binary mask; returns L2, PV Band, and EPE at each tolerance (nm)."""
     with torch.no_grad():
         b_nom, b_max, b_min = litho.binary(mask)
         out = {"l2": l2_loss(b_nom, target), "pvb": pv_band(b_max, b_min)}
         for tol in tolerances:
-            ein, eout = epe_violations(b_nom, target, tolerance=tol)
+            ein, eout = epe_violations(b_nom, target, tol, pixel_nm)
             out[f"epe@{tol}nm"] = ein + eout
             out[f"epe_in@{tol}nm"] = ein
             out[f"epe_out@{tol}nm"] = eout

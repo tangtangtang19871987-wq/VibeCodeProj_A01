@@ -30,7 +30,8 @@ class SamplingConfig:
     group_size: int = 16          # K (paper)
     latent_dim: int = 256         # (paper)
     selection_metric: str = "epe"  # "epe" | "l2" | "pvb"
-    epe_tolerance: int = 3        # (paper) training/stress threshold
+    epe_tolerance: float = 3      # (paper) training/stress threshold, NANOMETRES
+    pixel_nm: float = 1.0         # canvas pixel pitch; 1.0 on the 2048 ICCAD13 canvas
     seed: int = 0
 
 
@@ -87,7 +88,11 @@ def low_res_refine(
 
 
 def score_candidates(
-    masks: torch.Tensor, target: torch.Tensor, litho: LithoModel, tolerance: int
+    masks: torch.Tensor,
+    target: torch.Tensor,
+    litho: LithoModel,
+    tolerance: float,
+    pixel_nm: float = 1.0,
 ) -> list[dict]:
     """Score each candidate mask. ``masks``: ``(K,1,H,W)``; returns K dicts."""
     out = []
@@ -95,7 +100,7 @@ def score_candidates(
     with torch.no_grad():
         for k in range(masks.shape[0]):
             b_nom, b_max, b_min = litho.binary(masks[k, 0])
-            ein, eout = epe_violations(b_nom, tgt2d, tolerance=tolerance)
+            ein, eout = epe_violations(b_nom, tgt2d, tolerance, pixel_nm)
             out.append(
                 {
                     "index": k,
@@ -160,7 +165,7 @@ def sample_and_refine(
         init_params=init_params,
     )
     refined = res.mask.unsqueeze(1)
-    scores = score_candidates(refined, design, litho, cfg.epe_tolerance)
+    scores = score_candidates(refined, design, litho, cfg.epe_tolerance, cfg.pixel_nm)
     return {
         "best": select_best(scores, cfg.selection_metric),
         "scores": scores,
