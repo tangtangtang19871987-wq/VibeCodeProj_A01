@@ -82,3 +82,24 @@ def test_morphological_open_removes_isolated_speck():
 def test_morphological_open_is_identity_for_size_one():
     x = torch.rand(16, 16).round()
     assert torch.equal(morphological_open(x, 1), x)
+
+
+def test_solve_does_not_touch_global_rng(litho, target):
+    """Regression: solve() used to call torch.manual_seed, resetting the CALLER's
+    RNG. It runs inside the RL reward loop, so that silently reset the training
+    RNG on every refinement and destroyed reproducibility.
+    """
+    torch.manual_seed(42)
+    expected = torch.randn(4)
+    torch.manual_seed(42)
+    solve(target, litho, ILTConfig(iterations=1))
+    assert torch.equal(torch.randn(4), expected)
+
+
+def test_solve_still_deterministic_without_seeding(litho, target):
+    """Determinism must come from construction, not from reseeding."""
+    torch.manual_seed(0)
+    a = solve(target, litho, ILTConfig(iterations=5)).mask
+    torch.manual_seed(999)
+    b = solve(target, litho, ILTConfig(iterations=5)).mask
+    assert torch.equal(a, b)

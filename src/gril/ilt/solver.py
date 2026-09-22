@@ -41,6 +41,8 @@ class ILTConfig:
     early_stop_rtol: float = 0.0       # 0 disables; fixed budgets keep comparisons exact
     mrc_open_size: int = 0             # morphological opening kernel, 0 = off
     checkpoints: tuple[int, ...] = ()  # iteration counts at which to snapshot the mask
+    #: Reserved. The solver is deterministic, so this is recorded in experiment
+    #: manifests for provenance but is intentionally NOT applied to the global RNG.
     seed: int = 0
 
 
@@ -125,7 +127,12 @@ def solve(
         ``mask`` is the binarised (and optionally MRC-opened) result.
     """
     cfg = cfg or ILTConfig()
-    torch.manual_seed(cfg.seed)
+    # NOTE: deliberately no torch.manual_seed here. This solver is deterministic
+    # by construction (fixed initialisation, no stochastic operators), so seeding
+    # buys nothing -- and seeding globally would silently reset the CALLER's RNG
+    # stream on every call. solve() runs inside the RL reward loop, so that would
+    # have reset the training RNG on every single refinement and destroyed
+    # reproducibility. Pinned by test_solve_does_not_touch_global_rng.
     # solve() runs its own optimisation, so it must hold a gradient scope even
     # when called from inside torch.no_grad() (e.g. during evaluation).
     grad_ctx = torch.enable_grad()
