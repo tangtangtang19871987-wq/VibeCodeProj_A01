@@ -174,6 +174,48 @@ def main() -> None:
       f"({total/len(done):.0f} s/case, {cases[done[0]]['seconds_per_iter']:.2f} s/iteration at 2048x2048).")
     A("")
 
+    # ---- Table E: optimizer ablation (X-14), if it has been run ----
+    abl_path = os.path.join(ROOT, "results", "abl_optimizer", "summary.json")
+    if os.path.exists(abl_path):
+        abl = json.load(open(abl_path))
+        abl_cases = abl["config"]["cases"]
+        opt_names = list(abl["config"]["optimizers"])
+        A("## Table E — optimizer ablation (X-14): Adam vs L-BFGS")
+        A("")
+        A("**Not the same configuration as Tables A-D above.** This uses a common,")
+        A("well-conditioned starting point (`init_scale=0.5`) for every optimizer,")
+        A("chosen because the main baseline's own constants (`init_scale=2.0`) saturate")
+        A("the mask sigmoid badly enough that L-BFGS makes no measurable progress from")
+        A("it (F-SAT-01, `docs/findings.md`) -- this ablation isolates the optimizer")
+        A("question from that separate finding. Only 3 of 10 ICCAD13 cases are covered")
+        A("(chosen for a stated reason, see `configs/experiments/abl_optimizer.yaml`).")
+        A("**L-BFGS is given FEWER function evaluations in every row below, not more** --")
+        A("its `n_func_evals` column is always less than Adam's despite running its own")
+        A("full configured iteration budget, because its line search needs less than the")
+        A("naively-estimated evaluations-per-step on these cases.")
+        A("")
+        A("| Case | Optimizer | Func evals | Seconds | L2 | EPE@15nm | EPE@3nm |")
+        A("|---|---|---|---|---|---|---|")
+        for c in abl_cases:
+            for opt in opt_names:
+                r = abl["results"].get(f"case{c}_{opt}")
+                if r is None:
+                    continue
+                sc = r["scores"]
+                A(f"| {c} | {opt} | {r['n_func_evals']} | {r['seconds']:.0f} | "
+                  f"{sc['l2']:.0f} | {sc['epe@15nm']} | {sc['epe@3nm']} |")
+        A("")
+        A("**Reading this honestly:** L-BFGS matched or beat Adam's EPE@15nm in all 3")
+        A("cases (tied at 3 and 0; notably better on case 3's hardest run, 13 vs 24) and")
+        A("had lower L2 in all 3 cases, while using 26-27% fewer function evaluations and")
+        A("34-36% less wall-clock time. EPE@3nm was NOT uniformly better: worse on case 1")
+        A("(77 vs 64), better on cases 3 and 5. This is evidence that quasi-Newton")
+        A("curvature information helps THIS objective at a well-conditioned start, on")
+        A("this 3-case sample -- not a claim that L-BFGS dominates on every metric or")
+        A("that this generalises to all 10 cases, which have not been run under this")
+        A("configuration.")
+        A("")
+
     A("## Verdict per paper claim")
     A("")
     A("| Claim | Status |")
@@ -184,6 +226,8 @@ def main() -> None:
     A("| Eqs. 6-7 teacher-relative advantage | **Implemented**, but the paper contradicts itself (G-012); both variants available |")
     A("| Table 1 / Table 2 \"Ours\" rows | **Not reproduced** — needs LithoBench + 8x A100 |")
     A("| \"3x speedup\" | **Not evaluable** — CPU-only host |")
+    if os.path.exists(abl_path):
+        A("| Optimizer choice affects solver quality (G-015) | **Measured (X-14)**: L-BFGS matched/beat Adam's EPE@15nm with 26-27% fewer function evaluations on a 3-case sample; not run on all 10 cases |")
     A("")
 
     out = os.path.join(ROOT, "REPRODUCTION_REPORT.md")

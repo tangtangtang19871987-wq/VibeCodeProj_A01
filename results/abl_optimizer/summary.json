@@ -1,0 +1,252 @@
+{
+  "experiment_id": "abl_optimizer",
+  "config": {
+    "experiment_id": "abl_optimizer",
+    "paper_reference": "G-015 (solver unspecified); tests the optimizer axis independently of the iteration-count axis already covered by X-10",
+    "threads": 4,
+    "canvas": 2048,
+    "kernel_dir": "/home/user/openopc/openilt/kernel",
+    "bench_dir": "/home/user/openopc/openilt/benchmark/ICCAD2013",
+    "cases": [
+      1,
+      3,
+      5
+    ],
+    "epe_tolerances": [
+      15,
+      3
+    ],
+    "process": {
+      "target_density": 0.225,
+      "print_thresh": 0.5,
+      "print_steepness": 50.0,
+      "dose_nom": 1.0,
+      "dose_max": 1.02,
+      "dose_min": 0.98,
+      "num_kernels": 24
+    },
+    "shared_ilt": {
+      "mask_steepness": 8.0,
+      "init_scale": 0.5,
+      "weight_nominal": 1.0,
+      "weight_pvb": 0.0,
+      "seed": 0
+    },
+    "optimizers": {
+      "adam": {
+        "optimizer": "adam",
+        "step_size": 0.2,
+        "iterations": 150
+      },
+      "lbfgs": {
+        "optimizer": "lbfgs",
+        "step_size": 1.0,
+        "iterations": 50,
+        "lbfgs_max_iter_per_step": 1,
+        "lbfgs_history_size": 10,
+        "lbfgs_line_search": "strong_wolfe"
+      }
+    }
+  },
+  "provenance": {
+    "git_commit": "d431911cde86f675b47040ab1951a7561c7ced95",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  },
+  "results": {
+    "case1_adam": {
+      "case": 1,
+      "optimizer": "adam",
+      "config": {
+        "mask_steepness": 8.0,
+        "init_scale": 0.5,
+        "weight_nominal": 1.0,
+        "weight_pvb": 0.0,
+        "seed": 0,
+        "optimizer": "adam",
+        "step_size": 0.2,
+        "iterations": 150
+      },
+      "scores": {
+        "l2": 34932.0,
+        "pvb": 50808.0,
+        "epe@15nm": 3,
+        "epe_in@15nm": 0,
+        "epe_out@15nm": 3,
+        "epe@3nm": 64,
+        "epe_in@3nm": 8,
+        "epe_out@3nm": 56
+      },
+      "iterations_run": 150,
+      "n_func_evals": 150,
+      "seconds": 846.8567409515381,
+      "seconds_per_func_eval": 5.645711606343587,
+      "final_loss": 29477.03515625,
+      "initial_loss": 88786.1875
+    },
+    "case1_lbfgs": {
+      "case": 1,
+      "optimizer": "lbfgs",
+      "config": {
+        "mask_steepness": 8.0,
+        "init_scale": 0.5,
+        "weight_nominal": 1.0,
+        "weight_pvb": 0.0,
+        "seed": 0,
+        "optimizer": "lbfgs",
+        "step_size": 1.0,
+        "iterations": 50,
+        "lbfgs_max_iter_per_step": 1,
+        "lbfgs_history_size": 10,
+        "lbfgs_line_search": "strong_wolfe"
+      },
+      "scores": {
+        "l2": 33246.0,
+        "pvb": 53761.0,
+        "epe@15nm": 3,
+        "epe_in@15nm": 0,
+        "epe_out@15nm": 3,
+        "epe@3nm": 77,
+        "epe_in@3nm": 6,
+        "epe_out@3nm": 71
+      },
+      "iterations_run": 50,
+      "n_func_evals": 110,
+      "seconds": 540.596488237381,
+      "seconds_per_func_eval": 4.914513529430736,
+      "final_loss": 29075.59375,
+      "initial_loss": 88786.1875
+    },
+    "case3_adam": {
+      "case": 3,
+      "optimizer": "adam",
+      "config": {
+        "mask_steepness": 8.0,
+        "init_scale": 0.5,
+        "weight_nominal": 1.0,
+        "weight_pvb": 0.0,
+        "seed": 0,
+        "optimizer": "adam",
+        "step_size": 0.2,
+        "iterations": 150
+      },
+      "scores": {
+        "l2": 60783.0,
+        "pvb": 81233.0,
+        "epe@15nm": 24,
+        "epe_in@15nm": 4,
+        "epe_out@15nm": 20,
+        "epe@3nm": 113,
+        "epe_in@3nm": 36,
+        "epe_out@3nm": 77
+      },
+      "iterations_run": 150,
+      "n_func_evals": 150,
+      "seconds": 682.5100502967834,
+      "seconds_per_func_eval": 4.550067001978556,
+      "final_loss": 48098.078125,
+      "initial_loss": 131299.765625
+    },
+    "case3_lbfgs": {
+      "case": 3,
+      "optimizer": "lbfgs",
+      "config": {
+        "mask_steepness": 8.0,
+        "init_scale": 0.5,
+        "weight_nominal": 1.0,
+        "weight_pvb": 0.0,
+        "seed": 0,
+        "optimizer": "lbfgs",
+        "step_size": 1.0,
+        "iterations": 50,
+        "lbfgs_max_iter_per_step": 1,
+        "lbfgs_history_size": 10,
+        "lbfgs_line_search": "strong_wolfe"
+      },
+      "scores": {
+        "l2": 55557.0,
+        "pvb": 92652.0,
+        "epe@15nm": 13,
+        "epe_in@15nm": 8,
+        "epe_out@15nm": 5,
+        "epe@3nm": 103,
+        "epe_in@3nm": 38,
+        "epe_out@3nm": 65
+      },
+      "iterations_run": 50,
+      "n_func_evals": 111,
+      "seconds": 522.3095905780792,
+      "seconds_per_func_eval": 4.7054918070097225,
+      "final_loss": 45929.171875,
+      "initial_loss": 131299.765625
+    },
+    "case5_adam": {
+      "case": 5,
+      "optimizer": "adam",
+      "config": {
+        "mask_steepness": 8.0,
+        "init_scale": 0.5,
+        "weight_nominal": 1.0,
+        "weight_pvb": 0.0,
+        "seed": 0,
+        "optimizer": "adam",
+        "step_size": 0.2,
+        "iterations": 150
+      },
+      "scores": {
+        "l2": 30159.0,
+        "pvb": 50552.0,
+        "epe@15nm": 0,
+        "epe_in@15nm": 0,
+        "epe_out@15nm": 0,
+        "epe@3nm": 75,
+        "epe_in@3nm": 12,
+        "epe_out@3nm": 63
+      },
+      "iterations_run": 150,
+      "n_func_evals": 150,
+      "seconds": 692.6466317176819,
+      "seconds_per_func_eval": 4.617644211451212,
+      "final_loss": 26354.30859375,
+      "initial_loss": 86793.7265625
+    },
+    "case5_lbfgs": {
+      "case": 5,
+      "optimizer": "lbfgs",
+      "config": {
+        "mask_steepness": 8.0,
+        "init_scale": 0.5,
+        "weight_nominal": 1.0,
+        "weight_pvb": 0.0,
+        "seed": 0,
+        "optimizer": "lbfgs",
+        "step_size": 1.0,
+        "iterations": 50,
+        "lbfgs_max_iter_per_step": 1,
+        "lbfgs_history_size": 10,
+        "lbfgs_line_search": "strong_wolfe"
+      },
+      "scores": {
+        "l2": 25613.0,
+        "pvb": 55280.0,
+        "epe@15nm": 0,
+        "epe_in@15nm": 0,
+        "epe_out@15nm": 0,
+        "epe@3nm": 69,
+        "epe_in@3nm": 6,
+        "epe_out@3nm": 63
+      },
+      "iterations_run": 50,
+      "n_func_evals": 112,
+      "seconds": 538.465921163559,
+      "seconds_per_func_eval": 4.807731438960348,
+      "final_loss": 24548.8359375,
+      "initial_loss": 86793.7265625
+    }
+  }
+}

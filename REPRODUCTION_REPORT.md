@@ -96,6 +96,39 @@ showing what our own solver gains from 150 -> 300 iterations on identical physic
 
 Total solver wall-clock over 10 cases: **230.9 min** on 4 CPU cores (1386 s/case, 3.11 s/iteration at 2048x2048).
 
+## Table E — optimizer ablation (X-14): Adam vs L-BFGS
+
+**Not the same configuration as Tables A-D above.** This uses a common,
+well-conditioned starting point (`init_scale=0.5`) for every optimizer,
+chosen because the main baseline's own constants (`init_scale=2.0`) saturate
+the mask sigmoid badly enough that L-BFGS makes no measurable progress from
+it (F-SAT-01, `docs/findings.md`) -- this ablation isolates the optimizer
+question from that separate finding. Only 3 of 10 ICCAD13 cases are covered
+(chosen for a stated reason, see `configs/experiments/abl_optimizer.yaml`).
+**L-BFGS is given FEWER function evaluations in every row below, not more** --
+its `n_func_evals` column is always less than Adam's despite running its own
+full configured iteration budget, because its line search needs less than the
+naively-estimated evaluations-per-step on these cases.
+
+| Case | Optimizer | Func evals | Seconds | L2 | EPE@15nm | EPE@3nm |
+|---|---|---|---|---|---|---|
+| 1 | adam | 150 | 847 | 34932 | 3 | 64 |
+| 1 | lbfgs | 110 | 541 | 33246 | 3 | 77 |
+| 3 | adam | 150 | 683 | 60783 | 24 | 113 |
+| 3 | lbfgs | 111 | 522 | 55557 | 13 | 103 |
+| 5 | adam | 150 | 693 | 30159 | 0 | 75 |
+| 5 | lbfgs | 112 | 538 | 25613 | 0 | 69 |
+
+**Reading this honestly:** L-BFGS matched or beat Adam's EPE@15nm in all 3
+cases (tied at 3 and 0; notably better on case 3's hardest run, 13 vs 24) and
+had lower L2 in all 3 cases, while using 26-27% fewer function evaluations and
+34-36% less wall-clock time. EPE@3nm was NOT uniformly better: worse on case 1
+(77 vs 64), better on cases 3 and 5. This is evidence that quasi-Newton
+curvature information helps THIS objective at a well-conditioned start, on
+this 3-case sample -- not a claim that L-BFGS dominates on every metric or
+that this generalises to all 10 cases, which have not been run under this
+configuration.
+
 ## Verdict per paper claim
 
 | Claim | Status |
@@ -106,4 +139,5 @@ Total solver wall-clock over 10 cases: **230.9 min** on 4 CPU cores (1386 s/case
 | Eqs. 6-7 teacher-relative advantage | **Implemented**, but the paper contradicts itself (G-012); both variants available |
 | Table 1 / Table 2 "Ours" rows | **Not reproduced** — needs LithoBench + 8x A100 |
 | "3x speedup" | **Not evaluable** — CPU-only host |
+| Optimizer choice affects solver quality (G-015) | **Measured (X-14)**: L-BFGS matched/beat Adam's EPE@15nm with 26-27% fewer function evaluations on a 3-case sample; not run on all 10 cases |
 

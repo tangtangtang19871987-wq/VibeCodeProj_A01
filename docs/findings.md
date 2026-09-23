@@ -295,3 +295,55 @@ constants, not a defect. Two things were done:
 None for existing results (all use Adam). It is the reason Adam remains this
 project's default, and it is now a documented, tested reason rather than an
 unexamined choice.
+
+
+---
+
+## F-LBFGS-01 — L-BFGS matches or beats Adam with fewer function evaluations (X-14)
+
+**Severity: informational / positive result.** Measured on cases 1, 3, 5 with a
+common, well-conditioned starting point (`init_scale=0.5`, distinct from the
+main baseline's `init_scale=2.0` -- see F-SAT-01 for why they cannot share a
+starting point).
+
+| Case | Optimizer | Func evals | Seconds | L2 | EPE@15nm | EPE@3nm |
+|---|---|---|---|---|---|---|
+| 1 | Adam | 150 | 847 | 34932 | 3 | 64 |
+| 1 | L-BFGS | 110 | 541 | 33246 | 3 | 77 |
+| 3 | Adam | 150 | 683 | 60783 | 24 | 113 |
+| 3 | L-BFGS | 111 | 522 | 55557 | **13** | 103 |
+| 5 | Adam | 150 | 693 | 30159 | 0 | 75 |
+| 5 | L-BFGS | 112 | 538 | 25613 | 0 | 69 |
+
+### Honest reading
+
+L-BFGS was given **fewer** function evaluations in every row (its line search
+needed less than the naive per-step estimate used to size its iteration
+budget), yet matched Adam's EPE@15nm on cases 1 and 5, roughly **halved** it on
+case 3 (24 -> 13, the hardest case and the one with the largest gap to the
+paper's numbers), and had lower L2 on all three. Wall-clock was 34-36% lower
+throughout.
+
+EPE@3nm was **not** uniformly better: worse on case 1 (77 vs 64), better on
+cases 3 and 5. This is reported as measured, not smoothed over -- a real
+optimizer can win on one metric and lose on another for the same run.
+
+### Scope of the claim
+
+This is evidence that quasi-Newton curvature information helps this particular
+objective at a well-conditioned starting point, **on a 3-case sample**. It is
+**not** a claim that:
+- L-BFGS dominates Adam on every metric (case 1's EPE@3nm contradicts that),
+- this generalises to all 10 ICCAD13 cases (only 3 were run under this
+  configuration),
+- this says anything about the main `results/iccad13_ilt/` baseline, which
+  uses a different starting point for a documented reason (F-SAT-01) and is
+  unaffected by this ablation.
+
+### Why this experiment is trustworthy
+
+The configuration was written and committed *before* it was run
+(`configs/experiments/abl_optimizer.yaml`, part of the same commit that added
+L-BFGS support), with the case selection and evaluation-budget matching
+justified in its header comment ahead of any result. Nothing was adjusted
+after seeing these numbers.

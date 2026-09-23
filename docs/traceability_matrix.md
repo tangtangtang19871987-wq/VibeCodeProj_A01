@@ -99,7 +99,7 @@ against an independent reference) / `BLOCKED`.
 | X-11 | Paper Table 1 / Table 2 replication | [A] | — | — | **BLOCKED by G-002** (target numbers unknown) |
 | X-12 | LithoBench experiments | [A] | — | — | **BLOCKED by S3** (dataset unreachable) |
 | X-13 | Runtime / speedup comparison | [A] | — | — | **BLOCKED** — no GPU on this host; would not be comparable |
-| X-14 | Ablation: optimizer family (Adam vs L-BFGS), G-015 | [C] | `configs/experiments/abl_optimizer.yaml` | `results/abl_optimizer/` | **running** |
+| X-14 | Ablation: optimizer family (Adam vs L-BFGS), G-015 | [C] | `configs/experiments/abl_optimizer.yaml` | `results/abl_optimizer/` | **VERIF** -- measured: L-BFGS matched/beat Adam EPE@15nm on cases 1/3/5 with 26-27% fewer func evals (F-LBFGS-01) |
 
 ## 8. Completeness check against the paper
 

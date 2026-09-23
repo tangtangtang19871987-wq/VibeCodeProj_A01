@@ -1,0 +1,30 @@
+{
+  "case": 3,
+  "optimizer": "adam",
+  "config": {
+    "mask_steepness": 8.0,
+    "init_scale": 0.5,
+    "weight_nominal": 1.0,
+    "weight_pvb": 0.0,
+    "seed": 0,
+    "optimizer": "adam",
+    "step_size": 0.2,
+    "iterations": 150
+  },
+  "scores": {
+    "l2": 60783.0,
+    "pvb": 81233.0,
+    "epe@15nm": 24,
+    "epe_in@15nm": 4,
+    "epe_out@15nm": 20,
+    "epe@3nm": 113,
+    "epe_in@3nm": 36,
+    "epe_out@3nm": 77
+  },
+  "iterations_run": 150,
+  "n_func_evals": 150,
+  "seconds": 682.5100502967834,
+  "seconds_per_func_eval": 4.550067001978556,
+  "final_loss": 48098.078125,
+  "initial_loss": 131299.765625
+}

@@ -1,0 +1,33 @@
+{
+  "case": 3,
+  "optimizer": "lbfgs",
+  "config": {
+    "mask_steepness": 8.0,
+    "init_scale": 0.5,
+    "weight_nominal": 1.0,
+    "weight_pvb": 0.0,
+    "seed": 0,
+    "optimizer": "lbfgs",
+    "step_size": 1.0,
+    "iterations": 50,
+    "lbfgs_max_iter_per_step": 1,
+    "lbfgs_history_size": 10,
+    "lbfgs_line_search": "strong_wolfe"
+  },
+  "scores": {
+    "l2": 55557.0,
+    "pvb": 92652.0,
+    "epe@15nm": 13,
+    "epe_in@15nm": 8,
+    "epe_out@15nm": 5,
+    "epe@3nm": 103,
+    "epe_in@3nm": 38,
+    "epe_out@3nm": 65
+  },
+  "iterations_run": 50,
+  "n_func_evals": 111,
+  "seconds": 522.3095905780792,
+  "seconds_per_func_eval": 4.7054918070097225,
+  "final_loss": 45929.171875,
+  "initial_loss": 131299.765625
+}
