@@ -24,6 +24,7 @@ import torch
 import torch.nn.functional as F
 
 from gril.data.glp import Design
+from gril.experiments.run_iccad13 import provenance
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import evaluate
@@ -83,6 +84,7 @@ def main() -> None:
         ),
         "cases": CASES,
         "sweep": sweep,
+        "provenance": provenance(),
     }
     summary_path = os.path.join(out_dir, "summary.json")
     json.dump(summary, open(summary_path, "w"), indent=2)

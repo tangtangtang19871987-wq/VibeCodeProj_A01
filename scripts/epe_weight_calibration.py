@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import torch
 
 from gril.data.glp import Design
+from gril.experiments.run_iccad13 import provenance
 from gril.ilt.epe_loss import build_epe_sites, soft_epe_loss
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig, resist
@@ -131,6 +132,7 @@ def main() -> None:
             **calib,
         },
         "runs": runs,
+        "provenance": provenance(),
     }
     summary_path = os.path.join(out_dir, "summary.json")
     json.dump(summary, open(summary_path, "w"), indent=2)

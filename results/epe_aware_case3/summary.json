@@ -1,72 +1,73 @@
 {
   "experiment_id": "epe_aware_case3",
-  "description": "F-EPE-01: weight_epe calibration on ICCAD13 case 3, full 2048 resolution, 100 iterations, step_size=0.2, mask_steepness=8.0 (main-baseline constants). Two rounds: a naive guess (weight_epe=2.0) and a magnitude-calibrated weight (weight_epe in {1000,3000}), calibrated by directly measuring raw L2 vs raw soft_epe_loss magnitude at the solver start point. Regenerate with scripts/epe_weight_calibration.py.",
+  "description": "F-EPE-01: weight_epe calibration on ICCAD13 case 3, full 2048 resolution, 100 iterations, step_size=0.2, mask_steepness=8.0 (main-baseline constants). A naive guess (weight_epe=2.0) vs a magnitude-calibrated weight (weight_epe in {1000,3000}).",
   "magnitude_calibration": {
     "measured_at": "case 3 solver start point (init_scale=2.0, mask_steepness=8.0 sigmoid init)",
-    "raw_l2_sum_sq_err": 132101.4,
-    "raw_soft_epe_loss_tol15nm": 45.8,
+    "raw_l2_sum_sq_err": 132101.421875,
+    "raw_soft_epe_loss_tol15nm": 45.81863021850586,
     "n_epe_sites_tol15nm": 294,
-    "ratio_l2_over_epe": 2883.1
+    "ratio_l2_over_epe": 2883.1377377502886
   },
   "runs": [
     {
       "label": "baseline (L2 only)",
       "weight_epe": 0.0,
       "epe_tolerance_nm": null,
-      "l2": 62947,
+      "l2": 62947.0,
       "epe_at_15nm": 26,
       "epe_at_3nm": 121,
-      "seconds": 625,
+      "seconds": 262.1314129829407,
       "n_func_evals": 100
     },
     {
       "label": "EPE-aware (naive weight)",
       "weight_epe": 2.0,
       "epe_tolerance_nm": 15.0,
-      "l2": 62939,
+      "l2": 62939.0,
       "epe_at_15nm": 26,
       "epe_at_3nm": 121,
-      "seconds": 673,
+      "seconds": 256.15703535079956,
       "n_func_evals": 100
     },
     {
       "label": "EPE-aware (naive weight, strict tol)",
       "weight_epe": 2.0,
       "epe_tolerance_nm": 3.0,
-      "l2": 62934,
+      "l2": 62934.0,
       "epe_at_15nm": 26,
       "epe_at_3nm": 121,
-      "seconds": 851,
+      "seconds": 257.07136583328247,
       "n_func_evals": 100
     },
     {
       "label": "EPE-aware (calibrated weight)",
       "weight_epe": 1000.0,
       "epe_tolerance_nm": 15.0,
-      "l2": 60703,
+      "l2": 60703.0,
       "epe_at_15nm": 20,
       "epe_at_3nm": 113,
-      "seconds": 331,
+      "seconds": 251.0635895729065,
       "n_func_evals": 100
     },
     {
       "label": "EPE-aware (calibrated weight, higher)",
       "weight_epe": 3000.0,
       "epe_tolerance_nm": 15.0,
-      "l2": 62422,
+      "l2": 62422.0,
       "epe_at_15nm": 16,
       "epe_at_3nm": 117,
-      "seconds": 486,
+      "seconds": 258.03035140037537,
       "n_func_evals": 100
     }
   ],
   "provenance": {
-    "git_commit": "e9645f8e3f761ffc69296379cea3e2f7f8c4d9ed",
+    "git_commit": "9449310f048c589f880061214310da08c51670e4",
     "torch": "2.9.1+cu128",
     "cuda_available": false,
     "device": "cpu",
     "python": "3.11.15",
     "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
-    "cpu_count": 4
+    "cpu_count": 4,
+    "threads": 4
   }
 }
