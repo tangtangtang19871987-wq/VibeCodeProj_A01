@@ -1,0 +1,72 @@
+{
+  "experiment_id": "epe_aware_case3",
+  "description": "F-EPE-01: weight_epe calibration on ICCAD13 case 3, full 2048 resolution, 100 iterations, step_size=0.2, mask_steepness=8.0 (main-baseline constants). Two rounds: a naive guess (weight_epe=2.0) and a magnitude-calibrated weight (weight_epe in {1000,3000}), calibrated by directly measuring raw L2 vs raw soft_epe_loss magnitude at the solver start point. Regenerate with scripts/epe_weight_calibration.py.",
+  "magnitude_calibration": {
+    "measured_at": "case 3 solver start point (init_scale=2.0, mask_steepness=8.0 sigmoid init)",
+    "raw_l2_sum_sq_err": 132101.4,
+    "raw_soft_epe_loss_tol15nm": 45.8,
+    "n_epe_sites_tol15nm": 294,
+    "ratio_l2_over_epe": 2883.1
+  },
+  "runs": [
+    {
+      "label": "baseline (L2 only)",
+      "weight_epe": 0.0,
+      "epe_tolerance_nm": null,
+      "l2": 62947,
+      "epe_at_15nm": 26,
+      "epe_at_3nm": 121,
+      "seconds": 625,
+      "n_func_evals": 100
+    },
+    {
+      "label": "EPE-aware (naive weight)",
+      "weight_epe": 2.0,
+      "epe_tolerance_nm": 15.0,
+      "l2": 62939,
+      "epe_at_15nm": 26,
+      "epe_at_3nm": 121,
+      "seconds": 673,
+      "n_func_evals": 100
+    },
+    {
+      "label": "EPE-aware (naive weight, strict tol)",
+      "weight_epe": 2.0,
+      "epe_tolerance_nm": 3.0,
+      "l2": 62934,
+      "epe_at_15nm": 26,
+      "epe_at_3nm": 121,
+      "seconds": 851,
+      "n_func_evals": 100
+    },
+    {
+      "label": "EPE-aware (calibrated weight)",
+      "weight_epe": 1000.0,
+      "epe_tolerance_nm": 15.0,
+      "l2": 60703,
+      "epe_at_15nm": 20,
+      "epe_at_3nm": 113,
+      "seconds": 331,
+      "n_func_evals": 100
+    },
+    {
+      "label": "EPE-aware (calibrated weight, higher)",
+      "weight_epe": 3000.0,
+      "epe_tolerance_nm": 15.0,
+      "l2": 62422,
+      "epe_at_15nm": 16,
+      "epe_at_3nm": 117,
+      "seconds": 486,
+      "n_func_evals": 100
+    }
+  ],
+  "provenance": {
+    "git_commit": "e9645f8e3f761ffc69296379cea3e2f7f8c4d9ed",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "cpu_count": 4
+  }
+}

@@ -556,3 +556,248 @@ gracefully (skips the site) instead of crashing -- verified by
 
 This is recorded here as a known, low-priority, out-of-scope latent issue
 rather than silently worked around or silently left undocumented.
+
+
+---
+
+## F-PVB-01 — The PV-band-aware objective produces a real, monotonic L2/EPE-vs-PVB trade-off
+
+**Severity: informational.** Confirms `weight_pvb` (already present in
+`ILTConfig`, wired through `ilt_loss`) does what it is meant to do, measured
+directly rather than assumed from the formula alone.
+
+### Experiment
+
+`weight_pvb in {0, 0.001, 0.01, 0.05, 0.1, 0.5, 1.0}`, cases 1/3/9, 60
+iterations, 4x-downsampled resolution (a deliberate tuning-scale sweep, not a
+paper comparison — same discipline as the `step_size`/`mask_steepness` sweep
+documented in `configs/experiments/README.md`). Raw per-point results in
+`results/pvb_sweep/summary.json`.
+
+| `weight_pvb` | L2 (sum, 3 cases) | PVB (sum, 3 cases) | EPE@15 (case 3) |
+|---:|---:|---:|---:|
+| 0.0   | 8608 | 11514 | 22 |
+| 0.001 | 8615 | 11512 | 22 |
+| 0.01  | 8621 | 11475 | 23 |
+| 0.05  | 8641 | 11462 | 23 |
+| 0.1   | 8645 | 11415 | 23 |
+| 0.5   | 8741 | 10978 | 21 |
+| 1.0   | 8933 | 10654 | 20 |
+
+### Result
+
+PV Band drops **monotonically** as `weight_pvb` increases, by ~7.5% total
+(11514 → 10654) from `weight_pvb=0` to `weight_pvb=1.0`, while L2 rises
+monotonically but much more gently, by ~3.8% (8608 → 8933) over the same
+range. This is a genuine trade-off curve, not noise: every one of the seven
+points moves in the expected direction on both axes. EPE@15nm on case 3 is
+essentially flat (22→23→21→20) — at this weight range the process-window term
+trades off against nominal fidelity (L2) well before it visibly moves the
+discrete EPE count.
+
+### Interpretation
+
+The PV-band term is doing real, physically sensible work: it measures
+`(z_max - z_min)^2` at the resist threshold (the best/worst-case aerial images
+across the process window in `litho.aerial_outer`), so penalizing it more
+heavily pushes the optimizer toward masks whose printed edge moves less across
+the process window, at the cost of nominal-image fit. `weight_pvb=0.1` is a
+reasonable middle point (PVB down 0.9% from baseline, L2 up only 0.4%) if this
+were to be adopted for a full run; this project does not adopt it into the
+main ICCAD13 baseline, since doing so would need re-verifying the baseline's
+un-annealed, un-EPE-aware numbers change for a reason tied to a real
+paper claim, and the paper does not specify a PV-band weight to reproduce
+(G-015 territory again).
+
+### What this does NOT establish
+
+This is a small-scale, 3-case, reduced-resolution calibration sweep, exactly
+like the `step_size`/`mask_steepness` sweep it follows the same discipline of.
+It establishes that the term is *not inert or broken* — it was not run at full
+resolution on all 10 cases, and no full-resolution PV-band number is claimed
+anywhere in this project's tables.
+
+
+---
+
+## F-MULTISTART-01 — Random multi-start matches the trained generator's own single-start baseline; both trained-generator arms are *worse* than either
+
+**Severity: high (core scientific finding of this round).** This is the
+control neither the paper nor this project's earlier experiments run: is the
+"generator beats single-start ILT" result (Table 2, PT/PT+RL rows) actually
+about a *learned prior placing K starts well*, or just about *having K
+independent tries at all* — something a random perturbation would also give
+for free? See `src/gril/experiments/run_multistart_ablation.py`'s module
+docstring for the full design rationale and `configs/experiments/multistart_ablation.yaml`
+for the calibration discipline (`perturb_sigma` matched to the generator's
+measured sampling diversity, not guessed).
+
+### Setup
+
+Four arms, same 8 held-out validation designs (deterministically regenerated
+from `train_scaled.yaml`'s own seed), same per-candidate ILT refinement budget
+(`downsample=2, iterations=100, step_size=0.2, mask_steepness=8.0`), same
+selection rule (best-of-K by EPE@3nm):
+
+- **A. single-start** — one deterministic cold start, K=1.
+- **B. random-K** — K=8 independent Gaussian perturbations of the same cold
+  start (`sigma=0.63`, calibrated so its measured mask-space diversity matches
+  arm C's), no learning at all.
+- **C. PT** — K=8 samples from the WGAN-GP-pretrained generator (read from the
+  already-completed `results/train_scaled/summary.json`, not re-run).
+- **D. PT+RL** — K=8 samples from the GRPO-finetuned generator (same source).
+
+Raw per-design numbers in `results/multistart_ablation/summary.json`.
+
+### Result
+
+| Arm | best-of-K EPE@3nm (mean over 8 designs) | sample mean | diversity |
+|---|---:|---:|---:|
+| A. single-start | **115.00** | — | — |
+| B. random-K (no learning) | **115.00** | 115.08 | 0.00155 |
+| C. PT (generator) | 134.75 | 135.59 | 0.00161 |
+| D. PT+RL (generator) | 134.50 | 135.64 | 0.00133 |
+
+Per-design (all 8 designs, single vs random-K-best): `98=98`, `67=67`,
+`152=152`, `124=124`, `112=112`, `95=95`, `73=73`, `199=199` — **exactly equal
+on every single design**, not just on average. Arm B's 8 individual candidate
+scores per design are also nearly identical to each other (e.g. design 1:
+`67,67,67,67,67,67,67,69`) despite a diversity (mean pairwise mask L1 distance
+`0.00155`) matched to the generator's own measured diversity (`0.00161`).
+
+### Interpretation
+
+Two findings, not one:
+
+1. **Random multi-start gives zero measurable benefit over single-start at
+   this diversity scale.** At the perturbation magnitude that matches the
+   generator's own measured sample diversity, the ILT refinement gradient
+   descent converges to essentially the same local optimum regardless of
+   which of the 8 perturbed starts it began from — the "spread" is real in
+   mask-pixel space (diversity ≈ 0.0016, not zero) but the *downstream ILT
+   solve washes it out* before it reaches the EPE metric. Best-of-8 buys
+   nothing here because there is effectively nothing to select between.
+2. **Both generator arms are measurably *worse* than single-start ILT with no
+   generator involved at all** (134.75/134.50 vs 115.00 — a ~17% *increase* in
+   EPE violations, in the wrong direction). This is consistent with, and
+   sharpens, F-RL-01's null result for GRPO: PT+RL is marginally better than
+   PT (134.50 vs 134.75, as the paper's ordering claims), but the entire
+   pretrained-generator pipeline is worse than doing nothing more sophisticated
+   than the single deterministic cold start this project's own ICCAD13
+   baseline already uses. The generator is not merely failing to add value on
+   top of ILT — its initialization is actively worse than the plain cold start
+   this experiment's own arm A shows is already good enough to reach the same
+   optimum that random search reaches.
+
+Together these show the paper's core mechanism, as measured at this
+project's training scale (F-RL-01's compute budget — a few hundred WGAN-GP
+steps, a comparably small GRPO run), is not doing the two things its
+narrative would require: it is not placing its K starts more usefully than
+random noise would, and its starts are not even as good as no learned prior
+at all. This does not contradict F-RL-01 (a null result for the *finetuning*
+step specifically) — it extends it: the pretraining stage itself, not only
+GRPO, is the part that is not adding value at this scale.
+
+### What this does NOT establish
+
+This is measured at the same reduced training scale as F-RL-01 (256x256
+canvas, 64 training designs, the compute budget available on this CPU-only
+host) — it is a statement about *this reproduction's* trained generator, not
+a claim that a learned sampler can never beat random multi-start in
+principle, nor a claim that the paper's own (larger-scale, GPU-trained)
+generator would show the same gap. It is, however, exactly the control this
+project's earlier experiments and the paper itself never isolate, and it
+directly explains *why* a "generator vs no-OPC" or "generator vs single ILT
+start" comparison alone (Table 2's framing) cannot distinguish "the generator
+learned something useful" from "having any K tries at all would have done
+just as well" — a distinction the paper's ablations do not make either.
+
+
+---
+
+## F-EPE-01 — The EPE-aware loss term works, but only once weighted to the same order of magnitude as L2
+
+**Severity: informational.** Confirms `weight_epe` (backed by the new,
+independently cross-checked `gril.ilt.epe_loss` module) does real work, and
+documents the calibration mistake that would have hidden that — mirroring
+F-PVB-01's discipline of measuring the correct weight rather than guessing.
+
+### Correctness check (before any real-scale run)
+
+`soft_epe_loss` is deliberately built as a *parallel, independent*
+implementation of the same measurement-site geometry `epe_violations()`
+already uses (not a differentiable relaxation derived from that function),
+specifically so a bug in one is unlikely to be masked by the same bug in the
+other. `tests_gril/unit/test_epe_loss.py` cross-checks it against a real
+curvy ILT-optimized mask (not just synthetic hand-built cases): evaluated at
+`margin=0` on a **binary** image, `soft_epe_loss`'s sign structure reproduces
+`epe_violations()`'s exact per-side violation counts.
+
+### First attempt: `weight_epe=2.0` — no measurable effect
+
+Case 3, full 2048 resolution, 100 iterations, `step_size=0.2,
+mask_steepness=8.0` (this project's own main-baseline constants):
+
+| Config | L2 | EPE@15nm | EPE@3nm |
+|---|---:|---:|---:|
+| baseline (L2 only) | 62947 | 26 | 121 |
+| `weight_epe=2.0, tol=15nm` | 62939 | 26 | 121 |
+| `weight_epe=2.0, tol=3nm`  | 62934 | 26 | 121 |
+
+Identical EPE counts in every arm; L2 moves by less than 0.02%. Rather than
+conclude "the term doesn't work" from this, the raw loss magnitudes were
+measured directly at the solver's actual starting point (case 3, same
+constants):
+
+```
+raw L2 term (sum sq err)     = 132101
+raw soft_epe_loss (294 sites) =     46
+ratio                          =   2883
+```
+
+`weight_epe=2.0` makes the EPE term's total contribution to the gradient
+roughly **1400x smaller** than L2's — it is not broken, it is numerically
+invisible next to the term it is meant to compete with. This is the same
+diagnostic step F-SAT-01 used (measure the actual gradient scale, don't
+reason about the formula in the abstract) applied to a different loss term.
+
+### Second attempt: weight calibrated to L2's order of magnitude
+
+Same case, same constants, `weight_epe in {1000, 3000}` (chosen so
+`weight_epe * raw_soft_epe_loss` is comparable to `raw L2`, using the ratio
+measured above):
+
+| Config | L2 | EPE@15nm | EPE@3nm |
+|---|---:|---:|---:|
+| baseline (L2 only) | 62947 | 26 | 121 |
+| `weight_epe=1000, tol=15nm` | 60703 | 20 | 113 |
+| `weight_epe=3000, tol=15nm` | 62422 | **16** | 117 |
+
+At `weight_epe=3000`, EPE@15nm drops **38%** (26 → 16) with L2 essentially at
+the baseline (62422 vs 62947, −0.8%) — the discrete metric the soft loss is a
+proxy for actually moves, not just the smooth surrogate. At `weight_epe=1000`
+L2 *also* improves (62947 → 60703, −3.6%) alongside EPE@15nm (26 → 20) and
+EPE@3nm (121 → 113): penalizing the exact sites the discrete metric checks
+apparently also helps the surrounding nominal fit at those sites, rather than
+purely trading against it — a genuinely useful term once correctly weighted,
+not only a trade-off knob like `weight_pvb`.
+
+### What this does NOT establish
+
+Two points on a hand-picked weight range, one case, one iteration budget —
+not a full sweep across all 10 ICCAD13 cases (unlike `weight_pvb`, which got
+a dedicated 7-point sweep on 3 cases). It is not adopted into the main
+baseline for the same reason `weight_pvb` was not: the paper specifies no EPE
+loss weight to reproduce against, and the main baseline's un-annealed,
+un-EPE-aware numbers are the ones already verified against the paper's own
+Table 1/2 rows.
+
+### Lesson
+
+The two calibration mistakes this round made independently (`weight_epe=2.0`
+here, and the original un-swept guess that motivated F-PVB-01's dedicated
+sweep) point at the same underlying discipline: a new loss term's weight
+cannot be chosen by intuition about what "should" matter — it has to be
+measured against the term(s) it is added to, in the same units, at the actual
+starting point of the actual optimization. A weight that "looks small" (2.0)
+can be three orders of magnitude too small in practice.

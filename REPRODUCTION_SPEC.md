@@ -212,6 +212,35 @@ same constants once annealing is enabled — closing the gap without touching
 to flip any pixel's binary classification — annealing is not a blanket fix for
 every optimizer's speed, only for the underlying vanishing-gradient mechanism.
 
+**The PV-band and EPE-aware terms are real, calibration-sensitive knobs, not
+inert options (F-PVB-01, F-EPE-01).** `weight_pvb` was swept over seven values
+on 3 cases: PV Band dropped monotonically (~7.5%, `weight_pvb=0→1.0`) against
+a gentler monotonic L2 rise (~3.8%) — a genuine trade-off curve, not noise.
+`weight_epe` (backed by `gril.ilt.epe_loss`'s independently-built, verified
+differentiable relaxation of the exact EPE measurement-site geometry) showed
+the opposite failure mode first: at a naive `weight_epe=2.0` it had **zero**
+measurable effect on case 3, traced to the raw loss magnitudes actually
+differing by ~2883x at that resolution — not a broken term, an invisible one.
+At a weight recalibrated to that measured ratio (`weight_epe=3000`), EPE@15nm
+on case 3 dropped 38% (26→16) with L2 essentially unchanged. Neither term is
+adopted into the main ICCAD13 baseline (the paper specifies no weight for
+either to reproduce against), but both are now verified to do real work at the
+right scale rather than left as an unexercised code path.
+
+**The paper's core "learned sampler beats single-start" claim does not survive
+the control this project runs for it (F-MULTISTART-01, X-15).** At this
+project's training scale, four arms — single-start, K=8 random perturbation
+(diversity-matched to the trained generator, no learning), the WGAN-GP
+pretrained generator (K=8), and the GRPO-finetuned generator (K=8) — were
+compared on 8 held-out designs under an identical per-candidate ILT budget.
+Random-K exactly matched single-start on **every** design (mean EPE@3nm 115.00
+vs 115.00); **both** generator arms scored worse (PT 134.75, PT+RL 134.50) —
+about 17% more EPE violations than doing nothing more sophisticated than one
+deterministic cold start. This extends F-RL-01 (a null result for GRPO
+finetuning specifically): at this scale, the pretraining stage is not placing
+its samples better than noise would either, and neither stage's output beats
+the plain baseline this project's own ICCAD13 numbers already use.
+
 **Declared honestly:** the paper's actual solver is unknown (G-015). All of the
 above — the optimizer choices, the regularization, and the specific constants —
 are ours.

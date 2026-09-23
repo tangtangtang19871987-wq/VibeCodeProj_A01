@@ -164,29 +164,96 @@ def fig3_mask_visualization(case: int = 1):
 
 
 def fig4_pvb_sweep():
-    """PV Band vs weight_pvb, if that sweep's raw output has been saved."""
+    """PV Band vs weight_pvb, if that sweep's raw output has been saved.
+
+    Two side-by-side panels sharing an x-axis rather than one dual-y-axis
+    plot: PV Band and L2 are different units at different scales, and a
+    twin-axis chart makes their trade-off look however the two scales are
+    chosen to make it look. Indexing both to their weight_pvb=0 baseline
+    (F-PVB-01's own framing: ~7.5% PVB reduction vs ~3.8% L2 increase) reads
+    the actual trade-off directly, with no scale-choice degree of freedom.
+    """
     path = os.path.join(ROOT, "results/pvb_sweep/summary.json")
     if not os.path.exists(path):
         print("skip fig4: results/pvb_sweep/summary.json not present")
         return
     s = json.load(open(path))
     weights = [r["weight_pvb"] for r in s["sweep"]]
-    pvb = [r["pvb_sum"] for r in s["sweep"]]
-    l2 = [r["l2_sum"] for r in s["sweep"]]
+    pvb = np.array([r["pvb_sum"] for r in s["sweep"]])
+    l2 = np.array([r["l2_sum"] for r in s["sweep"]])
+    pvb_pct = 100.0 * (pvb / pvb[0] - 1.0)
+    l2_pct = 100.0 * (l2 / l2[0] - 1.0)
 
-    fig, ax = plt.subplots(figsize=(6.5, 4.5))
-    ax2 = ax.twinx()
-    ax.plot(weights, pvb, "-o", color=BLUE, label="PV Band (sum, 3 cases)")
-    ax2.plot(weights, l2, "-o", color=ORANGE, label="L2 (sum, 3 cases)")
-    ax.set_xscale("symlog", linthresh=0.001)
+    # Categorical x positions, not a log/symlog numeric axis: weight_pvb=0
+    # has no logarithm, and the swept values are not meant to be read as
+    # evenly-spaced on any continuous scale.
+    x = np.arange(len(weights))
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    ax.plot(x, pvb_pct, "-o", color=BLUE, linewidth=2, markersize=5,
+            label="PV Band (sum, 3 cases)")
+    ax.plot(x, l2_pct, "-o", color=ORANGE, linewidth=2, markersize=5,
+            label="L2 (sum, 3 cases)")
+    ax.axhline(0, color=GRAY, linewidth=1, linestyle="--", alpha=0.7)
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(w) for w in weights])
     ax.set_xlabel("weight_pvb")
-    ax.set_ylabel("PV Band", color=BLUE)
-    ax2.set_ylabel("L2", color=ORANGE)
+    ax.set_ylabel("% change from weight_pvb=0 baseline")
     ax.set_title("Process-window-aware objective: weight_pvb sweep")
+    ax.legend(frameon=False, loc="lower left")
     fig.tight_layout()
     fig.savefig(os.path.join(OUT, "pvb_sweep.png"), dpi=150)
     plt.close(fig)
     print("wrote figures/pvb_sweep.png")
+
+
+def fig5_multistart_comparison():
+    """Four-arm best-of-K EPE@3nm comparison (X-15 / F-MULTISTART-01)."""
+    path = os.path.join(ROOT, "results/multistart_ablation/summary.json")
+    if not os.path.exists(path):
+        print("skip fig5: results/multistart_ablation/summary.json not present")
+        return
+    s = json.load(open(path))
+    agg = s["aggregate"]
+    gen = s.get("generator_arms", {})
+    labels = ["single-start\n(K=1)", "random-K\n(no learning)", "PT\n(generator)", "PT+RL\n(generator)"]
+    values = [
+        agg["single_start_epe_mean"],
+        agg["random_k_best_epe_mean"],
+        gen.get("PT", {}).get("epe_best_mean"),
+        gen.get("PT+RL", {}).get("epe_best_mean"),
+    ]
+    if any(v is None for v in values):
+        print("skip fig5: generator_arms missing from summary.json")
+        return
+
+    x = np.arange(len(labels))
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    bars = ax.bar(x, values, width=0.55, color=BLUE)
+    # The two arms that involve no learned prior at all are the best result;
+    # mark them, rather than relying on a second hue, to keep this a single
+    # series (one legend-free color) with a secondary encoding for the point
+    # of the figure.
+    for i in (0, 1):
+        bars[i].set_color(ORANGE)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=9.5)
+    ax.set_ylabel("best-of-K EPE @ 3 nm (mean, 8 held-out designs)")
+    ax.set_title("Learned sampler vs random multi-start (X-15)")
+    for i, v in enumerate(values):
+        ax.annotate(f"{v:.1f}", (x[i], v), ha="center", va="bottom", fontsize=9.5)
+    from matplotlib.patches import Patch
+
+    ax.legend(
+        handles=[
+            Patch(color=ORANGE, label="no learned prior"),
+            Patch(color=BLUE, label="trained generator"),
+        ],
+        frameon=False, loc="upper left",
+    )
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUT, "multistart_comparison.png"), dpi=150)
+    plt.close(fig)
+    print("wrote figures/multistart_comparison.png")
 
 
 if __name__ == "__main__":
@@ -195,3 +262,4 @@ if __name__ == "__main__":
     fig2_optimizer_comparison()
     fig3_mask_visualization(case=1)
     fig4_pvb_sweep()
+    fig5_multistart_comparison()
