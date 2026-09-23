@@ -1,0 +1,443 @@
+{
+  "experiment_id": "mrc_sweep",
+  "description": "F-MRC-01: post-hoc morphological-opening MRC cleanup applied to the already-committed results/iccad13_ilt masks (raw, mrc_open_size=0), across all 10 cases, at open_size in {0,3,5,7,9}. Quantifies how unmanufacturable the raw output is (isolated debris, disconnected component count) and the L2/EPE cost of cleaning it up.",
+  "cases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "open_sizes": [
+    0,
+    3,
+    5,
+    7,
+    9
+  ],
+  "tiny_area_px2_threshold": 20,
+  "per_case": {
+    "1": {
+      "0": {
+        "l2": 33786.0,
+        "epe_at_15nm": 3,
+        "epe_at_3nm": 65,
+        "n_components": 196,
+        "n_tiny_components": 73
+      },
+      "3": {
+        "l2": 33790.0,
+        "epe_at_15nm": 3,
+        "epe_at_3nm": 64,
+        "n_components": 135,
+        "n_tiny_components": 9
+      },
+      "5": {
+        "l2": 33869.0,
+        "epe_at_15nm": 3,
+        "epe_at_3nm": 63,
+        "n_components": 119,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 34015.0,
+        "epe_at_15nm": 3,
+        "epe_at_3nm": 63,
+        "n_components": 124,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 34789.0,
+        "epe_at_15nm": 3,
+        "epe_at_3nm": 63,
+        "n_components": 123,
+        "n_tiny_components": 0
+      }
+    },
+    "2": {
+      "0": {
+        "l2": 26967.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 66,
+        "n_components": 207,
+        "n_tiny_components": 58
+      },
+      "3": {
+        "l2": 27079.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 67,
+        "n_components": 174,
+        "n_tiny_components": 30
+      },
+      "5": {
+        "l2": 27196.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 71,
+        "n_components": 143,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 27241.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 67,
+        "n_components": 134,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 27483.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 62,
+        "n_components": 131,
+        "n_tiny_components": 0
+      }
+    },
+    "3": {
+      "0": {
+        "l2": 58582.0,
+        "epe_at_15nm": 22,
+        "epe_at_3nm": 110,
+        "n_components": 233,
+        "n_tiny_components": 101
+      },
+      "3": {
+        "l2": 58586.0,
+        "epe_at_15nm": 25,
+        "epe_at_3nm": 106,
+        "n_components": 152,
+        "n_tiny_components": 15
+      },
+      "5": {
+        "l2": 58911.0,
+        "epe_at_15nm": 25,
+        "epe_at_3nm": 101,
+        "n_components": 142,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 59272.0,
+        "epe_at_15nm": 25,
+        "epe_at_3nm": 103,
+        "n_components": 130,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 60382.0,
+        "epe_at_15nm": 24,
+        "epe_at_3nm": 102,
+        "n_components": 121,
+        "n_tiny_components": 0
+      }
+    },
+    "4": {
+      "0": {
+        "l2": 9314.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 24,
+        "n_components": 224,
+        "n_tiny_components": 86
+      },
+      "3": {
+        "l2": 9322.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 22,
+        "n_components": 177,
+        "n_tiny_components": 19
+      },
+      "5": {
+        "l2": 9402.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 20,
+        "n_components": 156,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 9738.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 20,
+        "n_components": 148,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 10280.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 22,
+        "n_components": 138,
+        "n_tiny_components": 0
+      }
+    },
+    "5": {
+      "0": {
+        "l2": 28824.0,
+        "epe_at_15nm": 1,
+        "epe_at_3nm": 74,
+        "n_components": 214,
+        "n_tiny_components": 89
+      },
+      "3": {
+        "l2": 28828.0,
+        "epe_at_15nm": 1,
+        "epe_at_3nm": 72,
+        "n_components": 155,
+        "n_tiny_components": 27
+      },
+      "5": {
+        "l2": 28879.0,
+        "epe_at_15nm": 1,
+        "epe_at_3nm": 71,
+        "n_components": 119,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 28905.0,
+        "epe_at_15nm": 1,
+        "epe_at_3nm": 72,
+        "n_components": 120,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 28960.0,
+        "epe_at_15nm": 1,
+        "epe_at_3nm": 72,
+        "n_components": 119,
+        "n_tiny_components": 0
+      }
+    },
+    "6": {
+      "0": {
+        "l2": 28567.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 61,
+        "n_components": 232,
+        "n_tiny_components": 92
+      },
+      "3": {
+        "l2": 28534.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 59,
+        "n_components": 178,
+        "n_tiny_components": 30
+      },
+      "5": {
+        "l2": 28551.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 59,
+        "n_components": 147,
+        "n_tiny_components": 3
+      },
+      "7": {
+        "l2": 28536.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 57,
+        "n_components": 136,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 28562.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 52,
+        "n_components": 124,
+        "n_tiny_components": 0
+      }
+    },
+    "7": {
+      "0": {
+        "l2": 12163.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 29,
+        "n_components": 172,
+        "n_tiny_components": 57
+      },
+      "3": {
+        "l2": 12085.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 28,
+        "n_components": 137,
+        "n_tiny_components": 15
+      },
+      "5": {
+        "l2": 12028.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 26,
+        "n_components": 117,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 12031.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 25,
+        "n_components": 110,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 12023.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 24,
+        "n_components": 102,
+        "n_tiny_components": 0
+      }
+    },
+    "8": {
+      "0": {
+        "l2": 12135.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 30,
+        "n_components": 165,
+        "n_tiny_components": 34
+      },
+      "3": {
+        "l2": 12134.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 30,
+        "n_components": 164,
+        "n_tiny_components": 24
+      },
+      "5": {
+        "l2": 12131.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 30,
+        "n_components": 137,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 12196.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 31,
+        "n_components": 132,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 12257.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 31,
+        "n_components": 128,
+        "n_tiny_components": 0
+      }
+    },
+    "9": {
+      "0": {
+        "l2": 33194.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 84,
+        "n_components": 208,
+        "n_tiny_components": 74
+      },
+      "3": {
+        "l2": 33241.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 82,
+        "n_components": 158,
+        "n_tiny_components": 28
+      },
+      "5": {
+        "l2": 33470.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 82,
+        "n_components": 128,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 33687.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 79,
+        "n_components": 121,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 34072.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 73,
+        "n_components": 116,
+        "n_tiny_components": 0
+      }
+    },
+    "10": {
+      "0": {
+        "l2": 7116.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 11,
+        "n_components": 261,
+        "n_tiny_components": 135
+      },
+      "3": {
+        "l2": 7095.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 11,
+        "n_components": 149,
+        "n_tiny_components": 16
+      },
+      "5": {
+        "l2": 7057.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 10,
+        "n_components": 143,
+        "n_tiny_components": 0
+      },
+      "7": {
+        "l2": 7012.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 10,
+        "n_components": 134,
+        "n_tiny_components": 0
+      },
+      "9": {
+        "l2": 6999.0,
+        "epe_at_15nm": 0,
+        "epe_at_3nm": 10,
+        "n_components": 131,
+        "n_tiny_components": 0
+      }
+    }
+  },
+  "aggregate": {
+    "0": {
+      "l2_mean": 25064.8,
+      "epe_at_15nm_mean": 2.6,
+      "epe_at_3nm_mean": 55.4,
+      "n_components_mean": 211.2,
+      "n_tiny_components_mean": 79.9
+    },
+    "3": {
+      "l2_mean": 25069.4,
+      "epe_at_15nm_mean": 2.9,
+      "epe_at_3nm_mean": 54.1,
+      "n_components_mean": 157.9,
+      "n_tiny_components_mean": 21.3
+    },
+    "5": {
+      "l2_mean": 25149.4,
+      "epe_at_15nm_mean": 2.9,
+      "epe_at_3nm_mean": 53.3,
+      "n_components_mean": 135.1,
+      "n_tiny_components_mean": 0.3
+    },
+    "7": {
+      "l2_mean": 25263.3,
+      "epe_at_15nm_mean": 2.9,
+      "epe_at_3nm_mean": 52.7,
+      "n_components_mean": 128.9,
+      "n_tiny_components_mean": 0.0
+    },
+    "9": {
+      "l2_mean": 25580.7,
+      "epe_at_15nm_mean": 2.8,
+      "epe_at_3nm_mean": 51.1,
+      "n_components_mean": 123.3,
+      "n_tiny_components_mean": 0.0
+    }
+  },
+  "provenance": {
+    "git_commit": "7e107649504b76437c8ea4f54fb2b59dc346e668",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 2
+  }
+}

@@ -289,6 +289,72 @@ def fig5_multistart_comparison():
     print("wrote figures/multistart_comparison.png")
 
 
+def fig6_mrc_cleanup(case: int = 1):
+    """Raw mask vs MRC-opened mask, zoomed on a debris-heavy region (F-MRC-01)."""
+    import sys
+
+    sys.path.insert(0, os.path.join(ROOT, "src"))
+    import torch
+
+    from gril.ilt.solver import morphological_open
+
+    mask_path = os.path.join(ROOT, f"results/iccad13_ilt/mask{case}.pt")
+    if not os.path.exists(mask_path):
+        print(f"skip fig6: mask{case}.pt not present")
+        return
+    mask = torch.load(mask_path, weights_only=False).float()
+    cleaned = morphological_open(mask, 5)
+    mask_np, cleaned_np = mask.numpy(), cleaned.numpy()
+
+    # The full design bounding box is dominated by large, intentional SRAF
+    # rings that look similar before/after opening -- the debris this finding
+    # is about is small (<10px^2) isolated specks, easy to miss at that zoom.
+    # Center the crop on the densest cluster of tiny components instead, so
+    # the removal is actually visible.
+    import scipy.ndimage as ndi
+
+    lbl, n = ndi.label(mask_np > 0.5, structure=np.ones((3, 3)))
+    sizes = ndi.sum(mask_np > 0.5, lbl, range(1, n + 1)) if n > 0 else np.array([])
+    tiny_ids = np.where(sizes < 10)[0] + 1
+    if len(tiny_ids) > 0:
+        centroids = np.array(ndi.center_of_mass(mask_np > 0.5, lbl, tiny_ids))
+        # densest 240x240 window: for each tiny centroid, count how many
+        # OTHER tiny centroids fall within 120px of it, and center on the
+        # winner -- a simple, robust "most crowded" pick.
+        w = 120
+        counts = ((np.abs(centroids[:, None, :] - centroids[None, :, :]) < w).all(axis=2)).sum(axis=1)
+        cy, cx = centroids[np.argmax(counts)]
+        y0, y1 = max(int(cy - w), 0), min(int(cy + w), 2048)
+        x0, x1 = max(int(cx - w), 0), min(int(cx + w), 2048)
+    else:
+        ys, xs = np.nonzero(mask_np > 0.5)
+        m = 60
+        y0, y1 = max(ys.min() - m, 0), min(ys.max() + m, 2048)
+        x0, x1 = max(xs.min() - m, 0), min(xs.max() + m, 2048)
+
+    fig, axes = plt.subplots(1, 2, figsize=(9, 4.5))
+    for ax, (img, title) in zip(
+        axes,
+        [
+            (mask_np[y0:y1, x0:x1], "raw (mrc_open_size=0, every committed run)"),
+            (cleaned_np[y0:y1, x0:x1], "mrc_open_size=5 (post-hoc cleanup)"),
+        ],
+    ):
+        ax.imshow(img, cmap="Greys", origin="upper", vmin=0, vmax=1)
+        ax.set_title(title, fontsize=10)
+        ax.set_xticks([])
+        ax.set_yticks([])
+    fig.suptitle(
+        f"ICCAD13 case {case}: MRC cleanup removes isolated sub-5nm debris "
+        "for ~0.3% mean L2 cost (F-MRC-01)",
+        fontsize=10.5,
+    )
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUT, f"mrc_cleanup_case{case}.png"), dpi=150)
+    plt.close(fig)
+    print(f"wrote figures/mrc_cleanup_case{case}.png")
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     fig1_iteration_budget_curve()
@@ -296,3 +362,4 @@ if __name__ == "__main__":
     fig3_mask_visualization(case=1)
     fig4_pvb_sweep()
     fig5_multistart_comparison()
+    fig6_mrc_cleanup(case=1)

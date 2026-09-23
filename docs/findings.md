@@ -715,6 +715,102 @@ just as well" — a distinction the paper's ablations do not make either.
 
 ---
 
+## F-MRC-01 — Every committed mask is manufacturability-unconstrained; a cheap, already-implemented fix removes the worst of it for near-zero cost
+
+**Severity: medium.** Not a numerical bug — a real, user-flagged gap between
+what this project reports (L2/PVB/EPE against the target) and what a fab
+could actually build. Confirms the concern directly with per-case counts
+rather than by inspection of one figure.
+
+### The concern, verified
+
+Every ICCAD13 result committed so far (`iccad13_ilt`, `abl_optimizer`,
+`train_scaled`'s refinement stage) uses `ILTConfig.mrc_open_size=0` — the
+raw `sigmoid(β·P) ≥ 0.5` threshold, with **no manufacturability constraint of
+any kind** applied during or after optimization. Connected-component analysis
+of the raw masks (`scripts/mrc_cleanup_sweep.py`, all 10 cases):
+
+| | mean over 10 cases |
+|---|---:|
+| connected components | **211.2** |
+| components smaller than 20 px² (4.5×4.5 nm — physically absurd at any real process node) | **79.9** |
+| single-pixel islands present | yes, in every case |
+
+This is a real defect in what "the mask" means in this project's figures and
+`maskN.pt` files: no real fab's mask-writer or MRC (mask rule check) tooling
+would accept output with ~80 pieces of sub-5nm floating debris per case. The
+`figures/mask_visualization_case1.png` panel the user was looking at when
+this was raised shows exactly this (196 components for case 1 specifically).
+
+### The fix already existed, unused
+
+`gril.ilt.solver.morphological_open` (binary erosion-then-dilation) and
+`ILTConfig.mrc_open_size` were implemented from the start (docs/gap_ledger.md
+G-021: "morphological opening with a configurable structuring-element size;
+default off") but never exercised in any committed run. Since opening is a
+pure post-processing step on the already-binarized mask (`_binarize()`), it
+can be applied to the already-saved `maskN.pt` files with **no
+re-optimization needed** — `scripts/mrc_cleanup_sweep.py` does exactly that,
+sweeping `open_size in {0,3,5,7,9}` across all 10 cases and re-scoring each
+result against the target with the same verified litho model and EPE metric.
+
+| `open_size` | L2 (mean) | EPE@15nm (mean) | EPE@3nm (mean) | components (mean) | tiny components (mean) |
+|---:|---:|---:|---:|---:|---:|
+| 0 (raw, current) | 25065 | 2.6 | 55.4 | 211.2 | 79.9 |
+| 3 | 25069 | 2.9 | 54.1 | 157.9 | 21.3 |
+| **5** | **25149** | 2.9 | 53.3 | 135.1 | **0.3** |
+| 7 | 25263 | 2.9 | 52.7 | 128.9 | 0.0 |
+| 9 | 25581 | 2.8 | 51.1 | 123.3 | 0.0 |
+
+`open_size=5` (a 5nm structuring element) eliminates essentially all tiny
+debris (79.9 → 0.3 mean components, and exactly 0 in 9 of the 10 cases) for a
+**0.33% increase in mean L2** and, interestingly, a slight *improvement* in
+mean EPE@3nm (55.4 → 53.3) — cleaning up isolated noise pixels removes some
+of the spurious violations they were causing. Mean EPE@15nm rises slightly
+(2.6 → 2.9), driven almost entirely by case 3 specifically (22 → 25 — see
+"What this does NOT establish" below).
+
+### Interpretation
+
+The single-pixel/tiny-island debris — the most egregious, "no fab would ever
+accept this" part of the concern — is close to a free fix: `open_size=5`
+removes essentially all of it for a fraction of a percent of L2. This is not
+adopted as the new default for the committed baseline (same reason as
+F-PVB-01/F-EPE-01: no re-verification against the paper's numbers has been
+done with it on), but it demonstrates the gap is not expensive to close for
+its worst symptom.
+
+**This does not make the masks production-realistic.** Even at `open_size=9`,
+~123 connected components remain per case — a real OPC/SRAF mask for these
+patterns would likely have on the order of a few dozen, not >100 — and
+morphological opening only removes debris/protrusions *narrower* than the
+structuring element; it enforces nothing about a *minimum spacing* between
+separate shapes (a closing operation or an explicit spacing check would be
+needed for that), and nothing about final mask *complexity* (shot count) in
+the sense the paper's cited MRC reference actually cares about. The
+differentiable `weight_tv` (total-variation) regularizer already in
+`ilt_loss` is the more principled fix — applied *during* optimization rather
+than as a post-hoc crop, it can shape the mask towards fewer, smoother
+features instead of just erasing violations after the fact — but it is
+likewise off by default (`weight_tv=0.0`) in every committed run, and was not
+swept this round.
+
+### What this does NOT establish
+
+Case 3's EPE@15nm specifically gets **worse** under opening (22 → 24-25
+across every tested size) — the single case that is also this project's
+largest known gap to the paper (F-LBFGS-01, X-16 in progress). This is a
+real, measured interaction, not noise (monotonic across all 4 nonzero sizes
+tested), and a caution against assuming MRC cleanup is free everywhere just
+because it is free *on average*: for at least one case, removing what
+opening treats as "debris" was removing pixels that were doing real EPE work.
+No sweep of `weight_tv` or a spacing-aware constraint was run; this finding
+establishes that the cheapest fix (opening) handles the debris problem well
+on average but is not a complete or unconditionally-free MRC solution.
+
+
+---
+
 ## F-EPE-01 — The EPE-aware loss term works, but only once weighted to the same order of magnitude as L2
 
 **Severity: informational.** Confirms `weight_epe` (backed by the new,

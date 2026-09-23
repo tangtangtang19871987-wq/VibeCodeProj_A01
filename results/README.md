@@ -31,6 +31,7 @@ PYTHONPATH=src python -m gril.experiments.run_optimizer_ablation --config config
 PYTHONPATH=src python -m gril.experiments.run_multistart_ablation --config configs/experiments/multistart_ablation.yaml
 PYTHONPATH=src python scripts/pvb_weight_sweep.py          # -> results/pvb_sweep/summary.json (F-PVB-01)
 PYTHONPATH=src python scripts/epe_weight_calibration.py    # -> results/epe_aware_case3/summary.json (F-EPE-01)
+PYTHONPATH=src python scripts/mrc_cleanup_sweep.py          # -> results/mrc_sweep/summary.json (F-MRC-01)
 python scripts/make_report.py     # -> REPRODUCTION_REPORT.md
 python scripts/make_figures.py    # -> figures/*.png
 ```

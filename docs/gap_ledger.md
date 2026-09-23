@@ -70,6 +70,7 @@ Low = our reconstruction. **None = unknown.**
 |---|---|
 | **Current assumption** | Morphological opening with a configurable structuring-element size; default off, reported when on. |
 | **Confidence** | **None.** |
+| **New finding (F-MRC-01)** | Every committed mask so far used the default (opening off): measured, this means **~211 connected components per case on average, ~80 of them smaller than a 4.5x4.5nm square** -- real, user-flagged, physically unmanufacturable debris, not a visualization artifact. A 10-case post-hoc sweep (`scripts/mrc_cleanup_sweep.py`) shows `mrc_open_size=5` removes essentially all of that debris (79.9 -> 0.3 mean tiny components) for a 0.33% mean L2 cost -- but ~123-135 components still remain even at the largest sizes tested, and case 3's EPE@15nm specifically gets WORSE under opening (22 -> 24-25). Opening is a cheap partial fix for the worst symptom, not a real MRC solution (`docs/findings.md` F-MRC-01). |
 
 ---
 
