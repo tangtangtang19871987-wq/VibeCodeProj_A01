@@ -1,0 +1,37 @@
+# X-15: single-start vs random-K vs learned-sampler-K, the control the paper
+# never runs. See src/gril/experiments/run_multistart_ablation.py's module
+# docstring for the full design rationale.
+#
+# perturb_sigma=0.63 was calibrated (not guessed) on a standalone sweep over
+# {0.55, 0.60, 0.62, 0.65, 0.68, 0.70, 0.72, 0.75} against the SAME 8
+# validation designs, BEFORE this ablation was run, to match the trained PT
+# generator's measured sampling diversity (0.00161): sigma=0.62 gave 0.00128,
+# sigma=0.65 gave 0.00211; 0.63 interpolates to approximately 0.0016. The
+# ACTUAL diversity achieved is measured and reported in this run's own output
+# (random_k_diversity_mean), not assumed to hit the target exactly.
+#
+# Uses the exact same validation split, canvas, refine budget, and generator
+# summary as configs/experiments/train_scaled.yaml, so all four arms are
+# compared on identical designs under an identical per-candidate ILT budget.
+experiment_id: multistart_ablation
+paper_reference: "Fig. 1c, Sec. 3.3.2 -- tests whether a LEARNED sampler beats dumb random multi-start, which neither the paper nor this project's earlier experiments isolate"
+seed: 0
+kernel_dir: /home/user/openopc/openilt/kernel
+
+canvas: 256
+pixel_nm: 8.0
+n_train: 64          # must match train_scaled.yaml exactly (same seed -> same val split)
+n_val: 8
+group_size: 8        # K, matches train_scaled.yaml's eval_group_size
+epe_tolerance: 3      # matches train_scaled.yaml
+init_scale: 2.0
+mask_steepness: 8.0
+perturb_sigma: 0.63    # calibrated, see header comment
+
+refine:
+  downsample: 2
+  iterations: 100
+  step_size: 0.2
+  mask_steepness: 8.0
+
+generator_summary_path: results/train_scaled/summary.json
