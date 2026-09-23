@@ -239,3 +239,59 @@ regressing a single mask, and it reproduces at this reduced scale.
 No hyperparameter was adjusted between the two runs. The only change was the
 EPE-unit bug fix in F-UNIT-01, applied uniformly to both PT and PT+RL
 evaluation.
+
+
+---
+
+## F-SAT-01 — Default init_scale x mask_steepness saturates the mask sigmoid; only Adam escapes it
+
+**Severity: informational.** Not a bug in any committed result (all ICCAD13
+results use Adam, unaffected). Found while adding L-BFGS/SGD/Nesterov support
+to the ILT solver and testing them fairly.
+
+### Symptom
+With the solver's default `init_scale=2.0` and the ICCAD13 experiment's
+`mask_steepness=8.0`, plain SGD and L-BFGS made **zero measurable progress**
+over dozens of iterations at step sizes that are perfectly reasonable for a
+well-conditioned problem, while Adam converged normally from the identical
+starting point.
+
+### Diagnosis
+`M = sigmoid(beta_m * P)` with `P_0 = init_scale * (2*target - 1)`. At the
+defaults, `beta_m * P_0 = 8 * (+-2.0) = +-16` at every pixel. `sigmoid(+-16)`
+is `0.9999999 / 1.1e-7` in float32 -- already almost exactly binary -- and its
+derivative `sigmoid(x)(1-sigmoid(x))` is correspondingly tiny. Measured: raw
+gradient magnitude at this starting point is **~1.7e-6**, several orders of
+magnitude smaller than at a well-conditioned start (`init_scale=0.25` gives
+gradients of order 1).
+
+Adam's update rule divides each parameter's step by an estimate of that
+parameter's own gradient RMS, so a *persistently tiny but nonzero* gradient
+still produces an order-1 step -- Adam is effectively blind to the absolute
+gradient scale. SGD, Nesterov, and L-BFGS all use the gradient's actual
+magnitude directly (L-BFGS additionally builds a curvature estimate from it),
+so at this starting point their steps are proportionally tiny too, and a
+reasonable step size (or the L-BFGS default) does not move them measurably in
+a small iteration budget.
+
+### Resolution
+Not "fixed" -- this is a real property of the sigmoid parameterisation at these
+constants, not a defect. Two things were done:
+
+1. `docs/findings.md` (this entry) and the `ILTConfig`/`solver.py` module
+   docstrings now state it explicitly, so a future user of `optimizer="sgd"` or
+   `"lbfgs"` is not left to rediscover it by watching a run silently fail to
+   move.
+2. `tests_gril/unit/test_ilt_optimizers.py::test_saturation_makes_raw_gradient_methods_stall`
+   pins the phenomenon itself (Adam moves, SGD does not, from the exact
+   configuration every ICCAD13 experiment uses) so it is caught if the
+   underlying physics or parameterisation ever changes silently. All other
+   optimizer tests use a deliberately well-conditioned `init_scale=0.5` starting
+   point, which is the practical guidance this finding produces: keep
+   `init_scale * mask_steepness` moderate (or warm-start from something already
+   close to a reasonable mask) when using a raw-gradient optimizer.
+
+### Consequence
+None for existing results (all use Adam). It is the reason Adam remains this
+project's default, and it is now a documented, tested reason rather than an
+unexamined choice.

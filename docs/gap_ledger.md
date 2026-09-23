@@ -43,9 +43,10 @@ Low = our reconstruction. **None = unknown.**
 |---|---|
 | **Missing** | The paper never defines its ILT solver. It cites CurvyILT [4] (Yang & Ren, ISPD'25) for the solver *and* the morphological MRC handling, giving no mask parameterization, step size, optimizer, loss weights, or convergence rule. |
 | **Sources searched** | The paper (nothing); no public code for [4] found. |
-| **Current assumption** | MOSAIC/GAN-OPC/CurvyILT-lineage reconstruction in `src/gril/ilt/solver.py`: `M = sigmoid(beta_m * P)`, nominal-corner L2 vs the target, optional PV-band term, Adam. **Constants tuned by our own sweep and logged**, never tuned to match the paper's numbers. |
-| **Sensitivity experiment** | X-02 step-size/steepness sweep (run); X-10 iteration-budget curve. |
+| **Current assumption** | MOSAIC/GAN-OPC/CurvyILT-lineage reconstruction in `src/gril/ilt/solver.py`: `M = sigmoid(beta_m * P)`, nominal-corner L2 vs the target, optional PV-band and total-variation terms. **Four optimizers implemented and tested** (Adam default, SGD, Nesterov, L-BFGS with strong-Wolfe line search); the committed ICCAD13 results use Adam, whose constants were tuned by our own sweep and logged, never tuned to match the paper's numbers. |
+| **Sensitivity experiment** | X-02 step-size/steepness sweep (run); X-10 iteration-budget curve; **X-14 optimizer comparison** (Adam vs L-BFGS, wall-clock- and function-eval-matched, `configs/experiments/abl_optimizer.yaml`). |
 | **Confidence** | **Medium** for the family (the paper's Eq. 1-2 physics is fixed and verified), **Low** for the constants. |
+| **New finding (F-SAT-01)** | At the constants every ICCAD13 experiment uses (`init_scale=2.0`, `mask_steepness=8.0`), the sigmoid mask parameterization is saturated enough (`sigmoid(±16)`) that raw-gradient optimizers (SGD, Nesterov, L-BFGS) make no measurable progress from the standard cold start, while Adam's per-parameter normalization is insensitive to the tiny gradient magnitude and converges normally. This is why Adam is the default, now tested rather than assumed (`docs/findings.md` F-SAT-01). |
 
 ### G-010 — Generator sizing
 | **Missing** | Channel widths, number of Style ResBlocks `n`, MLP depth for `f_phi`, and the "optional head downsample" choice. Fig. 3 fixes the **topology** (3-level pyramid, AdaIN at Level 2 only, element-wise-addition fusion, Local ResBlocks, UpConv, optional final bicubic) but no sizes. |

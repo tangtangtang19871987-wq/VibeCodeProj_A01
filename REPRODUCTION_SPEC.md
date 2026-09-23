@@ -143,12 +143,61 @@ the MOSAIC-lineage default) and an optional process-window term
 `L_pvb = ||Z_max - Z_min||²₂`. `L_tv` is an optional total-variation smoothness
 regularizer, default off. **Every weight is config-exposed and logged.**
 
-Optimizer: Adam on `P`. Defaults: lr 1.0, `iters` 100. Stopping: fixed iteration
-count (so that "iteration budget" comparisons are exact), with optional early
-stop on relative loss improvement < 1e-5.
+**Optimizers.** Four are implemented, all config-selected via `ILTConfig.optimizer`,
+none dictated by the paper (G-015):
 
-**Declared honestly:** the paper's actual solver is unknown (G-015). These
-constants are ours.
+| Optimizer | Notes |
+|---|---|
+| `adam` (default) | Unchanged from the module's first version; every committed ICCAD13 result uses this and is reproduced bit-for-bit by the current code. |
+| `sgd` | Plain or classical-momentum gradient descent (`momentum` field, default 0 = plain). |
+| `nesterov` | Nesterov-accelerated SGD; requires `momentum > 0`, validated at construction. |
+| `lbfgs` | Quasi-Newton L-BFGS with a strong-Wolfe line search (`torch.optim.LBFGS`). |
+
+Stopping: fixed iteration count by default (so "iteration budget" comparisons
+are exact), with optional early stop on relative loss improvement (`early_stop_rtol`)
+or on gradient-norm convergence (`convergence_grad_tol`).
+
+**Regularization.** An optional total-variation term
+`L_tv = Σ |∂M/∂x| + |∂M/∂y|` (Eq. S-5's `λ_tv·L_tv`) penalizes mask-boundary
+roughness in the continuous relaxation, a standard ILT-literature proxy for
+lower mask complexity / e-beam shot count. Off by default (`weight_tv = 0`).
+Optional gradient-norm clipping (`grad_clip`, default 0 = off) is available for
+stabilization with any optimizer.
+
+**Comparing optimizers fairly — a real subtlety, not a footnote.** "Iterations"
+is not the same unit of compute across optimizers: Adam/SGD/Nesterov do exactly
+one forward+backward pass per iteration, while each L-BFGS iteration runs a
+line search that may evaluate the closure several times. `ILTResult.n_func_evals`
+records the true number of forward/backward evaluations, and this project never
+compares optimizers by raw iteration count without also reporting it.
+
+**Batched L-BFGS runs per-example, not jointly.** `torch.optim.LBFGS` builds one
+shared curvature (Hessian) approximation over the entire flattened tensor it is
+given. Handed a `(B,H,W)` batch of otherwise-independent ILT problems directly,
+it would silently couple their curvature estimates — the joint optimum still
+coincides with the per-example optima (the objective is separable), but it
+would break the `batched == looped single-case` equivalence this project's test
+suite otherwise guarantees for every optimizer. `solve()` therefore runs one
+independent `torch.optim.LBFGS` instance per batch element for that path, at
+the cost of a Python-level loop rather than a fully vectorized kernel.
+
+**A genuine numerical finding (F-SAT-01, `docs/findings.md`):** the defaults
+`init_scale=2.0` and `mask_steepness=8.0` push `sigmoid(β_m·P_0)` to `sigmoid(±16)`
+at every pixel — already almost exactly binary, with a correspondingly tiny
+derivative (measured raw gradient magnitude ≈ 1.7e-6 at this starting point).
+Adam's per-parameter step normalization is insensitive to this and converges
+normally; SGD, Nesterov, and L-BFGS all use the gradient's actual magnitude and
+make **no measurable progress** from this exact starting point at step sizes
+that are reasonable for a well-conditioned problem. This is why every existing
+ICCAD13 result uses Adam, and it is now a tested, documented reason rather than
+an unexamined default: pinned by
+`tests_gril/unit/test_ilt_optimizers.py::test_saturation_makes_raw_gradient_methods_stall`.
+Anyone using `sgd`/`nesterov`/`lbfgs` should keep `init_scale * mask_steepness`
+moderate or warm-start from something already close to a reasonable mask.
+
+**Declared honestly:** the paper's actual solver is unknown (G-015). All of the
+above — the optimizer choices, the regularization, and the specific constants —
+are ours.
 
 ## 9. Generative model **[B], G-010/011**
 

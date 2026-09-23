@@ -43,9 +43,11 @@ against an independent reference) / `BLOCKED`.
 | # | Provenance | Item | Implementation | Test | Status |
 |---|---|---|---|---|---|
 | I-01 | [C] G-015 (paper never specifies its solver) | Mask parameterization `M = sigmoid(beta_m * P)` | `src/gril/ilt/solver.py` | binary output; determinism | **TEST** |
-| I-02 | [C] G-015 | ILT loss `\|\|Z_nom - target\|\|^2` (+ optional PVB term, corner weights) | `src/gril/ilt/solver.py` | loss decreases; beats no-OPC | **TEST** |
-| I-03 | [C] G-015 | Adam-based descent on `P`; configurable step/iters | `src/gril/ilt/solver.py` | sweep-selected constants; loss decreases | **TEST** |
-| I-04 | [A] | **Batched** ILT over K candidates | `src/gril/ilt/solver.py` | **batched == looped single-case, exactly** | **VERIF** |
+| I-02 | [C] G-015 | ILT loss `\|\|Z_nom - target\|\|^2` (+ optional PVB, total-variation terms) | `src/gril/ilt/solver.py` | loss decreases; beats no-OPC; TV reduces mask roughness | **TEST** |
+| I-03 | [C] G-015 | **Four optimizers**: Adam (default), SGD, Nesterov, L-BFGS (strong-Wolfe) | `src/gril/ilt/solver.py` | each reduces loss from a well-conditioned start; sweep-selected Adam constants for the committed baseline | **TEST** |
+| I-04 | [A] | **Batched** ILT over K candidates | `src/gril/ilt/solver.py` | **batched == looped single-case, exactly**, for ALL FOUR optimizers (L-BFGS via independent per-example instances, by design — see REPRODUCTION_SPEC.md Sec. 8) | **VERIF** |
+| I-07 | [C] | L-BFGS quasi-Newton solver with line search; gradient-norm convergence; gradient clipping | `src/gril/ilt/solver.py` | deterministic; more func-evals than iterations (line search); `n_func_evals` tracked for fair cross-optimizer comparison | **TEST** |
+| I-08 | [C] | F-SAT-01: sigmoid saturation at default constants stalls raw-gradient optimizers | `src/gril/ilt/solver.py`, `docs/findings.md` | Adam moves from the exact default start, SGD does not (pinned) | **VERIF** |
 | I-05 | **[Sec 4.1]** 8x downsample, 100 iters, bicubic upsample, binarize 0.5 | `src/gril/experiments/infer.py` | **multi-resolution physics verified to 0.17% of peak at 8x** | **VERIF** |
 | I-06 | [C] | Checkpoint / resume | `src/gril/experiments/run_iccad13.py` | per-case JSON cache; resume verified in use | **IMPL** |
 
@@ -97,6 +99,7 @@ against an independent reference) / `BLOCKED`.
 | X-11 | Paper Table 1 / Table 2 replication | [A] | — | — | **BLOCKED by G-002** (target numbers unknown) |
 | X-12 | LithoBench experiments | [A] | — | — | **BLOCKED by S3** (dataset unreachable) |
 | X-13 | Runtime / speedup comparison | [A] | — | — | **BLOCKED** — no GPU on this host; would not be comparable |
+| X-14 | Ablation: optimizer family (Adam vs L-BFGS), G-015 | [C] | `configs/experiments/abl_optimizer.yaml` | `results/abl_optimizer/` | **running** |
 
 ## 8. Completeness check against the paper
 

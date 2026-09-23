@@ -1,0 +1,60 @@
+# X-14: fair Adam vs L-BFGS comparison (G-015 -- the paper specifies neither).
+#
+# See src/gril/experiments/run_optimizer_ablation.py's module docstring for why
+# this uses its OWN well-conditioned starting point (init_scale=0.5) rather than
+# reusing configs/experiments/iccad13_ilt.yaml's constants (init_scale=2.0):
+# at those constants L-BFGS (like plain SGD) makes zero measurable progress
+# from the saturated cold start (F-SAT-01, docs/findings.md) -- verified: 5
+# L-BFGS iterations there moved the loss by 0.0%. This ablation is therefore a
+# separate, self-contained experiment; results/iccad13_ilt/ remains the
+# authoritative Adam baseline reported in REPRODUCTION_REPORT.md.
+#
+# Cases: case1 (paper-exact match on the main Adam baseline -- does a better
+# optimizer change an already-good result?), case3 (hardest case, largest EPE
+# gap to the paper), case5 (one of only two cases where the main baseline
+# missed the paper's EPE@15nm exactly).
+#
+# Compute budget is chosen from direct calibration (not tuned to any result):
+# at init_scale=0.5, Adam costs ~5.2s/func-eval, L-BFGS ~4.8s/func-eval, and
+# L-BFGS averaged ~3 func-evals per outer iteration in that calibration run.
+# 150 Adam iterations (150 evals) vs 50 L-BFGS iterations (~150 evals) is
+# therefore an approximately function-eval-matched comparison -- but the
+# ACTUAL n_func_evals is recorded per run and is what any conclusion must cite,
+# not this estimate.
+experiment_id: abl_optimizer
+paper_reference: "G-015 (solver unspecified); tests the optimizer axis independently of the iteration-count axis already covered by X-10"
+threads: 4
+canvas: 2048
+kernel_dir: /home/user/openopc/openilt/kernel
+bench_dir: /home/user/openopc/openilt/benchmark/ICCAD2013
+cases: [1, 3, 5]
+epe_tolerances: [15, 3]
+process:
+  target_density: 0.225
+  print_thresh: 0.5
+  print_steepness: 50.0
+  dose_nom: 1.00
+  dose_max: 1.02
+  dose_min: 0.98
+  num_kernels: 24
+
+# Identical for every optimizer -- this is what makes the comparison fair.
+shared_ilt:
+  mask_steepness: 8.0
+  init_scale: 0.5
+  weight_nominal: 1.0
+  weight_pvb: 0.0
+  seed: 0
+
+optimizers:
+  adam:
+    optimizer: adam
+    step_size: 0.2
+    iterations: 150
+  lbfgs:
+    optimizer: lbfgs
+    step_size: 1.0
+    iterations: 50
+    lbfgs_max_iter_per_step: 1
+    lbfgs_history_size: 10
+    lbfgs_line_search: strong_wolfe
