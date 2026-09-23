@@ -500,3 +500,59 @@ CPU-minute baseline after each individual change.
 prior committed result: `test_beta_init_none_is_bit_exact_with_constant_beta`
 and a direct replay of case 1's first 10 iterations against the current
 (post-F-PERF-01) code both match exactly.
+
+
+---
+
+## F-EDGE-01 — `epe_violations()` crashes on a target touching the canvas edge (pre-existing, never triggered by real data)
+
+**Severity: low (latent, never exercised by any of this project's 10 real
+ICCAD13 targets).** Discovered while writing an independent cross-check for
+the new differentiable EPE-site loss (F-EPE-01).
+
+### Symptom
+
+`epe_violations(target.clone(), target, tolerance=15)` on an all-``1`` 64x64
+target raises `IndexError: index 64 is out of bounds for dimension 1 with size
+64`. Confirmed this is in the **already bit-exact-verified** metric itself,
+not a new module:
+
+```
+>>> epe_violations(torch.ones(64,64), torch.ones(64,64), tolerance=15)
+IndexError: index 64 is out of bounds for dimension 1 with size 64
+```
+
+### Root cause
+
+`_segments()` pads the target with zeros before detecting boundary pixels, so
+a target that is `1` all the way to the canvas edge has its LAST ROW/COLUMN
+misclassified as a boundary (the zero padding looks like an adjacent "0"
+region). `_check_sites()` then probes `target[r0, c0+1]` (or the symmetric
+row/column case) to determine which side is "inside" -- and for a site sampled
+at the very last valid index, `c0+1` (or `r0+1`) is out of bounds.
+
+### Why this was never caught before
+
+All 10 ICCAD13 targets have generous margin from the canvas edge (largest
+bounding box: 828x640 nm inside a 2048 nm canvas -- hundreds of nm of margin),
+and this project's regression tests only exercise those 10 real designs plus
+synthetic hand-computed examples that were, by construction, never built to
+probe this specific edge case. The bit-exact verification against the
+reference contest checker (`tests_gril/regression`) is therefore correct and
+remains correct for everything it actually tests -- it simply never had a
+reason to construct an edge-touching target.
+
+### What was (and was not) done about it
+
+**`epe_violations()` and `_check_sites()` were NOT modified.** They are
+bit-exact-verified against the reference checker and touching them for a case
+that never occurs in any real experiment in this project carries a real risk
+of silently perturbing the verified behaviour, for zero benefit to any actual
+result. The new, independently-written `gril.ilt.epe_loss` module (which
+parallels this sampling geometry for a different, differentiable purpose) adds
+an explicit bounds check before the same neighbour lookup, so it degrades
+gracefully (skips the site) instead of crashing -- verified by
+`test_full_target_gives_zero_sites`.
+
+This is recorded here as a known, low-priority, out-of-scope latent issue
+rather than silently worked around or silently left undocumented.

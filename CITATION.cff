@@ -1,0 +1,66 @@
+cff-version: 1.2.0
+message: >-
+  If you use this repository, please cite it as below, and cite the original
+  paper it reproduces (see references). This is an independent, third-party
+  reproduction and is NOT the paper's own code -- see README_REPRODUCTION.md
+  and docs/source_inventory.md for exactly what is and is not verified against
+  the original.
+title: >-
+  A Reproduction of "Pushing the Limits of Inverse Lithography with
+  Generative Reinforcement Learning"
+type: software
+license: Apache-2.0
+repository-code: https://github.com/tangtangtang19871987-wq/VibeCodeProj_A01
+keywords:
+  - inverse lithography
+  - computational lithography
+  - ILT
+  - OPC
+  - optical proximity correction
+  - reinforcement learning
+  - generative adversarial networks
+  - semiconductor manufacturing
+  - reproducibility
+references:
+  - type: conference-paper
+    title: >-
+      Pushing the Limits of Inverse Lithography with Generative
+      Reinforcement Learning
+    authors:
+      - family-names: Yang
+        given-names: Haoyu
+      - family-names: Ren
+        given-names: Haoxing
+    year: 2026
+    identifiers:
+      - type: other
+        value: "arXiv:2602.19027v1"
+        description: arXiv preprint identifier
+    url: https://arxiv.org/abs/2602.19027
+    notes: >-
+      The paper this repository reproduces. 63rd Design Automation Conference
+      (DAC'26). Authors are affiliated with NVIDIA Corp.
+  - type: generic
+    title: ICCAD-2013 CAD contest in mask optimization and benchmark suite
+    authors:
+      - family-names: Banerjee
+        given-names: Shayak
+      - family-names: Li
+        given-names: Zhuo
+      - family-names: Nassif
+        given-names: Sani R.
+    year: 2013
+    notes: >-
+      Source of the public ICCAD13 benchmark layouts and the L2/PV-Band/EPE
+      scoring protocol this repository reproduces bit-exactly. See
+      docs/source_inventory.md S2.1.
+  - type: software
+    title: OpenILT
+    repository-code: https://github.com/OpenOPC/OpenILT
+    license: Apache-2.0
+    notes: >-
+      Public source of the 24-term SOCS optical kernels and the reference
+      ICCAD13 scoring implementation this repository's physics stack is
+      checksummed and validated against. Not the target paper's own code.
+      See docs/source_inventory.md S2.2-S2.5 and docs/findings.md F-ADJ-01
+      for a correction found in its reference adjoint implementation.

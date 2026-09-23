@@ -19,8 +19,8 @@ import subprocess
 import time
 
 import torch
-import yaml
 
+from gril.config.schema import ICCAD13ExperimentSchema, load_and_validate
 from gril.data.glp import Design
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
@@ -64,8 +64,12 @@ def score_mask(mask, target, litho, tolerances, pixel_nm: float = 1.0) -> dict:
 
 
 def run(config_path: str) -> dict:
-    with open(config_path) as fh:
-        cfg = yaml.safe_load(fh)
+    # Validates against ICCAD13ExperimentSchema before anything else -- a
+    # typo'd key or a bad type is rejected here, with a clear message, rather
+    # than failing partway through a multi-hour CPU run or (worse) silently
+    # using a wrong default. `cfg` stays the plain dict every line below
+    # already expects; only the loading step changed.
+    _validated, cfg = load_and_validate(config_path, ICCAD13ExperimentSchema)
 
     exp_id = cfg["experiment_id"]
     out_dir = os.path.join(cfg.get("output_root", "results"), exp_id)

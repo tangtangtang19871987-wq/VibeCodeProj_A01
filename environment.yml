@@ -1,0 +1,27 @@
+# Conda environment, as an alternative to `pip install -r requirements.txt`.
+# Pinned to the exact versions verified in this session -- see
+# docs/environment_audit.md. CPU-only throughout; no CUDA anywhere in this
+# repository, by explicit project direction (this host has no GPU).
+#
+# Usage:
+#   conda env create -f environment.yml
+#   conda activate gril
+#   ./scripts/fetch_data.sh
+#   python -m pytest
+name: gril
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - torch==2.9.1
+      - numpy==2.4.6
+      - scipy==1.17.1
+      - opencv-python-headless==5.0.0.93
+      - matplotlib==3.11.2
+      - PyYAML==6.0.1
+      - pydantic==2.13.5
+      - pytest==9.1.1
+      - tqdm==4.70.1

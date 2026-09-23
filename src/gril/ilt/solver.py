@@ -51,6 +51,7 @@ from typing import Callable
 import torch
 import torch.nn.functional as F
 
+from gril.ilt.epe_loss import EPESites, build_epe_sites, soft_epe_loss
 from gril.litho.resist import LithoModel, resist
 
 _KNOWN_OPTIMIZERS = ("adam", "sgd", "nesterov", "lbfgs")
@@ -84,6 +85,14 @@ class ILTConfig:
     weight_nominal: float = 1.0        # L2 against the target at the nominal corner
     weight_pvb: float = 0.0            # process-window term ||Z_max - Z_min||^2
     weight_tv: float = 0.0             # total-variation mask-complexity regulariser, 0 = off
+    #: EPE-site-aware hinge loss (see gril.ilt.epe_loss). 0 = off (default,
+    #: bit-exact with every prior result: the loss falls back to global L2
+    #: only, exactly as before). Targets the SAME measurement sites the EPE
+    #: metric itself checks, rather than global pixel-wise error -- see
+    #: docs/findings.md F-EPE-01.
+    weight_epe: float = 0.0
+    epe_tolerance_nm: float = 15.0     # tolerance used to build the EPE sites
+    epe_margin: float = 0.0            # extra margin pushed past the 0.5 threshold
     init_scale: float = 2.0            # P_0 = init_scale * (2*target - 1)
     optimizer: str = "adam"            # "adam" | "sgd" | "nesterov" | "lbfgs"
     momentum: float = 0.0              # for "sgd" / "nesterov"; nesterov requires > 0
@@ -217,12 +226,14 @@ def ilt_loss(
     litho: LithoModel,
     cfg: ILTConfig,
     beta: float | None = None,
+    epe_sites: "EPESites | list[EPESites] | None" = None,
 ) -> torch.Tensor:
     """Differentiable ILT objective.
 
     ``M = sigmoid(beta * P)``; the loss is the squared error of the nominal
-    resist image against the target, plus optional process-window and
-    total-variation terms. Returns a scalar (summed over the batch).
+    resist image against the target, plus optional process-window, total-
+    variation, and EPE-site-aware terms. Returns a scalar (summed over the
+    batch).
 
     Parameters
     ----------
@@ -231,6 +242,16 @@ def ilt_loss(
         uses ``cfg.mask_steepness`` directly -- existing call sites that don't
         pass this are completely unaffected. ``solve()`` passes the current
         annealed value here when ``cfg.beta_init`` is set.
+    epe_sites:
+        Required when ``cfg.weight_epe > 0``: a single ``EPESites`` for an
+        unbatched ``(H,W)`` target, or a list of one ``EPESites`` per example
+        for a batched ``(B,H,W)`` target (see ``gril.ilt.epe_loss``).
+        ``solve()`` precomputes this ONCE per run (the target is fixed
+        throughout optimization) and passes it into every iteration, since
+        rebuilding it from scratch every call would repeat the same boundary-
+        extraction work for no reason. Calling ``ilt_loss`` directly with
+        ``weight_epe > 0`` and no sites raises ``ValueError`` rather than
+        silently paying that cost or silently skipping the term.
     """
     mask = torch.sigmoid((cfg.mask_steepness if beta is None else beta) * params)
     z_nom = resist(litho.aerial_nominal(mask), litho.cfg)
@@ -242,6 +263,25 @@ def ilt_loss(
         loss = loss + cfg.weight_pvb * ((z_max - z_min) ** 2).sum()
     if cfg.weight_tv > 0:
         loss = loss + cfg.weight_tv * total_variation(mask)
+    if cfg.weight_epe > 0:
+        if epe_sites is None:
+            raise ValueError(
+                "cfg.weight_epe > 0 requires epe_sites (build once with "
+                "gril.ilt.epe_loss.build_epe_sites and pass it in -- solve() "
+                "does this automatically). Refusing to silently rebuild it "
+                "every call or silently skip the term."
+            )
+        if z_nom.dim() == 2:
+            loss = loss + cfg.weight_epe * soft_epe_loss(z_nom, epe_sites, cfg.epe_margin)
+        else:
+            assert isinstance(epe_sites, list) and len(epe_sites) == z_nom.shape[0], (
+                f"epe_sites must be a list of {z_nom.shape[0]} EPESites for a "
+                f"batched call, got {epe_sites!r}"
+            )
+            epe_term = sum(
+                soft_epe_loss(z_nom[b], epe_sites[b], cfg.epe_margin) for b in range(z_nom.shape[0])
+            )
+            loss = loss + cfg.weight_epe * epe_term
     return loss
 
 
@@ -268,6 +308,7 @@ def _solve_first_order(
     cfg: ILTConfig,
     params: torch.Tensor,
     progress: bool,
+    epe_sites: "EPESites | list[EPESites] | None" = None,
 ) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor]]:
     """Adam / SGD / Nesterov: fully vectorised across the batch dimension."""
     opt = _make_first_order_optimizer(params, cfg)
@@ -276,7 +317,9 @@ def _solve_first_order(
     ran = 0
     for step in range(cfg.iterations):
         opt.zero_grad(set_to_none=True)
-        loss = ilt_loss(params, target, litho, cfg, beta=_beta_for_step(cfg, step))
+        loss = ilt_loss(
+            params, target, litho, cfg, beta=_beta_for_step(cfg, step), epe_sites=epe_sites
+        )
         loss.backward()
         if cfg.grad_clip > 0:
             torch.nn.utils.clip_grad_norm_([params], cfg.grad_clip)
@@ -304,6 +347,7 @@ def _solve_lbfgs_one(
     cfg: ILTConfig,
     params_2d: torch.Tensor,
     progress: bool,
+    epe_sites: "EPESites | None" = None,
 ) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor]]:
     """L-BFGS on a single (unbatched) example.
 
@@ -338,7 +382,9 @@ def _solve_lbfgs_one(
     def closure() -> torch.Tensor:
         nonlocal n_evals
         opt.zero_grad(set_to_none=True)
-        loss = ilt_loss(params_2d, target_2d, litho, cfg, beta=current_beta[0])
+        loss = ilt_loss(
+            params_2d, target_2d, litho, cfg, beta=current_beta[0], epe_sites=epe_sites
+        )
         loss.backward()
         if cfg.grad_clip > 0:
             torch.nn.utils.clip_grad_norm_([params_2d], cfg.grad_clip)
@@ -373,10 +419,13 @@ def _solve_lbfgs(
     cfg: ILTConfig,
     params: torch.Tensor,
     progress: bool,
+    epe_sites: "EPESites | list[EPESites] | None" = None,
 ) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor]]:
     """Dispatch L-BFGS over an optional batch dimension, one example at a time."""
     if target.dim() == 2:
-        p, hist, ran, evals, snaps = _solve_lbfgs_one(target, litho, cfg, params, progress)
+        p, hist, ran, evals, snaps = _solve_lbfgs_one(
+            target, litho, cfg, params, progress, epe_sites=epe_sites
+        )
         return p, hist, ran, evals, snaps
 
     batch = target.shape[0]
@@ -387,8 +436,9 @@ def _solve_lbfgs(
     max_ran = 0
     for b in range(batch):
         p_b = params[b].detach().clone().requires_grad_(True)
+        sites_b = epe_sites[b] if epe_sites is not None else None
         p_b, hist_b, ran_b, evals_b, snaps_b = _solve_lbfgs_one(
-            target[b], litho, cfg, p_b, progress and b == 0
+            target[b], litho, cfg, p_b, progress and b == 0, epe_sites=sites_b
         )
         per_example_params.append(p_b.detach())
         per_example_history.append(hist_b)
@@ -471,9 +521,24 @@ def solve(
         else init_params.clone()
     ).requires_grad_(True)
 
+    # Precompute EPE measurement geometry ONCE for this run, outside the
+    # gradient loop -- the target never changes during optimization, so
+    # rebuilding it every iteration (as ilt_loss() would otherwise require the
+    # caller to do) would repeat the same boundary-extraction work for no
+    # reason. None when the term is off (cfg.weight_epe == 0), matching every
+    # other optional term's zero-cost-when-disabled behaviour.
+    epe_sites: "EPESites | list[EPESites] | None" = None
+    if cfg.weight_epe > 0:
+        if target.dim() == 2:
+            epe_sites = build_epe_sites(target, cfg.epe_tolerance_nm)
+        else:
+            epe_sites = [build_epe_sites(target[b], cfg.epe_tolerance_nm) for b in range(target.shape[0])]
+
     start = time.time()
     dispatch: Callable = _solve_lbfgs if cfg.optimizer == "lbfgs" else _solve_first_order
-    params, history, ran, n_evals, snapshots = dispatch(target, litho, cfg, params, progress)
+    params, history, ran, n_evals, snapshots = dispatch(
+        target, litho, cfg, params, progress, epe_sites=epe_sites
+    )
 
     with torch.no_grad():
         mask = _binarize(params, target.dtype, cfg)

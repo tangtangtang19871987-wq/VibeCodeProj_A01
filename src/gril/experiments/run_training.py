@@ -33,8 +33,8 @@ import time
 import numpy as np
 import torch
 import torch.nn.functional as F
-import yaml
 
+from gril.config.schema import TrainingExperimentSchema, load_and_validate
 from gril.data.synthetic import layout_dataset
 from gril.experiments.infer import low_res_refine
 from gril.experiments.run_iccad13 import provenance
@@ -96,8 +96,9 @@ def evaluate(generator, designs, litho, cfg, tolerance, refine_kwargs, pixel_nm)
 
 
 def run(config_path: str) -> dict:
-    with open(config_path) as fh:
-        cfg = yaml.safe_load(fh)
+    # See run_iccad13.run()'s equivalent comment: schema-validated before any
+    # of the (expensive, long-running) work below starts.
+    _validated, cfg = load_and_validate(config_path, TrainingExperimentSchema)
 
     out_dir = os.path.join(cfg.get("output_root", "results"), cfg["experiment_id"])
     os.makedirs(out_dir, exist_ok=True)

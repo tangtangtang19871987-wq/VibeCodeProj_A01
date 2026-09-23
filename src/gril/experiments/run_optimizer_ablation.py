@@ -40,8 +40,8 @@ import os
 import time
 
 import torch
-import yaml
 
+from gril.config.schema import OptimizerAblationSchema, load_and_validate
 from gril.data.glp import Design
 from gril.experiments.run_iccad13 import provenance, score_mask
 from gril.ilt.solver import ILTConfig, solve
@@ -49,8 +49,9 @@ from gril.litho.resist import LithoModel, ProcessConfig
 
 
 def run(config_path: str) -> dict:
-    with open(config_path) as fh:
-        cfg = yaml.safe_load(fh)
+    # See run_iccad13.run()'s equivalent comment: schema-validated before any
+    # of the (expensive, long-running) work below starts.
+    _validated, cfg = load_and_validate(config_path, OptimizerAblationSchema)
 
     exp_id = cfg["experiment_id"]
     out_dir = os.path.join(cfg.get("output_root", "results"), exp_id)
