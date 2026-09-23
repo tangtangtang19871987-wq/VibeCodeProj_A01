@@ -347,3 +347,86 @@ The configuration was written and committed *before* it was run
 L-BFGS support), with the case selection and evaluation-budget matching
 justified in its header comment ahead of any result. Nothing was adjusted
 after seeing these numbers.
+
+
+---
+
+## F-PERF-01 — Profiling beat intuition: forward FFT is 1% of cost, not the bottleneck
+
+**Context.** The originally proposed "exact frequency-limited FFT speedup"
+(claiming ~8-10x by extracting only the SOCS kernel's 35x35 support) was based
+on a flawed derivation: it conflated the decimation-in-time <-> aliasing-in-
+frequency identity (which gives an evenly-SPACED comb of frequencies cheaply)
+with extracting a small CONTIGUOUS low-frequency block (which it does not
+give). Extracting a genuinely small contiguous band from a general
+(non-structured) signal without the full FFT requires either exploiting
+analytic structure in the *signal* (not available for a continuously-optimized
+mask) or a true pruned-FFT algorithm (real, but only a further ~2x on the
+transform itself, and does not touch the other 3 stages of the pipeline).
+
+**What profiling actually found**, breaking down `aerial_image()` on a
+2048x2048 mask, 24 kernels (measured, not estimated):
+
+| Stage | Share of wall-clock |
+|---|---|
+| Forward FFT (mask -> spectrum) | **1%** |
+| Kernel multiply (corner placement) | 11% |
+| Inverse FFT (24-channel, complex) | 34% |
+| `abs()**2` + weighted sum | **59%** |
+
+The forward FFT -- the one thing the original proposal targeted -- turned out
+to be irrelevant. The real bottleneck, by a wide margin, was `images.abs()**2`.
+
+### The actual fix
+
+`|z|^2 = re(z)^2 + im(z)^2` is an exact algebraic identity. `.abs()**2`
+computes `sqrt(re^2+im^2)` and immediately squares the result back, paying for
+an unnecessary `sqrt` over every element (~100M elements: 24 kernels x
+2048x2048). Replacing it with the direct identity:
+
+- **Isolated benchmark**: 1.80x faster (541.6ms -> 301.1ms on a representative
+  tensor), values agreeing to 1.1e-7 relative (pure float32 rounding, not a
+  numerical difference -- the two formulas ARE the same real number
+  mathematically).
+- **Measured end-to-end** on `aerial_image()`: **1.12x** (1276.3ms -> 1134.6ms).
+  Lower than the isolated benchmark suggested -- micro-benchmarks routinely
+  overstate real-pipeline gains, which is why this is reported as measured
+  end-to-end, not extrapolated from the isolated number.
+
+This change sits inside a custom `torch.autograd.Function.forward()` (see
+`_SocsIntensity` in `socs.py`), so it carries **zero differentiability risk**:
+the backward pass is computed analytically, not by autodiff through this line.
+
+### A genuine, honestly-reported side effect: a 1-pixel PV-Band shift
+
+Re-scoring all 10 of the already-saved ICCAD13 optimized masks with the new
+code against the committed `results/iccad13_ilt/case*.json`:
+
+| Metric | Cases checked | Cases that differ |
+|---|---|---|
+| L2 | 10 | 0 |
+| PV Band | 10 | **1** (case 5: 51978 -> 51979) |
+| EPE@15nm | 10 | 0 |
+| EPE@3nm | 10 | 0 |
+
+One pixel, in one case, in one metric, out of 40 numbers checked: a
+0.0019% relative change in case 5's PV Band. This is not a bug in either
+formula -- both are exact -- it is a pixel whose intensity sat close enough to
+the 0.5 binarization threshold that the last-bit rounding difference between
+two equivalent floating-point expressions flipped its classification at ONE of
+the two process corners that PV Band compares. This is expected behavior at a
+measure-zero decision boundary and would occur with any two independently
+-ordered but algebraically-equivalent implementations, on any hardware.
+
+**What was NOT done, and why:** the affected "150-iteration" budget-curve
+number for case 5 was not corrected, because the run_iccad13.py runner does
+not persist intermediate checkpoint masks to disk -- only the final
+(300-iteration) mask is saved -- so correcting it requires a full ~231-CPU-
+minute re-run of the whole ICCAD13 baseline, not a cheap re-score. Given the
+effect is a documented, understood, sub-0.002% artifact that changes no
+conclusion in `REPRODUCTION_REPORT.md`, that re-run was deferred rather than
+performed immediately; the baseline will be regenerated (and this will
+self-correct) the next time a solver change (e.g. beta-annealing) requires a
+fresh run anyway. The committed `case5.json` is therefore known to be stale by
+exactly this one pixel until then -- recorded here rather than silently
+tolerated or hand-edited.

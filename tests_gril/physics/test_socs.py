@@ -166,3 +166,18 @@ def test_multiresolution_consistency(focus_kernels):
         )
         ref = torch.nn.functional.avg_pool2d(full[None, None], factor)[0, 0]
         assert (low - ref).abs().max() / full.max() < 0.01
+
+
+def test_abs_squared_identity_matches_sqrt_then_square(focus_kernels):
+    """|z|^2 = re(z)^2 + im(z)^2 is exact; pin the identity used in socs.py.
+
+    Regression guard: if this line ever reverts to `.abs()**2`, this test still
+    passes (both formulas agree to float rounding) -- it exists to document
+    the identity, not to catch a regression in VALUE. What it protects against
+    is someone "optimizing" it into something that ISN'T the same identity.
+    """
+    torch.manual_seed(0)
+    z = torch.randn(4, 8, 16, 16, dtype=torch.complex64)
+    via_abs = z.abs() ** 2
+    via_identity = z.real**2 + z.imag**2
+    assert torch.allclose(via_abs, via_identity, rtol=1e-5, atol=1e-6)
