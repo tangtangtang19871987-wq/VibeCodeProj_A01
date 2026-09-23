@@ -1,0 +1,48 @@
+# X-16: full 10-case ICCAD13 baseline with L-BFGS instead of Adam.
+#
+# Motivation: X-14 (abl_optimizer.yaml) already showed, on cases 1/3/5 at a
+# well-conditioned starting point, that L-BFGS matches or beats Adam's
+# EPE@15nm with fewer function evaluations -- most strikingly on case 3
+# (this project's hardest case): Adam gets 24, L-BFGS gets 13, EXACTLY the
+# paper's own reported "Ours" value (Table 1). The main iccad13_ilt.yaml
+# baseline (Adam, its own saturated init_scale=2.0/mask_steepness=8.0
+# constants) gets case 3 to only 22 -- the single largest per-case gap to the
+# paper anywhere in Table 1. This config re-runs ALL 10 cases with L-BFGS at
+# the SAME well-conditioned starting point X-14 already validated
+# (init_scale=0.5), to see whether that gap closes at full benchmark scale,
+# not just on the 3-case sample.
+#
+# This is a clean, single-variable swap of the OPTIMIZER only -- the
+# EPE-aware loss (F-EPE-01) and PV-band term (F-PVB-01) are deliberately left
+# off here so any change in EPE is attributable to the optimizer alone, per
+# this project's "one change at a time" discipline. See docs/findings.md
+# F-LBFGS-01 and X-16 (new) for the writeup.
+experiment_id: iccad13_ilt_lbfgs
+paper_reference: "Table 1, ICCAD13 rows -- re-run with the optimizer X-14 validated, at full benchmark scale"
+seed: 0
+threads: 4
+canvas: 2048
+kernel_dir: /home/user/openopc/openilt/kernel
+bench_dir: /home/user/openopc/openilt/benchmark/ICCAD2013
+cases: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+epe_tolerances: [15, 3]
+process:
+  target_density: 0.225
+  print_thresh: 0.5
+  print_steepness: 50.0
+  dose_nom: 1.00
+  dose_max: 1.02
+  dose_min: 0.98
+  num_kernels: 24
+ilt:
+  iterations: 50
+  step_size: 1.0
+  mask_steepness: 8.0
+  weight_nominal: 1.0
+  weight_pvb: 0.0
+  init_scale: 0.5
+  optimizer: lbfgs
+  lbfgs_max_iter_per_step: 1
+  lbfgs_history_size: 10
+  lbfgs_line_search: strong_wolfe
+  seed: 0
