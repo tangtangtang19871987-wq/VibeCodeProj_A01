@@ -102,8 +102,16 @@ def fig2_optimizer_comparison():
 
 
 def fig3_mask_visualization(case: int = 1):
-    """Target vs optimized-mask overlay for one representative case, in the
-    spirit of the paper's own Fig. 4 (a target/mask/printed-image panel).
+    """Target / mask / mask-overlay / RESIST-overlay for one representative
+    case, in the spirit of the paper's own Fig. 4.
+
+    The mask is NOT supposed to look like the target -- it carries SRAFs
+    (sub-resolution assist features) that shape the optical image but never
+    print themselves, so a target-vs-mask overlay always looks like a poor
+    match by construction. The panel that actually validates ILT quality is
+    target vs the SIMULATED RESIST (the litho model's binarized nominal
+    printed image) -- that is what score_mask()'s L2/EPE numbers are computed
+    from, and it is included here explicitly so the two are never conflated.
     """
     import sys
 
@@ -111,15 +119,25 @@ def fig3_mask_visualization(case: int = 1):
     import torch
 
     from gril.data.glp import Design
+    from gril.litho.resist import LithoModel, ProcessConfig
 
     mask_path = os.path.join(ROOT, f"results/iccad13_ilt/mask{case}.pt")
     glp_path = f"/home/user/openopc/openilt/benchmark/ICCAD2013/M1_test{case}.glp"
+    kernel_dir = "/home/user/openopc/openilt/kernel"
     if not (os.path.exists(mask_path) and os.path.exists(glp_path)):
         print(f"skip fig3: mask{case}.pt or the GLP benchmark file is not present")
         return
 
-    mask = torch.load(mask_path, weights_only=False).float().numpy()
-    target = Design.from_glp(glp_path).centred_raster(2048)
+    mask_t = torch.load(mask_path, weights_only=False).float()
+    target_np = Design.from_glp(glp_path).centred_raster(2048)
+    target_t = torch.tensor(target_np)
+    litho = LithoModel(kernel_dir, ProcessConfig())
+    with torch.no_grad():
+        resist_nom, _, _ = litho.binary(mask_t)
+    mask = mask_t.numpy()
+    resist = resist_nom.float().numpy()
+    target = target_np
+    pixel_match = float((resist_nom == target_t).float().mean())
 
     # Crop to the design's bounding box (plus margin) -- the full 2048x2048
     # canvas is mostly empty and would waste the figure on blank space.
@@ -127,15 +145,14 @@ def fig3_mask_visualization(case: int = 1):
     m = 60
     y0, y1 = max(ys.min() - m, 0), min(ys.max() + m, 2048)
     x0, x1 = max(xs.min() - m, 0), min(xs.max() + m, 2048)
+    from matplotlib.lines import Line2D
 
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
-    panels = [
-        (target[y0:y1, x0:x1], "Target design", "Greys"),
-        (mask[y0:y1, x0:x1], "ILT-optimised mask (300 it)", "Greys"),
-        (None, "Overlay: target edge vs mask", None),
-    ]
-    for ax, (img, title, cmap) in zip(axes[:2], panels[:2]):
-        ax.imshow(img, cmap=cmap, origin="upper", vmin=0, vmax=1)
+    fig, axes = plt.subplots(1, 4, figsize=(15.5, 4.2))
+    for ax, (img, title) in zip(
+        axes[:2],
+        [(target[y0:y1, x0:x1], "Target design"), (mask[y0:y1, x0:x1], "ILT-optimised mask (300 it)\nincludes non-printing SRAFs")],
+    ):
+        ax.imshow(img, cmap="Greys", origin="upper", vmin=0, vmax=1)
         ax.set_title(title, fontsize=10)
         ax.set_xticks([])
         ax.set_yticks([])
@@ -144,19 +161,35 @@ def fig3_mask_visualization(case: int = 1):
     ax.imshow(np.zeros_like(target[y0:y1, x0:x1]), cmap="Greys", vmin=0, vmax=1, alpha=0)
     ax.contour(target[y0:y1, x0:x1], levels=[0.5], colors=[BLUE], linewidths=1.6)
     ax.contour(mask[y0:y1, x0:x1], levels=[0.5], colors=[ORANGE], linewidths=1.2, linestyles="dashed")
-    ax.set_title("Overlay: target edge vs mask", fontsize=10)
+    ax.set_title("target vs MASK\n(expected to differ -- SRAFs don't print)", fontsize=10)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.invert_yaxis()
-    from matplotlib.lines import Line2D
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=BLUE, lw=1.6, label="target"),
+            Line2D([0], [0], color=ORANGE, lw=1.2, ls="--", label="ILT mask"),
+        ],
+        frameon=False, fontsize=8.5, loc="upper right",
+    )
 
-    handles = [
-        Line2D([0], [0], color=BLUE, lw=1.6, label="target"),
-        Line2D([0], [0], color=ORANGE, lw=1.2, ls="--", label="ILT mask"),
-    ]
-    ax.legend(handles=handles, frameon=False, fontsize=8.5, loc="upper right")
+    ax = axes[3]
+    ax.imshow(np.zeros_like(target[y0:y1, x0:x1]), cmap="Greys", vmin=0, vmax=1, alpha=0)
+    ax.contour(target[y0:y1, x0:x1], levels=[0.5], colors=[BLUE], linewidths=1.6)
+    ax.contour(resist[y0:y1, x0:x1], levels=[0.5], colors=[ORANGE], linewidths=1.2, linestyles="dashed")
+    ax.set_title(f"target vs printed RESIST\n(what score_mask() measures; {pixel_match:.1%} pixel match)", fontsize=10)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.invert_yaxis()
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=BLUE, lw=1.6, label="target"),
+            Line2D([0], [0], color=ORANGE, lw=1.2, ls="--", label="simulated resist"),
+        ],
+        frameon=False, fontsize=8.5, loc="upper right",
+    )
 
-    fig.suptitle(f"ICCAD13 case {case}: target vs ILT-optimised mask (Adam, 300 it, weight_pvb=0)", fontsize=11)
+    fig.suptitle(f"ICCAD13 case {case}: mask vs target look different by design; the printed resist is what has to match (Adam, 300 it, weight_pvb=0)", fontsize=10.5)
     fig.tight_layout()
     fig.savefig(os.path.join(OUT, f"mask_visualization_case{case}.png"), dpi=150)
     plt.close(fig)
