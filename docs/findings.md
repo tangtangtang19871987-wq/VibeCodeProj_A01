@@ -430,3 +430,73 @@ self-correct) the next time a solver change (e.g. beta-annealing) requires a
 fresh run anyway. The committed `case5.json` is therefore known to be stale by
 exactly this one pixel until then -- recorded here rather than silently
 tolerated or hand-edited.
+
+
+---
+
+## F-ANNEAL-01 — Beta annealing lets L-BFGS train from the main baseline's own (saturated) constants
+
+**Severity: informational / positive result.** Extends F-SAT-01 with a fix
+that addresses the mechanism directly instead of avoiding it.
+
+### Recap of the problem (F-SAT-01)
+
+The main ICCAD13 baseline's constants (`init_scale=2.0`, `mask_steepness=8.0`)
+push every pixel's sigmoid argument to `+-16`, giving a raw gradient magnitude
+of ~1.7e-6. Adam's normalization is insensitive to this; SGD, Nesterov, and
+L-BFGS all stall completely from that starting point (confirmed directly for
+L-BFGS: 5 iterations moved the loss by 0.0%). The X-14 ablation (F-LBFGS-01)
+worked around this by using a *different*, well-conditioned starting point
+(`init_scale=0.5`) -- valuable evidence that L-BFGS is competitive, but not a
+fix usable in the main baseline's own configuration.
+
+### The fix
+
+`ILTConfig.beta_init` ramps the mask steepness used *during optimization*
+(linearly or geometrically, `beta_schedule`) from a low value at step 0 to
+`mask_steepness` by the final iteration, instead of holding it fixed. This is
+the standard "continuation method" from the ILT / level-set literature.
+Critically, this does not change what a converged result *means*: binarization
+is `sigmoid(beta*P) >= 0.5`, which is algebraically `P >= 0` for any `beta > 0`
+-- so annealing changes only the *optimization trajectory*, never the
+definition of the final mask.
+
+### Verified, on the exact saturated constants (`init_scale=2.0`,
+`mask_steepness=8.0`) that F-SAT-01 showed stall every optimizer but Adam:
+
+| Configuration | Final L2 (vs no-OPC = 103.0) |
+|---|---|
+| SGD, no annealing | 103.0 (unchanged -- confirms F-SAT-01) |
+| SGD, with annealing (`beta_init=1.0`), 20 iterations | 103.0 (loss moved 36% but no pixel flipped in this short budget) |
+| **L-BFGS, with annealing (`beta_init=1.0`), 10 iterations** | **12.0** |
+
+### Honest reading
+
+Annealing does not uniformly "fix" every optimizer's *speed* -- the SGD row is
+reported as measured, not smoothed into a success. What it does fix is the
+underlying **conditioning**: the continuous loss under SGD-with-annealing moved
+substantially (36% relative, vs the *literal* 0.0% without annealing), it
+simply needed more than 20 iterations at this step size to translate into a
+binarized pixel flip. L-BFGS's quasi-Newton curvature estimate converts that
+same improved conditioning into dramatic, fast progress. This is consistent
+with F-LBFGS-01's finding that L-BFGS is the strongest optimizer available
+here, now shown to work *at the main baseline's own constants*, not only at an
+alternate well-conditioned starting point.
+
+### What this does NOT yet establish
+
+This is a small-scale (96x96, single test pattern) verification of the
+mechanism, run to confirm annealing does what it is designed to do before
+building on it. It is **not** a claim about the full ICCAD13 baseline's
+numbers with annealing enabled -- that requires a full re-run, deferred (along
+with the F-PERF-01 case-5 pixel) to a single consolidated baseline
+regeneration once the other solver improvements in this round (EPE-aware loss,
+PV-band-aware objective) are also in place, rather than re-running the ~231
+CPU-minute baseline after each individual change.
+
+### Backward compatibility
+
+`beta_init=None` (the default) is verified bit-for-bit identical to every
+prior committed result: `test_beta_init_none_is_bit_exact_with_constant_beta`
+and a direct replay of case 1's first 10 iterations against the current
+(post-F-PERF-01) code both match exactly.

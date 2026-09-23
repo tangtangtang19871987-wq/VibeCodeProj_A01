@@ -195,6 +195,23 @@ an unexamined default: pinned by
 Anyone using `sgd`/`nesterov`/`lbfgs` should keep `init_scale * mask_steepness`
 moderate or warm-start from something already close to a reasonable mask.
 
+**Beta annealing fixes the conditioning directly (F-ANNEAL-01).** Rather than
+avoiding the saturated starting point, `ILTConfig.beta_init` ramps the mask
+steepness used *during optimization* from a low value up to `mask_steepness`
+by the final iteration (`beta_schedule`: `linear` or `exponential`), while
+`_binarize()`'s output is completely unaffected regardless — since
+`sigmoid(β·P) ≥ 0.5 ⟺ P ≥ 0` for any `β > 0`, the final binary mask depends on
+`β` only through the trajectory it shapes, never through where the threshold
+falls. Default `beta_init = None` reproduces the exact original constant-β
+behavior (verified bit-for-bit). Verified: L-BFGS, which F-SAT-01 showed makes
+*zero* progress at the exact main-baseline constants, achieves a substantial
+quality improvement (L2 103 → 12 on a representative test pattern) from those
+same constants once annealing is enabled — closing the gap without touching
+`init_scale`. The same short experiment showed plain SGD's continuous loss
+*does* move under annealing but, in a short (20-iteration) budget, not enough
+to flip any pixel's binary classification — annealing is not a blanket fix for
+every optimizer's speed, only for the underlying vanishing-gradient mechanism.
+
 **Declared honestly:** the paper's actual solver is unknown (G-015). All of the
 above — the optimizer choices, the regularization, and the specific constants —
 are ours.

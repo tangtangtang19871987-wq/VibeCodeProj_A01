@@ -26,6 +26,19 @@ Four are available, none dictated by the paper (G-015):
   "iteration" of L-BFGS is not comparable to one of Adam/SGD, and why batched
   L-BFGS runs independently per example rather than jointly.
 
+Beta annealing (continuation)
+------------------------------
+``ILTConfig.beta_init`` (default ``None`` = off, exactly the original constant-
+beta behaviour) ramps the mask steepness from a low starting value up to
+``mask_steepness`` over the course of the run instead of holding it fixed.
+This addresses F-SAT-01 (docs/findings.md): the main ICCAD13 baseline's own
+constants (``init_scale=2.0``, ``mask_steepness=8.0``) saturate the mask
+sigmoid so hard that SGD/Nesterov/L-BFGS make no measurable progress from a
+cold start, while Adam's per-parameter normalisation happens to be insensitive
+to it. Annealing fixes the underlying conditioning problem directly rather
+than routing around it with a different starting point (F-ANNEAL-01): verified
+to let L-BFGS train from those exact saturated constants.
+
 No CUDA is used anywhere; this runs on CPU.
 """
 
@@ -41,6 +54,7 @@ import torch.nn.functional as F
 from gril.litho.resist import LithoModel, resist
 
 _KNOWN_OPTIMIZERS = ("adam", "sgd", "nesterov", "lbfgs")
+_KNOWN_BETA_SCHEDULES = ("linear", "exponential")
 
 
 @dataclass
@@ -78,6 +92,19 @@ class ILTConfig:
     convergence_grad_tol: float = 0.0  # 0 disables; stop when ||grad||_inf falls below this
     mrc_open_size: int = 0             # morphological opening kernel, 0 = off
     checkpoints: tuple[int, ...] = ()  # iteration counts at which to snapshot the mask
+    # --- beta annealing / continuation (see F-SAT-01) ---
+    #: If set, the mask steepness used DURING optimization starts here and
+    #: anneals to `mask_steepness` by the final iteration, instead of using
+    #: `mask_steepness` for the whole run. None (default) preserves the exact
+    #: prior behaviour -- constant beta = mask_steepness throughout, bit-for-
+    #: bit compatible with every committed result. Binarization of the output
+    #: mask is UNAFFECTED by this: sigmoid(beta*P) >= 0.5 iff P >= 0 for any
+    #: beta > 0, so the final {0,1} mask depends on beta only through the
+    #: OPTIMIZATION TRAJECTORY it shapes, never through where the threshold
+    #: falls. See docs/findings.md F-SAT-01 for why a fixed high beta stalls
+    #: raw-gradient optimizers, and F-ANNEAL-01 for what this fixes.
+    beta_init: float | None = None
+    beta_schedule: str = "linear"      # "linear" | "exponential"; ignored if beta_init is None
     # --- L-BFGS-specific (ignored by the other optimizers) ---
     lbfgs_history_size: int = 10
     lbfgs_max_iter_per_step: int = 1   # inner L-BFGS iterations per solve() "iteration"
@@ -98,6 +125,16 @@ class ILTConfig:
                 "optimizer='nesterov' requires momentum > 0 (e.g. 0.9); "
                 "Nesterov acceleration is undefined without it."
             )
+        if self.beta_init is not None:
+            if self.beta_schedule not in _KNOWN_BETA_SCHEDULES:
+                raise ValueError(
+                    f"Unknown beta_schedule {self.beta_schedule!r}; "
+                    f"expected one of {_KNOWN_BETA_SCHEDULES}."
+                )
+            if self.beta_init <= 0:
+                raise ValueError(f"beta_init must be > 0, got {self.beta_init}")
+            if self.mask_steepness <= 0:
+                raise ValueError(f"mask_steepness must be > 0, got {self.mask_steepness}")
 
 
 @dataclass
@@ -153,16 +190,49 @@ def total_variation(mask: torch.Tensor) -> torch.Tensor:
     return dh + dw
 
 
+def _beta_for_step(cfg: ILTConfig, step: int) -> float:
+    """Mask steepness at optimizer step ``step`` (0-indexed).
+
+    Returns ``cfg.mask_steepness`` unchanged when ``cfg.beta_init`` is None --
+    this is what keeps every existing config's behaviour bit-for-bit identical.
+    Otherwise interpolates from ``beta_init`` (step 0) to ``mask_steepness``
+    (the final step), linearly or geometrically per ``cfg.beta_schedule``.
+    """
+    if cfg.beta_init is None:
+        return cfg.mask_steepness
+    total = max(cfg.iterations - 1, 1)
+    frac = min(step / total, 1.0)
+    if cfg.beta_schedule == "linear":
+        return cfg.beta_init + (cfg.mask_steepness - cfg.beta_init) * frac
+    # "exponential": geometric interpolation, i.e. linear in log(beta). Smoother
+    # early ramp than "linear" when beta_init << mask_steepness, since beta
+    # roughly doubles every fixed fraction of the run rather than growing by a
+    # fixed additive amount each step.
+    return cfg.beta_init * (cfg.mask_steepness / cfg.beta_init) ** frac
+
+
 def ilt_loss(
-    params: torch.Tensor, target: torch.Tensor, litho: LithoModel, cfg: ILTConfig
+    params: torch.Tensor,
+    target: torch.Tensor,
+    litho: LithoModel,
+    cfg: ILTConfig,
+    beta: float | None = None,
 ) -> torch.Tensor:
     """Differentiable ILT objective.
 
-    ``M = sigmoid(beta_m * P)``; the loss is the squared error of the nominal
+    ``M = sigmoid(beta * P)``; the loss is the squared error of the nominal
     resist image against the target, plus optional process-window and
     total-variation terms. Returns a scalar (summed over the batch).
+
+    Parameters
+    ----------
+    beta:
+        Overrides ``cfg.mask_steepness`` for this call. ``None`` (default)
+        uses ``cfg.mask_steepness`` directly -- existing call sites that don't
+        pass this are completely unaffected. ``solve()`` passes the current
+        annealed value here when ``cfg.beta_init`` is set.
     """
-    mask = torch.sigmoid(cfg.mask_steepness * params)
+    mask = torch.sigmoid((cfg.mask_steepness if beta is None else beta) * params)
     z_nom = resist(litho.aerial_nominal(mask), litho.cfg)
     loss = cfg.weight_nominal * ((z_nom - target) ** 2).sum()
     if cfg.weight_pvb > 0:
@@ -206,7 +276,7 @@ def _solve_first_order(
     ran = 0
     for step in range(cfg.iterations):
         opt.zero_grad(set_to_none=True)
-        loss = ilt_loss(params, target, litho, cfg)
+        loss = ilt_loss(params, target, litho, cfg, beta=_beta_for_step(cfg, step))
         loss.backward()
         if cfg.grad_clip > 0:
             torch.nn.utils.clip_grad_norm_([params], cfg.grad_clip)
@@ -259,11 +329,16 @@ def _solve_lbfgs_one(
     snapshots: dict[int, torch.Tensor] = {}
     n_evals = 0
     last_grad_norm = [0.0]
+    # Beta must stay FIXED across every closure call within one outer step's
+    # line search (the function being searched must not move under it) and
+    # only advance once per outer step. A mutable cell lets the closure read
+    # the value the outer loop set just before calling opt.step().
+    current_beta = [cfg.mask_steepness]
 
     def closure() -> torch.Tensor:
         nonlocal n_evals
         opt.zero_grad(set_to_none=True)
-        loss = ilt_loss(params_2d, target_2d, litho, cfg)
+        loss = ilt_loss(params_2d, target_2d, litho, cfg, beta=current_beta[0])
         loss.backward()
         if cfg.grad_clip > 0:
             torch.nn.utils.clip_grad_norm_([params_2d], cfg.grad_clip)
@@ -274,6 +349,7 @@ def _solve_lbfgs_one(
 
     ran = 0
     for step in range(cfg.iterations):
+        current_beta[0] = _beta_for_step(cfg, step)
         loss = opt.step(closure)
         history.append(loss.detach().item())
         ran = step + 1
