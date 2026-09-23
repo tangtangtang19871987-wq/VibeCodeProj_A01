@@ -12,6 +12,7 @@ only a plot.
 | `abl_grpo_teacher_relative.yaml` | Eqs. 6–7 | **X-07a.** The advantage the paper *defines and argues for* in Sec. 3.3.2 |
 | `abl_grpo_group_mean.yaml` | Sec. 4.1 | **X-07b.** The advantage Sec. 4.1 *says was actually used*. The paper contradicts itself (G-012); running both is the only way to say anything defensible about which matters. |
 | `abl_optimizer.yaml` | G-015 (solver unspecified) | **X-14.** Fair Adam vs L-BFGS comparison on cases 1/3/5, at a common well-conditioned starting point and matched (recorded, not assumed) function-evaluation counts. See its header comment and `docs/findings.md` F-SAT-01 for why it does NOT reuse `iccad13_ilt.yaml`'s constants. |
+| `multistart_ablation.yaml` | Fig. 1c, Sec. 3.3.2 | **X-15.** The control neither the paper nor this project's earlier experiments run: does a LEARNED sampler beat dumb random multi-start with the same K and the same per-candidate ILT budget? Four arms (single-start, random-K, PT, PT+RL); the perturbation scale is calibrated to match the trained generator's measured diversity. See its module docstring and `docs/findings.md` F-MULTISTART-01. |
 
 ## Reproducing the iteration-budget claim
 
