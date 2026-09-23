@@ -101,6 +101,7 @@ against an independent reference) / `BLOCKED`.
 | X-13 | Runtime / speedup comparison | [A] | — | — | **BLOCKED** — no GPU on this host; would not be comparable |
 | X-14 | Ablation: optimizer family (Adam vs L-BFGS), G-015 | [C] | `configs/experiments/abl_optimizer.yaml` | `results/abl_optimizer/` | **VERIF** -- measured: L-BFGS matched/beat Adam EPE@15nm on cases 1/3/5 with 26-27% fewer func evals (F-LBFGS-01) |
 | X-15 | Control: learned sampler (generator) vs random multi-start, same K and budget -- isolates what Table 2's PT/PT+RL rows actually demonstrate | [C] | `configs/experiments/multistart_ablation.yaml` | `results/multistart_ablation/` | **VERIF** -- random-K exactly equals single-start on all 8 designs (115.00 == 115.00); both generator arms (PT 134.75, PT+RL 134.50) are *worse* than either (F-MULTISTART-01) |
+| X-16 | X-14's optimizer swap extended to all 10 ICCAD13 cases, G-015 | [C] | `configs/experiments/iccad13_ilt_lbfgs.yaml` | `results/iccad13_ilt_lbfgs/` | **VERIF** -- L-BFGS matches the paper's Table 1 "OURS" EPE@15nm column EXACTLY on 10/10 cases (mean 1.6 == 1.6); closes both the main baseline's case-3 gap (22->13) and case-5's F-PERF-01 pixel (1->0) as a side effect (F-LBFGS-02) |
 
 ## 8. Completeness check against the paper
 

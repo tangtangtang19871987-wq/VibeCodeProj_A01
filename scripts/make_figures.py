@@ -101,6 +101,41 @@ def fig2_optimizer_comparison():
     print("wrote figures/optimizer_comparison.png")
 
 
+def fig2b_lbfgs_full_baseline():
+    """Adam (main baseline) vs L-BFGS (X-16) vs paper, all 10 cases, EPE@15nm."""
+    path = os.path.join(ROOT, "results/iccad13_ilt_lbfgs/summary.json")
+    if not os.path.exists(path):
+        print("skip fig2b: results/iccad13_ilt_lbfgs/summary.json not present")
+        return
+    lbfgs = json.load(open(path))
+    cases = sorted(int(c) for c in lbfgs["per_case"])
+    adam_vals, lbfgs_vals = [], []
+    for c in cases:
+        d = json.load(open(os.path.join(ROOT, f"results/iccad13_ilt/case{c}.json")))
+        adam_vals.append(d["scores"]["epe@15nm"])
+        lbfgs_vals.append(lbfgs["per_case"][str(c)]["epe@15nm"])
+    paper_vals = [3, 0, 13, 0, 0, 0, 0, 0, 0, 0]  # Table 1 "OURS" column
+
+    x = np.arange(len(cases))
+    width = 0.35
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    ax.bar(x - width / 2, adam_vals, width, color=BLUE, label="Adam (main baseline, 300 it)")
+    ax.bar(x + width / 2, lbfgs_vals, width, color=ORANGE, label="L-BFGS (X-16, ~110 evals)")
+    ax.scatter(x, paper_vals, marker="_", s=420, linewidths=2.2, color=GRAY, zorder=3,
+               label="paper Table 1 \"OURS\"")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"case {c}" for c in cases])
+    ax.set_ylabel("EPE @ 15 nm (lower is better)")
+    ax.set_title("L-BFGS matches the paper's EPE@15nm on all 10 cases (F-LBFGS-02)")
+    ax.legend(frameon=False, fontsize=8.5)
+    for i, l in enumerate(lbfgs_vals):
+        ax.annotate(str(l), (x[i] + width / 2, l), ha="center", va="bottom", fontsize=8.5, color=ORANGE)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUT, "lbfgs_full_baseline.png"), dpi=150)
+    plt.close(fig)
+    print("wrote figures/lbfgs_full_baseline.png")
+
+
 def fig3_mask_visualization(case: int = 1):
     """Target / mask / mask-overlay / RESIST-overlay for one representative
     case, in the spirit of the paper's own Fig. 4.
@@ -359,6 +394,7 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     fig1_iteration_budget_curve()
     fig2_optimizer_comparison()
+    fig2b_lbfgs_full_baseline()
     fig3_mask_visualization(case=1)
     fig4_pvb_sweep()
     fig5_multistart_comparison()

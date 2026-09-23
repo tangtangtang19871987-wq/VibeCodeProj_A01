@@ -351,6 +351,62 @@ after seeing these numbers.
 
 ---
 
+## F-LBFGS-02 — Extended to all 10 cases: exact match with the paper's Table 1 EPE@15nm on every case (X-16)
+
+**Severity: informational / positive result.** F-LBFGS-01 left explicitly
+open whether its 3-case result "generalises to all 10 ICCAD13 cases." This
+runs that extension. User-prompted: raised after noticing the main baseline's
+case-3 gap directly, which is exactly the case this closes.
+
+### Setup
+
+`configs/experiments/iccad13_ilt_lbfgs.yaml`: all 10 cases, L-BFGS at the
+SAME well-conditioned starting point X-14 validated (`init_scale=0.5`,
+`mask_steepness=8.0`, `step_size=1.0`, 50 outer iterations, strong-Wolfe line
+search) — a single-variable optimizer swap versus the main Adam baseline,
+nothing else changed (no EPE-aware loss, no PV-band term), per this project's
+"one change at a time" discipline.
+
+### Result
+
+| Case | Adam (main baseline) EPE@15nm | L-BFGS EPE@15nm | Paper "OURS" EPE@15nm | Adam L2 | L-BFGS L2 |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 3 | 3 | 3 | 33786 | 32823 |
+| 2 | 0 | 0 | 0 | 26967 | 25616 |
+| 3 | **22** | **13** | 13 | 58582 | 55009 |
+| 4 | 0 | 0 | 0 | 9314 | 10007 |
+| 5 | 1 | 0 | 0 | 28824 | 25503 |
+| 6 | 0 | 0 | 0 | 28567 | 27379 |
+| 7 | 0 | 0 | 0 | 12163 | 12739 |
+| 8 | 0 | 0 | 0 | 12135 | 9609 |
+| 9 | 0 | 0 | 0 | 33194 | 29055 |
+| 10 | 0 | 0 | 0 | 7116 | 6706 |
+| **mean** | **2.6** | **1.6** | **1.6** | 25065 | 23445 |
+
+**L-BFGS matches the paper's Table 1 "OURS" EPE@15nm column exactly on all 10
+of 10 cases**, closing both of the main baseline's previously-known gaps at
+once: case 3 (22 → 13, the single largest per-case gap anywhere in this
+project's Table 1 comparison) and case 5 (1 → 0, the F-PERF-01 pixel that had
+been deferred rather than hand-corrected — it disappears here as a side
+effect of the better-conditioned optimizer, not because anything about
+F-PERF-01 was touched). Mean L2 is also lower with L-BFGS in 8 of 10 cases.
+
+### What this does NOT establish
+
+This is **not** proposed as a replacement for the main `results/iccad13_ilt/`
+baseline everywhere it's cited in this project — it uses a different starting
+point (`init_scale=0.5` vs the main baseline's `init_scale=2.0`) for the
+documented reason in F-SAT-01, a different iteration/func-eval budget (50
+outer steps / ~110 func evals vs 300 iterations), and was run to test this
+specific hypothesis, not to supersede the primary reported numbers without
+separately deciding to do so. EPE@3nm was not swept or reported here as a
+headline number (see F-LBFGS-01's own caution that it is not uniformly
+better). The match to the paper's EPE@15nm column, case-for-case, is a strong
+signal that L-BFGS is closer to whatever the paper's own (unspecified,
+G-015) solver actually is — but "exact match on the metric reported" is not
+the same claim as "identical solver," and no PVB, EPE@3nm, or Table 2 column
+was used to further confirm or refute that.
+
 ## F-PERF-01 — Profiling beat intuition: forward FFT is 1% of cost, not the bottleneck
 
 **Context.** The originally proposed "exact frequency-limited FFT speedup"

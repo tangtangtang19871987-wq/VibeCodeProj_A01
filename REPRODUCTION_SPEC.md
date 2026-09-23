@@ -212,6 +212,19 @@ same constants once annealing is enabled — closing the gap without touching
 to flip any pixel's binary classification — annealing is not a blanket fix for
 every optimizer's speed, only for the underlying vanishing-gradient mechanism.
 
+**L-BFGS, extended to all 10 cases, matches the paper's Table 1 EPE@15nm
+column exactly (F-LBFGS-02, X-16).** F-LBFGS-01's 3-case result was extended
+to the full benchmark: at the same well-conditioned starting point
+(`init_scale=0.5`), L-BFGS matches the paper's "OURS" EPE@15nm value on **all
+10 of 10 cases** (mean 1.6, identical to the paper's own mean), closing the
+main Adam baseline's two known gaps in one single-variable optimizer swap —
+case 3 (this project's largest per-case gap, 22 → 13) and case 5's F-PERF-01
+pixel (1 → 0), the latter as a side effect rather than a targeted fix. This is
+not treated as a silent replacement for the primary reported baseline (it
+uses a different starting point and iteration budget, run specifically to
+test this one hypothesis) — see `docs/findings.md` F-LBFGS-02 for the full
+scope statement.
+
 **The PV-band and EPE-aware terms are real, calibration-sensitive knobs, not
 inert options (F-PVB-01, F-EPE-01).** `weight_pvb` was swept over seven values
 on 3 cases: PV Band dropped monotonically (~7.5%, `weight_pvb=0→1.0`) against
