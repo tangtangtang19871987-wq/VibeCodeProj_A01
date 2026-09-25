@@ -1,0 +1,173 @@
+{
+  "experiment_id": "iccad13_ilt_lbfgs100",
+  "config": {
+    "experiment_id": "iccad13_ilt_lbfgs100",
+    "paper_reference": "Table 1, ICCAD13 rows -- X-16 with a properly-tuned iteration budget",
+    "seed": 0,
+    "threads": 4,
+    "canvas": 2048,
+    "kernel_dir": "/home/user/openopc/openilt/kernel",
+    "bench_dir": "/home/user/openopc/openilt/benchmark/ICCAD2013",
+    "cases": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "epe_tolerances": [
+      15,
+      3
+    ],
+    "process": {
+      "target_density": 0.225,
+      "print_thresh": 0.5,
+      "print_steepness": 50.0,
+      "dose_nom": 1.0,
+      "dose_max": 1.02,
+      "dose_min": 0.98,
+      "num_kernels": 24
+    },
+    "ilt": {
+      "iterations": 100,
+      "step_size": 1.0,
+      "mask_steepness": 8.0,
+      "weight_nominal": 1.0,
+      "weight_pvb": 0.0,
+      "init_scale": 0.5,
+      "optimizer": "lbfgs",
+      "lbfgs_max_iter_per_step": 1,
+      "lbfgs_history_size": 10,
+      "lbfgs_line_search": "strong_wolfe",
+      "seed": 0
+    }
+  },
+  "provenance": {
+    "git_commit": "6daf37986b6ff55ced317596049f2f34c6b24737",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  },
+  "per_case": {
+    "1": {
+      "l2": 30630.0,
+      "pvb": 53653.0,
+      "epe@15nm": 3,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 3,
+      "epe@3nm": 63,
+      "epe_in@3nm": 4,
+      "epe_out@3nm": 59
+    },
+    "2": {
+      "l2": 23282.0,
+      "pvb": 41379.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 57,
+      "epe_in@3nm": 4,
+      "epe_out@3nm": 53
+    },
+    "3": {
+      "l2": 49900.0,
+      "pvb": 92669.0,
+      "epe@15nm": 7,
+      "epe_in@15nm": 3,
+      "epe_out@15nm": 4,
+      "epe@3nm": 92,
+      "epe_in@3nm": 22,
+      "epe_out@3nm": 70
+    },
+    "4": {
+      "l2": 6786.0,
+      "pvb": 24853.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 16,
+      "epe_in@3nm": 0,
+      "epe_out@3nm": 16
+    },
+    "5": {
+      "l2": 21977.0,
+      "pvb": 54667.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 47,
+      "epe_in@3nm": 2,
+      "epe_out@3nm": 45
+    },
+    "6": {
+      "l2": 25921.0,
+      "pvb": 49081.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 56,
+      "epe_in@3nm": 11,
+      "epe_out@3nm": 45
+    },
+    "7": {
+      "l2": 10308.0,
+      "pvb": 37864.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 26,
+      "epe_in@3nm": 1,
+      "epe_out@3nm": 25
+    },
+    "8": {
+      "l2": 8899.0,
+      "pvb": 21045.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 28,
+      "epe_in@3nm": 1,
+      "epe_out@3nm": 27
+    },
+    "9": {
+      "l2": 27168.0,
+      "pvb": 61255.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 69,
+      "epe_in@3nm": 9,
+      "epe_out@3nm": 60
+    },
+    "10": {
+      "l2": 6523.0,
+      "pvb": 16573.0,
+      "epe@15nm": 0,
+      "epe_in@15nm": 0,
+      "epe_out@15nm": 0,
+      "epe@3nm": 12,
+      "epe_in@3nm": 0,
+      "epe_out@3nm": 12
+    }
+  },
+  "aggregate": {
+    "l2": 21139.4,
+    "pvb": 45303.9,
+    "epe@15nm": 1.0,
+    "epe_in@15nm": 0.3,
+    "epe_out@15nm": 0.7,
+    "epe@3nm": 46.6,
+    "epe_in@3nm": 5.4,
+    "epe_out@3nm": 41.2
+  },
+  "total_seconds": 7615.408057451248
+}

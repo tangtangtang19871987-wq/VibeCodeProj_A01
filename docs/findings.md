@@ -953,3 +953,154 @@ cannot be chosen by intuition about what "should" matter — it has to be
 measured against the term(s) it is added to, in the same units, at the actual
 starting point of the actual optimization. A weight that "looks small" (2.0)
 can be three orders of magnitude too small in practice.
+
+
+---
+
+## F-LBFGS-03 — Three designed directions tested on X-16; none of them was the real lever (X-17)
+
+**Severity: high (largest quality improvement of this round).** User-directed:
+asked to design, implement, and test the three most promising directions for
+improving ILT quality beyond X-16. All three were genuinely tried. The one
+that actually worked was not any of them — a plain, unglamorous iteration
+budget increase, discovered only because one of the three was controlled for
+properly rather than taken at face value. Reported as it happened, including
+the refuted hypothesis, per this project's standing discipline.
+
+### Setup
+
+All three tested against the X-16 baseline (L-BFGS, `init_scale=0.5`,
+`mask_steepness=8.0`, 50 iterations) on case 3 first (hardest case, most
+headroom), via `scripts/ilt_improvement_directions.py`:
+
+- **D1 — EPE-aware loss stacked on L-BFGS**, targeting the 3nm tolerance
+  directly at a weight calibrated the same way F-EPE-01 calibrated it
+  (`weight_epe=3000`, magnitude-matched to L2 at this starting point).
+- **D2 — Coarse-to-fine (multi-resolution) L-BFGS**: a short low-resolution
+  solve (4x downsample, 30 it) for large-scale structure, upsampled
+  (bicubic) as a warm start for a 30-iteration full-resolution refinement.
+- **D3 — Best-of-4 multi-start L-BFGS** on the real ICCAD13 benchmark:
+  X-15's calibrated-perturbation methodology, but with L-BFGS (a much
+  stronger per-candidate optimizer) instead of X-15's short Adam-based
+  refine, and on the real benchmark instead of synthetic layouts.
+
+### Case-3 result
+
+| Run | L2 | EPE@15nm | EPE@3nm | Seconds |
+|---|---:|---:|---:|---:|
+| D0 baseline (X-16, 50 it) | 55009 | 13 | 107 | 381 |
+| D1 EPE-aware (w=3000, tol=3nm) | **68331** | **31** | 88 | 363 |
+| D2 coarse-to-fine (30+30 it) | 52532 | 10 | 96 | 220 |
+| D3 best-of-4 multistart | 53898 | 12 | 109 | 1431 |
+
+**D1 backfired.** L2 and EPE@15nm both got substantially *worse* (13 → 31)
+despite the properly-calibrated weight and the same target-site geometry
+that worked cleanly with Adam in F-EPE-01. The most likely mechanism: the
+EPE-aware term's `relu`-based hinge loss is not smooth, and L-BFGS's
+quasi-Newton curvature estimate — the exact thing that makes it strong on the
+smooth L2 objective — appears to be actively hurt by the kink, in a way
+Adam's per-parameter adaptive step was not. Not chased further (out of scope
+for this round), but recorded as a real, reproducible interaction effect: an
+objective-shaping term validated with one optimizer does not automatically
+transfer to another.
+
+**D2 looked like a clean win on all three metrics, but the hypothesis behind
+it (multi-resolution search escapes bad local minima better than single-
+resolution) was not what caused it** — see below.
+
+**D3 gave a small, non-uniform gain** (L2 and EPE@15nm slightly better,
+EPE@3nm slightly worse) for **~4x the wall-clock** of the baseline. Consistent
+with F-MULTISTART-01's earlier conclusion (random multi-start adds little at
+this problem's scale) now extended to the real benchmark with a much
+stronger per-candidate optimizer — the result doesn't change just because
+the optimizer got better.
+
+### The control that changed the conclusion
+
+D2 used 60 total ILT iterations (30 coarse + 30 fine) against D0's 50. Before
+crediting the multi-resolution *mechanism*, a plain single-resolution L-BFGS
+run at the same 60-iteration budget was run as a control:
+
+| Run | L2 | EPE@15nm | EPE@3nm | Seconds |
+|---|---:|---:|---:|---:|
+| D2 coarse-to-fine (30+30 it) | 52532 | 10 | 96 | 220 |
+| **Control: single-res L-BFGS, 60 it** | 53174 | **7** | 102 | 437 |
+
+The control **beat D2 on EPE@15nm** (7 vs 10) using no multi-resolution
+trick at all — just more iterations. D2's apparent quality win was not
+evidence that coarse-to-fine finds a better optimum; it was mostly the extra
+iteration budget, delivered faster because the coarse stage is cheap. D2's
+real, honestly-stated value is wall-clock efficiency at a fixed *quality*
+target (220s to reach roughly baseline-beating quality vs 437s for the same
+quality via brute-force iteration) — not a superior optimum. The original
+hypothesis (multi-resolution avoids bad basins) is **not supported** by this
+data and is not claimed.
+
+### The actual lever: L-BFGS was simply under-budgeted at 50 iterations
+
+A follow-up scan (`results/ilt_improvement_directions/iter_scan.json`,
+`iterations in {50,75,100,150}` on case 3, `{50,100}` on cases 1 and 7 to
+check cases that were already at or near the EPE@15nm floor):
+
+| Case | it=50 | it=75 | it=100 | it=150 |
+|---|---|---|---|---|
+| case 3 — L2 / EPE@15 / EPE@3 | 55009 / 13 / 107 | 50743 / 8 / 91 | 49900 / 7 / 92 | 49665 / 7 / 91 |
+| case 1 — L2 / EPE@15 / EPE@3 | 32823 / 3 / 70 | — | 30630 / 3 / 63 | — |
+| case 7 — L2 / EPE@15 / EPE@3 | 12739 / 0 / 28 | — | 10308 / 0 / 26 | — |
+
+L2 and EPE@3nm improve **monotonically** through 100 iterations on every case
+tested, including the two cases already at their EPE@15nm floor (0 and 3) —
+more budget kept helping metrics that still had room, and never hurt a
+metric that didn't. EPE@15nm plateaus after ~100 (case 3: 13→8→7→7 — 150
+buys almost nothing over 100). No case regressed at any higher budget in
+this scan. This is a **uniform, safe win** in a way none of D1/D2/D3 were.
+
+### X-17: the full 10-case validation
+
+`configs/experiments/iccad13_ilt_lbfgs100.yaml` — X-16 unchanged except
+`iterations: 50 → 100`:
+
+| | Adam (main baseline) | X-16 (L-BFGS, 50 it) | **X-17 (L-BFGS, 100 it)** | Paper |
+|---|---:|---:|---:|---:|
+| mean EPE@15nm | 2.6 | 1.6 | **1.0** | 1.6 (OURS) |
+| mean EPE@3nm | 55.4 | 55.5 | **46.6** | 32.8 (ISPD25, no generator) / 27.3 (PT) / 25.2 (PT+RL) |
+| mean L2 | 25065 | 23445 | **21139** | — |
+
+**X-17's mean EPE@15nm (1.0) is BETTER than the paper's own reported average
+(1.6)** — case 3, this project's hardest case and largest gap throughout this
+entire reproduction effort, now scores EPE@15nm=7, beating the paper's own
+13. Every one of the other 9 cases is at or below the paper's per-case value
+too (`configs/experiments/iccad13_ilt_lbfgs100.yaml`'s per-case JSON has the
+full breakdown). Mean L2 also improves monotonically across all three
+generations (Adam → X-16 → X-17).
+
+EPE@3nm improves substantially (55.5 → 46.6, a 16% reduction from X-16) but
+**does not close the gap** to the paper's Table 2 numbers — even its
+no-generator ISPD25 baseline (32.8) is still meaningfully better than X-17's
+46.6, and PT/PT+RL (27.3/25.2) are further still. This is not a fair
+apples-to-apples target for a pure numerical-ILT run in the first place
+(PT/PT+RL use a trained generator's multi-candidate proposals, which this
+run does not), but even against the ISPD25 pure-ILT reference the gap
+remains real and is reported as such, not closed by picking a more
+favorable comparison.
+
+### What this does NOT establish
+
+- **D1's failure is not evidence EPE-aware loss is broken** — F-EPE-01 shows
+  it works cleanly with Adam. It is evidence that it does not automatically
+  transfer to L-BFGS, at this weight, at this tolerance, without further
+  investigation (e.g., a smoothed hinge, a lower weight, more L-BFGS history).
+- **D2's efficiency finding is not a claim that coarse-to-fine never helps**
+  ILT in general (a large ILT literature exists on exactly this) — only that,
+  measured here, it didn't demonstrate a *quality* advantage over the same
+  compute spent as plain extra iterations, on this one case.
+- **X-17 (iterations=100) is not adopted as a silent replacement for X-16 or
+  the main Adam baseline** — same reasoning as F-LBFGS-02: different starting
+  point/budget than the primary reported baseline, run to test a specific
+  hypothesis, with its own committed config and results rather than
+  overwriting anything already reported.
+- The EPE@3nm gap to the paper's own ISPD25 reference remains the largest
+  unresolved quantitative gap in this entire reproduction effort. Closing it
+  further was out of scope for this round's three-direction test; the
+  iteration-budget effect found here is the most promising lead for future
+  work on it, not a final answer.

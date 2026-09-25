@@ -136,6 +136,57 @@ def fig2b_lbfgs_full_baseline():
     print("wrote figures/lbfgs_full_baseline.png")
 
 
+def fig2c_lbfgs_iteration_budget():
+    """Adam -> X-16 -> X-17 progression vs paper references (F-LBFGS-03)."""
+    path17 = os.path.join(ROOT, "results/iccad13_ilt_lbfgs100/summary.json")
+    if not os.path.exists(path17):
+        print("skip fig2c: results/iccad13_ilt_lbfgs100/summary.json not present")
+        return
+
+    def mean_of(exp_id, key):
+        vals = [
+            json.load(open(os.path.join(ROOT, f"results/{exp_id}/case{c}.json")))["scores"][key]
+            for c in range(1, 11)
+        ]
+        return sum(vals) / len(vals)
+
+    labels = ["Adam\n(main baseline)", "X-16\nL-BFGS, 50 it", "X-17\nL-BFGS, 100 it"]
+    epe15 = [mean_of(e, "epe@15nm") for e in ("iccad13_ilt", "iccad13_ilt_lbfgs", "iccad13_ilt_lbfgs100")]
+    epe3 = [mean_of(e, "epe@3nm") for e in ("iccad13_ilt", "iccad13_ilt_lbfgs", "iccad13_ilt_lbfgs100")]
+    paper_epe15, paper_epe3_ispd25 = 1.6, 32.8
+
+    x = np.arange(len(labels))
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.5))
+
+    ax = axes[0]
+    ax.bar(x, epe15, width=0.55, color=BLUE)
+    ax.axhline(paper_epe15, color=ORANGE, linewidth=1.8, linestyle="--")
+    ax.text(len(labels) - 0.4, paper_epe15 + 0.05, "paper OURS (1.6)", color=ORANGE, fontsize=8.5, va="bottom")
+    ax.set_ylabel("mean EPE @ 15 nm")
+    ax.set_title("EPE@15nm: X-17 beats the paper's own average", fontsize=10.5)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=9)
+    for i, v in enumerate(epe15):
+        ax.annotate(f"{v:.1f}", (x[i], v), ha="center", va="bottom", fontsize=9)
+
+    ax = axes[1]
+    ax.bar(x, epe3, width=0.55, color=BLUE)
+    ax.axhline(paper_epe3_ispd25, color=ORANGE, linewidth=1.8, linestyle="--")
+    ax.text(len(labels) - 0.4, paper_epe3_ispd25 + 1, "paper ISPD25, no gen. (32.8)", color=ORANGE, fontsize=8.5, va="bottom")
+    ax.set_ylabel("mean EPE @ 3 nm")
+    ax.set_title("EPE@3nm: improves, gap to paper remains", fontsize=10.5)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=9)
+    for i, v in enumerate(epe3):
+        ax.annotate(f"{v:.1f}", (x[i], v), ha="center", va="bottom", fontsize=9)
+
+    fig.suptitle("Iteration-budget effect found while testing 3 improvement directions (F-LBFGS-03)", fontsize=10.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.savefig(os.path.join(OUT, "lbfgs_iteration_budget.png"), dpi=150)
+    plt.close(fig)
+    print("wrote figures/lbfgs_iteration_budget.png")
+
+
 def fig3_mask_visualization(case: int = 1):
     """Target / mask / mask-overlay / RESIST-overlay for one representative
     case, in the spirit of the paper's own Fig. 4.
@@ -395,6 +446,7 @@ if __name__ == "__main__":
     fig1_iteration_budget_curve()
     fig2_optimizer_comparison()
     fig2b_lbfgs_full_baseline()
+    fig2c_lbfgs_iteration_budget()
     fig3_mask_visualization(case=1)
     fig4_pvb_sweep()
     fig5_multistart_comparison()

@@ -225,6 +225,27 @@ uses a different starting point and iteration budget, run specifically to
 test this one hypothesis) — see `docs/findings.md` F-LBFGS-02 for the full
 scope statement.
 
+**Three designed directions for improving further on X-16; the real lever
+was none of them (F-LBFGS-03, X-17).** Asked to design, implement, and test
+the three most promising directions for further quality improvement: (D1)
+the calibrated EPE-aware loss stacked on L-BFGS — backfired, L2 and EPE@15nm
+both got substantially worse, likely because L-BFGS's curvature estimate is
+hurt by the loss term's non-smooth hinge in a way Adam's adaptive step was
+not; (D2) coarse-to-fine multi-resolution optimization — looked like a clean
+3-metric win, but a matched-iteration-budget control (plain single-resolution
+L-BFGS at the same total iteration count) beat it outright, refuting the
+"escapes bad local minima" hypothesis behind it — D2's real value turned out
+to be wall-clock efficiency, not a better optimum; (D3) best-of-4 multi-start
+L-BFGS on the real benchmark — a marginal, non-uniform gain for ~4x the
+compute, extending F-MULTISTART-01's conclusion to a stronger per-candidate
+optimizer. The control built to check D2 surfaced the actual lever: L-BFGS
+was simply under-budgeted at 50 iterations. Re-run at 100 (**X-17**, all 10
+cases): mean EPE@15nm = **1.0, better than the paper's own reported average
+(1.6)** — case 3 alone drops from 13 to 7 — and mean EPE@3nm falls from 55.5
+to 46.6, though that still falls short of the paper's own no-generator
+ISPD25 reference (32.8). Reported with the refuted D2 hypothesis included,
+not silently dropped, per this project's standing discipline.
+
 **The PV-band and EPE-aware terms are real, calibration-sensitive knobs, not
 inert options (F-PVB-01, F-EPE-01).** `weight_pvb` was swept over seven values
 on 3 cases: PV Band dropped monotonically (~7.5%, `weight_pvb=0→1.0`) against
