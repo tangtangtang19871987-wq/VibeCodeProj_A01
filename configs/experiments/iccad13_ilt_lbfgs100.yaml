@@ -1,0 +1,47 @@
+# X-17: X-16's L-BFGS baseline with the iteration budget increased 50 -> 100.
+#
+# Motivation: while testing three designed directions for improving on X-16
+# (docs/findings.md F-LBFGS-02), a plain iteration-matched CONTROL run for
+# one of them (case 3, single-resolution L-BFGS at 60 iterations instead of
+# 50) unexpectedly outperformed that direction's own fancier mechanism --
+# EPE@15nm dropped from 13 to 7, better than anything else tried. A follow-up
+# scan (iterations in {50,75,100,150} on case 3, {50,100} on cases 1 and 7)
+# showed a clear, monotonic, plateauing trend: L2 and EPE@3nm keep improving
+# through ~100 iterations on every case tested, EPE@15nm improves then
+# plateaus (case 3: 13->8->7->7), and NO case got worse at any higher budget
+# tested -- unlike the three designed directions (D1 backfired, D2's gain
+# turned out to be mostly this same effect, D3 cost 4x for a marginal,
+# non-uniform gain), simply running L-BFGS longer was a uniform, robust win
+# on every case and metric tested. This re-runs the FULL 10-case X-16
+# baseline at iterations=100 (the point where case 3's returns visibly
+# plateau) to see whether that holds at full benchmark scale. See
+# docs/findings.md F-LBFGS-03.
+experiment_id: iccad13_ilt_lbfgs100
+paper_reference: "Table 1, ICCAD13 rows -- X-16 with a properly-tuned iteration budget"
+seed: 0
+threads: 4
+canvas: 2048
+kernel_dir: /home/user/openopc/openilt/kernel
+bench_dir: /home/user/openopc/openilt/benchmark/ICCAD2013
+cases: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+epe_tolerances: [15, 3]
+process:
+  target_density: 0.225
+  print_thresh: 0.5
+  print_steepness: 50.0
+  dose_nom: 1.00
+  dose_max: 1.02
+  dose_min: 0.98
+  num_kernels: 24
+ilt:
+  iterations: 100
+  step_size: 1.0
+  mask_steepness: 8.0
+  weight_nominal: 1.0
+  weight_pvb: 0.0
+  init_scale: 0.5
+  optimizer: lbfgs
+  lbfgs_max_iter_per_step: 1
+  lbfgs_history_size: 10
+  lbfgs_line_search: strong_wolfe
+  seed: 0

@@ -1,0 +1,74 @@
+[
+  {
+    "case": 3,
+    "iterations": 50,
+    "l2": 55009.0,
+    "epe_at_15nm": 13,
+    "epe_at_3nm": 107,
+    "seconds": 376.7383327484131,
+    "n_func_evals": 113
+  },
+  {
+    "case": 3,
+    "iterations": 75,
+    "l2": 50743.0,
+    "epe_at_15nm": 8,
+    "epe_at_3nm": 91,
+    "seconds": 540.4752025604248,
+    "n_func_evals": 164
+  },
+  {
+    "case": 3,
+    "iterations": 100,
+    "l2": 49900.0,
+    "epe_at_15nm": 7,
+    "epe_at_3nm": 92,
+    "seconds": 719.5026562213898,
+    "n_func_evals": 214
+  },
+  {
+    "case": 3,
+    "iterations": 150,
+    "l2": 49665.0,
+    "epe_at_15nm": 7,
+    "epe_at_3nm": 91,
+    "seconds": 1036.8825170993805,
+    "n_func_evals": 315
+  },
+  {
+    "case": 1,
+    "iterations": 50,
+    "l2": 32823.0,
+    "epe_at_15nm": 3,
+    "epe_at_3nm": 70,
+    "seconds": 360.81826519966125,
+    "n_func_evals": 108
+  },
+  {
+    "case": 1,
+    "iterations": 100,
+    "l2": 30630.0,
+    "epe_at_15nm": 3,
+    "epe_at_3nm": 63,
+    "seconds": 698.3086624145508,
+    "n_func_evals": 210
+  },
+  {
+    "case": 7,
+    "iterations": 50,
+    "l2": 12739.0,
+    "epe_at_15nm": 0,
+    "epe_at_3nm": 28,
+    "seconds": 353.6071093082428,
+    "n_func_evals": 107
+  },
+  {
+    "case": 7,
+    "iterations": 100,
+    "l2": 10308.0,
+    "epe_at_15nm": 0,
+    "epe_at_3nm": 26,
+    "seconds": 690.7223982810974,
+    "n_func_evals": 207
+  }
+]
