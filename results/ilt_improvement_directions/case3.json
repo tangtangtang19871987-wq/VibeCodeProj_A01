@@ -1,0 +1,33 @@
+{
+  "case": 3,
+  "records": [
+    {
+      "label": "D0 baseline (X-16, single-res L-BFGS)",
+      "l2": 55009.0,
+      "epe_at_15nm": 13,
+      "epe_at_3nm": 107,
+      "seconds": 381.43324065208435
+    },
+    {
+      "label": "D1 EPE-aware (w=3000, tol=3.0nm)",
+      "l2": 68331.0,
+      "epe_at_15nm": 31,
+      "epe_at_3nm": 88,
+      "seconds": 362.727420091629
+    },
+    {
+      "label": "D2 coarse-to-fine (4x, 30+30 it)",
+      "l2": 52532.0,
+      "epe_at_15nm": 10,
+      "epe_at_3nm": 96,
+      "seconds": 220.2202296257019
+    },
+    {
+      "label": "D3 best-of-4 multistart L-BFGS",
+      "l2": 53898.0,
+      "epe_at_15nm": 12,
+      "epe_at_3nm": 109,
+      "seconds": 1430.5665752887726
+    }
+  ]
+}
