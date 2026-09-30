@@ -71,7 +71,11 @@ def e1_more_iterations(litho, target, iters_list=(200, 300)):
     return out
 
 
-def e2_hybrid(litho, target, weight_epe=2500.0, tol=3.0, adam_iters=50, adam_step=0.02):
+def e2_hybrid(litho, target, weight_epe=5000.0, tol=3.0, adam_iters=50, adam_step=0.02):
+    # weight_epe calibrated by DIRECT MEASUREMENT at the L-BFGS(100it)-converged
+    # starting point (not the cold-start ratio F-EPE-01 measured, which does not
+    # apply here -- at convergence raw_L2=43187, raw_epe(tol=3)=8.4, ratio=5114),
+    # same discipline as F-EPE-01/F-PVB-01: never guess a weight, measure it.
     t0 = time.time()
     lbfgs_res = solve(target, litho, ILTConfig(iterations=100, step_size=1.0, **BASE_LBFGS))
     adam_cfg = ILTConfig(
