@@ -1104,3 +1104,105 @@ favorable comparison.
   further was out of scope for this round's three-direction test; the
   iteration-budget effect found here is the most promising lead for future
   work on it, not a final answer.
+
+
+---
+
+## F-OPT-01 — Six optimizers, wall-clock matched: the structure-exploiting Gauss-Newton beats every "state-of-the-art" deep-learning optimizer (X-18)
+
+**Severity: informational / positive result.** User-directed: survey the most
+advanced gradient-based optimizers, re-implement them for ILT, and test them.
+
+### Which methods, and why
+
+The optimizers that currently top neural-network benchmarks were built for a
+different problem class: **stochastic, mini-batch** training of many weight
+matrices. Schedule-Free AdamW won the AlgoPerf 2024 self-tuning track
+(Defazio et al. 2024); Shampoo won the external-tuning track, and SOAP
+(Vyas et al. 2024, Adam in Shampoo's eigenbasis) improves on it; Muon
+(Jordan et al. 2024) is steepest descent under the spectral norm, built
+specifically for 2-D weight matrices. ILT, by contrast, is a
+**deterministic, full-batch, nonlinear least-squares** problem over a single
+image-shaped parameter, `f(P) = ||Z(P) - T||^2`. The textbook method for that
+structure is Gauss-Newton / Levenberg-Marquardt, whose curvature model
+`J^T J` is exact up to the residual-curvature term and always positive
+semi-definite. All four were implemented from their papers
+(`gril.ilt.optimizers`, `gril.ilt.gauss_newton`) and wired into
+`ILTConfig.optimizer`.
+
+The Gauss-Newton solver is matrix-free (J is 4M x 4M at 2048^2): each outer
+step runs inexact CG on `(w J^T J + lam I) d = -w J^T r` using an analytic
+JVP and a VJP whose per-kernel adjoint convolutions are summed in the
+frequency domain before a single inverse FFT, so one CG step costs ~half a
+gradient evaluation (~50 FFTs vs ~98). Verified before use: its gradient
+equals the (independently verified) autograd path to 3e-16, `<Jv,u> =
+<v,J^T u>` to 1e-16, and the JVP matches central finite differences to 1e-9
+(`tests_gril/unit/test_advanced_optimizers.py`, 18 tests).
+
+### Protocol (fixed before any result)
+
+`scripts/optimizer_benchmark.py`. Same cold start for all
+(`init_scale=0.5`, `mask_steepness=8.0`, as X-14/16/17). **Tune:** case 3 at
+512^2, the same 4-configuration grid size and the same 32 s budget for every
+optimizer (~210 evaluations, matching the full-resolution regime), selected
+by printed-image L2 — never by EPE, the comparison metric. **Compare:**
+each selected configuration at 2048^2 on case 3 (hardest) and case 6 (largest
+remaining EPE@3nm gap), **identical 720 s wall-clock budget** (~X-17's
+per-case cost). Wall-clock, not iterations, is the unit: per-step costs
+differ by integer factors (Gauss-Newton ran 35 outer steps, Adam 212).
+
+### Result
+
+| Optimizer | Case 3 L2 (vs L-BFGS) | PVB | EPE@15 | EPE@3 | Case 6 L2 (vs L-BFGS) | PVB | EPE@3 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Gauss-Newton (LM-CG)** | **48696 (−3.2%)** | 89607 | **6** | **94** | **25556 (−2.3%)** | 48797 | 57 |
+| L-BFGS | 50281 | 93379 | 9 | 95 | 26146 | 49347 | 56 |
+| Schedule-Free AdamW | 53702 (+6.8%) | 86753 | 10 | 95 | 26625 (+1.8%) | 48482 | **52** |
+| Adam | 57532 (+14.4%) | 84662 | 10 | 104 | 27581 (+5.5%) | 47180 | 56 |
+| Muon | 58934 (+17.2%) | 110650 | 18 | 108 | 27505 (+5.2%) | 55822 | 59 |
+| SOAP | 60511 (+20.3%) | 110634 | 20 | 108 | 28115 (+7.5%) | 55814 | 61 |
+
+(Case 6: EPE@15nm = 0 for every optimizer.) The ranking on the continuous
+objective is **identical on both cases**: Gauss-Newton < L-BFGS <
+Schedule-Free AdamW < Adam < Muon < SOAP. Raw per-run JSON, thinned
+loss-vs-time curves and masks in `results/optimizer_benchmark/`.
+
+### Reading it
+
+1. **Exploiting the problem's structure beats the newest generic
+   optimizers.** Gauss-Newton has the lowest L2 on both cases, and the
+   lowest EPE@15nm on case 3 (6, vs 9 for L-BFGS) — at the same wall-clock.
+2. **Schedule-Free AdamW is a real upgrade over Adam** (L2 −6.7% / −3.5%,
+   EPE@3nm 104→95 on case 3), consistent with its AlgoPerf result, but it
+   does not reach L-BFGS or Gauss-Newton on the objective. Caveat: its
+   selected learning rate (0.5) was at the edge of its tuning grid, so it
+   may be slightly under-tuned; the grid size was held equal across
+   methods by design.
+3. **Muon and SOAP are worse than plain Adam here**, with ~20–30% larger PV
+   band. Both precondition in the *row/column space of the parameter
+   matrix* — exactly right for a linear layer's weights, where rows and
+   columns are input/output features, but physically meaningless for a
+   mask image, whose rows and columns are just spatial coordinates.
+   Plausibly the orthogonalised/rotated updates inject structured content
+   along image rows and columns that the optics does not reward (a
+   hypothesis consistent with the PVB penalty, not separately tested).
+   They also spend 10–20% of the budget on Newton-Schulz / eigenbasis
+   overhead.
+4. **EPE@3nm barely depends on the optimizer** (94–108 on case 3, 52–61 on
+   case 6, with no consistent winner). Minimising L2 better does not by
+   itself fix 3nm-tolerance edge placement; changing the *objective* does
+   (the E2 EPE-aware refinement got case 3 to EPE@3nm = 69,
+   `results/ilt_push_limits/results_partial.json`). The optimizer and the
+   objective are separate levers, and for EPE@3nm the objective is the
+   binding one.
+
+### What this does NOT establish
+
+Two cases, one budget, one starting point; tuned at 512^2 then transferred
+to 2048^2 (the optics is resolution-independent, but learning rates may not
+transfer perfectly for every method). Gauss-Newton supports the nominal-L2
+objective only (no PV-band, TV or EPE-aware terms, no beta annealing — all
+rejected explicitly rather than ignored). The deep-learning optimizers were
+re-implemented from their papers, not taken from their official packages
+(network access for installs was not used); behavioural checks are in the
+test file, but subtle deviations from the official code cannot be excluded.
