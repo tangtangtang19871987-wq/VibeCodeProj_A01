@@ -441,6 +441,74 @@ def fig6_mrc_cleanup(case: int = 1):
     print(f"wrote figures/mrc_cleanup_case{case}.png")
 
 
+def fig7_optimizer_benchmark():
+    """X-18 loss-vs-wall-clock (case 3) and X-19 per-case L2 change (F-OPT-01).
+
+    Six optimizers would need six categorical hues, but only the validated
+    blue/orange pair is used in this project. So the two methods the
+    finding is about get the hues and the other four are grey, each
+    direct-labelled at its line end.
+    """
+    bench = os.path.join(ROOT, "results/optimizer_benchmark/full")
+    gn_dir = os.path.join(ROOT, "results/iccad13_ilt_gn")
+    if not (os.path.isdir(bench) and os.path.exists(os.path.join(gn_dir, "summary.json"))):
+        print("skip fig7: X-18/X-19 results not present")
+        return
+    names = {"gauss_newton": "Gauss-Newton (LM-CG)", "lbfgs": "L-BFGS", "sf_adamw": "Schedule-Free AdamW",
+             "adam": "Adam", "muon": "Muon", "soap": "SOAP"}
+    style = {"gauss_newton": (ORANGE, 2.2), "lbfgs": (BLUE, 2.2)}
+
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.6))
+    ax = axes[0]
+    ends = []
+    for key, label in names.items():
+        r = json.load(open(os.path.join(bench, f"case3_{key}.json")))
+        t, loss = r["time_history"], r["loss_history"]
+        n = min(len(t), len(loss))
+        color, lw = style.get(key, (GRAY, 1.2))
+        ax.plot(t[:n], loss[:n], color=color, linewidth=lw)
+        ends.append((loss[n - 1], t[n - 1], f"{label}  (L2 {r['l2']:.0f})", color))
+    ax.set_yscale("log")
+    y_lo, y_hi = 4.0e4, 1.4e5
+    ax.set_ylim(y_lo, y_hi)
+    ax.set_xlim(0, 1180)
+    # Final values crowd together, so labels go in a stacked column (in
+    # final-value order) joined to their line ends by thin leaders.
+    slots = np.geomspace(4.3e4, 7.0e4, len(ends))
+    for (val, t_end, text, color), y in zip(sorted(ends), slots):
+        ax.annotate(text, xy=(t_end, val), xytext=(760, y), fontsize=8, va="center",
+                    color="#3a3a36", arrowprops=dict(arrowstyle="-", color=color, lw=0.8))
+    ax.set_xlabel("wall-clock (s), identical 720 s budget")
+    ax.set_ylabel("continuous ILT objective (log)")
+    ax.set_title("X-18, case 3: objective vs wall-clock", fontsize=10.5)
+
+    ax = axes[1]
+    cases = list(range(1, 11))
+    delta = []
+    for c in cases:
+        a = json.load(open(os.path.join(ROOT, f"results/iccad13_ilt_lbfgs100/case{c}.json")))["scores"]["l2"]
+        b = json.load(open(os.path.join(gn_dir, f"case{c}.json")))["scores"]["l2"]
+        delta.append(100.0 * (b / a - 1.0))
+    x = np.arange(len(cases))
+    ax.bar(x, delta, width=0.6, color=ORANGE)
+    ax.axhline(0, color=GRAY, linewidth=1)
+    for i, d in enumerate(delta):
+        ax.annotate(f"{d:.1f}%", (x[i], d), ha="center", va="top", fontsize=8.5, xytext=(0, -2),
+                    textcoords="offset points")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"case {c}" for c in cases], fontsize=8.5)
+    ax.set_ylabel("printed-image L2 change vs X-17 L-BFGS (%)")
+    ax.set_ylim(min(delta) * 1.25, 0.6)
+    ax.set_title("X-19: Gauss-Newton vs L-BFGS, same per-case wall-clock", fontsize=10.5)
+
+    fig.suptitle("Structure-exploiting Gauss-Newton beats recent deep-learning optimizers on ILT (F-OPT-01)",
+                 fontsize=10.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.savefig(os.path.join(OUT, "optimizer_benchmark.png"), dpi=150)
+    plt.close(fig)
+    print("wrote figures/optimizer_benchmark.png")
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     fig1_iteration_budget_curve()
@@ -451,3 +519,4 @@ if __name__ == "__main__":
     fig4_pvb_sweep()
     fig5_multistart_comparison()
     fig6_mrc_cleanup(case=1)
+    fig7_optimizer_benchmark()

@@ -1206,3 +1206,36 @@ rejected explicitly rather than ignored). The deep-learning optimizers were
 re-implemented from their papers, not taken from their official packages
 (network access for installs was not used); behavioural checks are in the
 test file, but subtle deviations from the official code cannot be excluded.
+
+### X-19: Gauss-Newton on all 10 cases, wall-clock matched to X-17 case by case
+
+Two cases is a small sample, so `scripts/gn_full_baseline.py` ran
+Gauss-Newton (X-18's selected `gn_max_cg=10`) on all 10 ICCAD13 cases, each
+case given exactly the wall-clock X-17's L-BFGS-100 used on it:
+
+| Case | L2 X-17 → GN | PVB X-17 → GN | EPE@15 X-17 / GN / paper | EPE@3 X-17 / GN / ISPD25 |
+|---:|---|---|---|---|
+| 1 | 30630 → 29731 (−2.9%) | 53653 → 53457 | 3 / 3 / 3 | 63 / 58 / 51 |
+| 2 | 23282 → 22779 (−2.2%) | 41379 → 41502 | 0 / 0 / 0 | 57 / 54 / 34 |
+| 3 | 49900 → 48616 (−2.6%) | 92669 → 89652 | 7 / **6** / 13 | 92 / 94 / 107 |
+| 4 | 6786 → 6719 (−1.0%) | 24853 → 23790 | 0 / 0 / 0 | 16 / 18 / 8 |
+| 5 | 21977 → 21479 (−2.3%) | 54667 → 53992 | 0 / 0 / 0 | 47 / 44 / 29 |
+| 6 | 25921 → 25543 (−1.5%) | 49081 → 48794 | 0 / 0 / 0 | 56 / 57 / 28 |
+| 7 | 10308 → 10070 (−2.3%) | 37864 → 36883 | 0 / 0 / 0 | 26 / 24 / 7 |
+| 8 | 8899 → 8485 (−4.7%) | 21045 → 20588 | 0 / 0 / 0 | 28 / 25 / 13 |
+| 9 | 27168 → 26801 (−1.4%) | 61255 → 60855 | 0 / 0 / 0 | 69 / 67 / 49 |
+| 10 | 6523 → 6389 (−2.1%) | 16573 → 16397 | 0 / 0 / 0 | 12 / 12 / 2 |
+| **mean** | **21139 → 20661 (−2.3%)** | **45304 → 44591 (−1.6%)** | **1.0 → 0.9** / 1.6 | **46.6 → 45.3** / 32.8 |
+
+**Gauss-Newton has lower L2 than X-17's L-BFGS on all 10 of 10 cases**, lower
+PV band on 9 of 10, and the lowest mean EPE@15nm of any run in this project
+(0.9, against the paper's own 1.6). EPE@3nm improves on average (6 better,
+1 tie, 3 worse) but stays well short of the paper's ISPD25 reference —
+consistent with reading (4) above.
+
+**Budget accounting, stated rather than hidden:** the time budget is checked
+between outer steps, so Gauss-Newton overshot by 2–17 s per case — 1.3% more
+total wall-clock than X-17 (7712 s vs 7615 s). That cannot explain the gap:
+F-LBFGS-03's scan shows L-BFGS gains only ~0.5% L2 from 50% more time at this
+point (case 3, 100 → 150 iterations), so 1.3% more time is worth roughly
+0.01–0.1%, against a 2.3% mean difference that holds on every case.

@@ -246,6 +246,21 @@ to 46.6, though that still falls short of the paper's own no-generator
 ISPD25 reference (32.8). Reported with the refuted D2 hypothesis included,
 not silently dropped, per this project's standing discipline.
 
+**Optimizer survey: exploiting the least-squares structure beats the newest
+deep-learning optimizers (F-OPT-01, X-18/X-19).** Schedule-Free AdamW, Muon and
+SOAP (the current AlgoPerf-era state of the art for stochastic network
+training) were re-implemented alongside a matrix-free Levenberg-Marquardt
+(damped Gauss-Newton) solver whose analytic JVP/VJP make one CG step cost
+about half a gradient evaluation. Wall-clock matched on cases 3 and 6, the
+objective ranking is identical on both: Gauss-Newton < L-BFGS < Schedule-Free
+AdamW < Adam < Muon < SOAP. Muon and SOAP precondition in the row/column
+space of the parameter matrix, which suits weight matrices but not a mask
+image, and they come out worse than plain Adam. On all 10 cases at X-17's
+per-case wall-clock, Gauss-Newton has lower L2 than L-BFGS on every case
+(mean -2.3%) and a mean EPE@15nm of 0.9, against the paper's 1.6. EPE@3nm
+barely depends on the optimizer (46.6 -> 45.3): for that metric the
+objective, not the optimizer, is the binding lever.
+
 **The PV-band and EPE-aware terms are real, calibration-sensitive knobs, not
 inert options (F-PVB-01, F-EPE-01).** `weight_pvb` was swept over seven values
 on 3 cases: PV Band dropped monotonically (~7.5%, `weight_pvb=0→1.0`) against
