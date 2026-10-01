@@ -25,6 +25,14 @@ Four are available, none dictated by the paper (G-015):
   (``torch.optim.LBFGS``). See the ``ILTConfig`` docstring for why an
   "iteration" of L-BFGS is not comparable to one of Adam/SGD, and why batched
   L-BFGS runs independently per example rather than jointly.
+* ``"sf_adamw"`` / ``"muon"`` / ``"soap"``  recent first-order optimizers
+  from neural-network training (``gril.ilt.optimizers``).
+* ``"gauss_newton"``  matrix-free Levenberg-Marquardt (``gril.ilt.gauss_newton``),
+  exploiting the objective's least-squares structure; nominal-L2 loss only.
+
+Compare optimizers by wall-clock (``ILTResult.seconds`` / ``time_history``,
+or a common ``ILTConfig.time_budget_s``), not by "iterations": their per-step
+costs differ by integer factors. See docs/findings.md F-OPT-01.
 
 Beta annealing (continuation)
 ------------------------------
@@ -52,9 +60,11 @@ import torch
 import torch.nn.functional as F
 
 from gril.ilt.epe_loss import EPESites, build_epe_sites, soft_epe_loss
+from gril.ilt.gauss_newton import solve_levenberg_marquardt
+from gril.ilt.optimizers import SOAP, Muon, ScheduleFreeAdamW
 from gril.litho.resist import LithoModel, resist
 
-_KNOWN_OPTIMIZERS = ("adam", "sgd", "nesterov", "lbfgs")
+_KNOWN_OPTIMIZERS = ("adam", "sgd", "nesterov", "lbfgs", "sf_adamw", "muon", "soap", "gauss_newton")
 _KNOWN_BETA_SCHEDULES = ("linear", "exponential")
 
 
@@ -118,6 +128,17 @@ class ILTConfig:
     lbfgs_history_size: int = 10
     lbfgs_max_iter_per_step: int = 1   # inner L-BFGS iterations per solve() "iteration"
     lbfgs_line_search: str | None = "strong_wolfe"
+    # --- other optimizers (each ignored unless its optimizer is selected) ---
+    sf_warmup_steps: int = 0                 # sf_adamw
+    muon_momentum: float = 0.95              # muon
+    soap_precondition_frequency: int = 10    # soap
+    gn_max_cg: int = 10                      # gauss_newton: CG steps per outer step
+    gn_cg_rtol: float = 0.1                  # gauss_newton: inexact-Newton forcing term
+    gn_damping_init: float = 1.0             # gauss_newton: initial LM lambda
+    #: Stop after this many wall-clock seconds (0 = off). For compute-matched
+    #: cross-optimizer comparisons only; it makes runs machine-dependent, so no
+    #: committed baseline sets it.
+    time_budget_s: float = 0.0
     #: Reserved. The solver is deterministic, so this is recorded in experiment
     #: manifests for provenance but is intentionally NOT applied to the global RNG.
     seed: int = 0
@@ -128,6 +149,12 @@ class ILTConfig:
                 f"Unknown optimizer {self.optimizer!r}; expected one of {_KNOWN_OPTIMIZERS}. "
                 "(Earlier versions of this module silently fell back to SGD for any "
                 "unrecognised name -- that silent fallback has been removed.)"
+            )
+        if self.optimizer == "gauss_newton" and (self.weight_pvb or self.weight_tv or self.weight_epe):
+            raise ValueError(
+                "optimizer='gauss_newton' implements the nominal-L2 least-squares "
+                "objective only; weight_pvb/weight_tv/weight_epe must be 0 rather "
+                "than being silently ignored."
             )
         if self.optimizer == "nesterov" and self.momentum <= 0:
             raise ValueError(
@@ -163,6 +190,8 @@ class ILTResult:
     seconds: float = 0.0
     #: iteration count -> binarised mask, for iteration-budget curves (X-10).
     checkpoint_masks: dict[int, torch.Tensor] = field(default_factory=dict)
+    #: Seconds since the start of optimisation at each loss_history entry.
+    time_history: list[float] = field(default_factory=list)
 
 
 def morphological_open(mask: torch.Tensor, size: int) -> torch.Tensor:
@@ -299,6 +328,12 @@ def _make_first_order_optimizer(params: torch.Tensor, cfg: ILTConfig) -> torch.o
         return torch.optim.SGD(
             [params], lr=cfg.step_size, momentum=cfg.momentum, nesterov=True
         )
+    if cfg.optimizer == "sf_adamw":
+        return ScheduleFreeAdamW([params], lr=cfg.step_size, warmup_steps=cfg.sf_warmup_steps)
+    if cfg.optimizer == "muon":
+        return Muon([params], lr=cfg.step_size, momentum=cfg.muon_momentum)
+    if cfg.optimizer == "soap":
+        return SOAP([params], lr=cfg.step_size, precondition_frequency=cfg.soap_precondition_frequency)
     raise AssertionError(f"_make_first_order_optimizer called with {cfg.optimizer!r}")
 
 
@@ -309,13 +344,23 @@ def _solve_first_order(
     params: torch.Tensor,
     progress: bool,
     epe_sites: "EPESites | list[EPESites] | None" = None,
-) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor]]:
-    """Adam / SGD / Nesterov: fully vectorised across the batch dimension."""
+) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor], list[float]]:
+    """Adam / SGD / Nesterov / SF-AdamW / Muon / SOAP, vectorised across the batch.
+
+    Schedule-Free AdamW evaluates gradients at an interpolated point ``y``; its
+    deliverable is the averaged iterate ``x``, so the optimizer is switched to
+    eval mode for snapshots and for the returned parameters.
+    """
     opt = _make_first_order_optimizer(params, cfg)
+    schedule_free = isinstance(opt, ScheduleFreeAdamW)
     history: list[float] = []
+    times: list[float] = []
     snapshots: dict[int, torch.Tensor] = {}
     ran = 0
+    start = time.time()
     for step in range(cfg.iterations):
+        if cfg.time_budget_s > 0 and time.time() - start >= cfg.time_budget_s:
+            break
         opt.zero_grad(set_to_none=True)
         loss = ilt_loss(
             params, target, litho, cfg, beta=_beta_for_step(cfg, step), epe_sites=epe_sites
@@ -326,10 +371,15 @@ def _solve_first_order(
         grad_norm = params.grad.detach().abs().max().item() if params.grad is not None else 0.0
         opt.step()
         history.append(loss.detach().item())
+        times.append(time.time() - start)
         ran = step + 1
         if ran in cfg.checkpoints:
             with torch.no_grad():
+                if schedule_free:
+                    opt.eval()
                 snapshots[ran] = _binarize(params, target.dtype, cfg)
+                if schedule_free:
+                    opt.train()
         if progress and step % 25 == 0:
             print(f"    iter {step:4d}  loss {float(loss):.1f}", flush=True)
         if cfg.early_stop_rtol > 0 and len(history) > 10:
@@ -338,7 +388,9 @@ def _solve_first_order(
                 break
         if cfg.convergence_grad_tol > 0 and grad_norm < cfg.convergence_grad_tol:
             break
-    return params, history, ran, ran, snapshots  # one func-eval per iteration
+    if schedule_free:
+        opt.eval()
+    return params, history, ran, ran, snapshots, times  # one func-eval per iteration
 
 
 def _solve_lbfgs_one(
@@ -394,10 +446,15 @@ def _solve_lbfgs_one(
         return loss
 
     ran = 0
+    times: list[float] = []
+    start = time.time()
     for step in range(cfg.iterations):
+        if cfg.time_budget_s > 0 and time.time() - start >= cfg.time_budget_s:
+            break
         current_beta[0] = _beta_for_step(cfg, step)
         loss = opt.step(closure)
         history.append(loss.detach().item())
+        times.append(time.time() - start)
         ran = step + 1
         if ran in cfg.checkpoints:
             with torch.no_grad():
@@ -410,7 +467,7 @@ def _solve_lbfgs_one(
                 break
         if cfg.convergence_grad_tol > 0 and last_grad_norm[0] < cfg.convergence_grad_tol:
             break
-    return params_2d, history, ran, n_evals, snapshots
+    return params_2d, history, ran, n_evals, snapshots, times
 
 
 def _solve_lbfgs(
@@ -420,13 +477,10 @@ def _solve_lbfgs(
     params: torch.Tensor,
     progress: bool,
     epe_sites: "EPESites | list[EPESites] | None" = None,
-) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor]]:
+) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor], list[float]]:
     """Dispatch L-BFGS over an optional batch dimension, one example at a time."""
     if target.dim() == 2:
-        p, hist, ran, evals, snaps = _solve_lbfgs_one(
-            target, litho, cfg, params, progress, epe_sites=epe_sites
-        )
-        return p, hist, ran, evals, snaps
+        return _solve_lbfgs_one(target, litho, cfg, params, progress, epe_sites=epe_sites)
 
     batch = target.shape[0]
     per_example_params: list[torch.Tensor] = []
@@ -437,7 +491,7 @@ def _solve_lbfgs(
     for b in range(batch):
         p_b = params[b].detach().clone().requires_grad_(True)
         sites_b = epe_sites[b] if epe_sites is not None else None
-        p_b, hist_b, ran_b, evals_b, snaps_b = _solve_lbfgs_one(
+        p_b, hist_b, ran_b, evals_b, snaps_b, _ = _solve_lbfgs_one(
             target[b], litho, cfg, p_b, progress and b == 0, epe_sites=sites_b
         )
         per_example_params.append(p_b.detach())
@@ -467,7 +521,45 @@ def _solve_lbfgs(
                 [s[cp] for s in per_example_snapshots], dim=0
             )
 
-    return stacked_params, joint_history, max_ran, total_evals, joint_snapshots
+    # Examples run one after another, so no per-index timestamp is meaningful
+    # for the joint curve; time_history is left empty in the batched case.
+    return stacked_params, joint_history, max_ran, total_evals, joint_snapshots, []
+
+
+def _solve_gauss_newton(
+    target: torch.Tensor,
+    litho: LithoModel,
+    cfg: ILTConfig,
+    params: torch.Tensor,
+    progress: bool,
+    epe_sites: "EPESites | list[EPESites] | None" = None,
+) -> tuple[torch.Tensor, list[float], int, int, dict[int, torch.Tensor], list[float]]:
+    """Levenberg-Marquardt, one (H,W) example at a time (as for L-BFGS).
+
+    Beta is held at ``mask_steepness``; annealing is not applied here.
+    ``n_func_evals`` is reported in forward+backward equivalents
+    (``n_fwd + (n_jvp + n_vjp)/2``).
+    """
+    if cfg.beta_init is not None:
+        raise ValueError("optimizer='gauss_newton' does not support beta annealing (beta_init must be None)")
+    kwargs = dict(iterations=cfg.iterations, beta=cfg.mask_steepness, weight_nominal=cfg.weight_nominal,
+                  max_cg=cfg.gn_max_cg, cg_rtol=cfg.gn_cg_rtol, damping_init=cfg.gn_damping_init,
+                  time_budget_s=cfg.time_budget_s)
+    if target.dim() == 2:
+        p, hist, ran, work, times = solve_levenberg_marquardt(
+            target, litho, params, progress=progress, **kwargs
+        )
+        return p, hist, ran, work, {}, times
+    outs = [
+        solve_levenberg_marquardt(target[b], litho, params[b], progress=progress and b == 0, **kwargs)
+        for b in range(target.shape[0])
+    ]
+    joint = [
+        sum(h[i] if i < len(h) else h[-1] for _, h, _, _, _ in outs)
+        for i in range(max(len(h) for _, h, _, _, _ in outs))
+    ]
+    return (torch.stack([o[0] for o in outs]), joint, max(o[2] for o in outs),
+            sum(o[3] for o in outs), {}, [])
 
 
 def solve(
@@ -535,8 +627,11 @@ def solve(
             epe_sites = [build_epe_sites(target[b], cfg.epe_tolerance_nm) for b in range(target.shape[0])]
 
     start = time.time()
-    dispatch: Callable = _solve_lbfgs if cfg.optimizer == "lbfgs" else _solve_first_order
-    params, history, ran, n_evals, snapshots = dispatch(
+    dispatch: Callable = {
+        "lbfgs": _solve_lbfgs,
+        "gauss_newton": _solve_gauss_newton,
+    }.get(cfg.optimizer, _solve_first_order)
+    params, history, ran, n_evals, snapshots, times = dispatch(
         target, litho, cfg, params, progress, epe_sites=epe_sites
     )
 
@@ -553,4 +648,5 @@ def solve(
         optimizer=cfg.optimizer,
         seconds=time.time() - start,
         checkpoint_masks=snapshots,
+        time_history=times,
     )

@@ -1,0 +1,26 @@
+{
+  "note": "Partial: container restarted mid-run; case 3 E1/E2 completed, E3 and case 6 were lost. Values transcribed from the run log.",
+  "case3": [
+    {
+      "label": "E1 L-BFGS 200 it",
+      "l2": 49675,
+      "epe_at_15nm": 5,
+      "epe_at_3nm": 91,
+      "seconds": 1164
+    },
+    {
+      "label": "E1 L-BFGS 300 it",
+      "l2": 49560,
+      "epe_at_15nm": 5,
+      "epe_at_3nm": 93,
+      "seconds": 1646
+    },
+    {
+      "label": "E2 L-BFGS(100)->Adam+EPE(w=5000,tol=3nm) 50 it",
+      "l2": 49275,
+      "epe_at_15nm": 8,
+      "epe_at_3nm": 69,
+      "seconds": 707
+    }
+  ]
+}

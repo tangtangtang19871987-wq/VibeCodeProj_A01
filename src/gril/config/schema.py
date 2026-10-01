@@ -61,7 +61,7 @@ class ILTConfigSchema(_Strict):
     weight_pvb: float = Field(0.0, ge=0)
     weight_tv: float = Field(0.0, ge=0)
     init_scale: float = 2.0
-    optimizer: Literal["adam", "sgd", "nesterov", "lbfgs"] = "adam"
+    optimizer: Literal["adam", "sgd", "nesterov", "lbfgs", "sf_adamw", "muon", "soap", "gauss_newton"] = "adam"
     momentum: float = Field(0.0, ge=0, lt=1)
     grad_clip: float = Field(0.0, ge=0)
     early_stop_rtol: float = Field(0.0, ge=0)
@@ -76,6 +76,13 @@ class ILTConfigSchema(_Strict):
     lbfgs_history_size: int = Field(10, gt=0)
     lbfgs_max_iter_per_step: int = Field(1, gt=0)
     lbfgs_line_search: str | None = "strong_wolfe"
+    sf_warmup_steps: int = Field(0, ge=0)
+    muon_momentum: float = Field(0.95, ge=0, lt=1)
+    soap_precondition_frequency: int = Field(10, gt=0)
+    gn_max_cg: int = Field(10, gt=0)
+    gn_cg_rtol: float = Field(0.1, gt=0)
+    gn_damping_init: float = Field(1.0, gt=0)
+    time_budget_s: float = Field(0.0, ge=0)
     seed: int = 0
 
     @field_validator("checkpoints", mode="before")
