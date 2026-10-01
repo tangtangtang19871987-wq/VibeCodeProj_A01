@@ -1,0 +1,123 @@
+{
+  "protocol": "X-18: SOTA optimizers vs L-BFGS vs Gauss-Newton on ILT, wall-clock matched.\n\nProtocol (fixed before any result was seen):\n\nStage \"tune\": ICCAD13 case 3 at 4x reduced resolution (512^2; the optics are\nresolution-independent, see gril.experiments.infer.low_res_refine). Every\noptimizer gets the SAME number of configurations (4) and the SAME wall-clock\nbudget per configuration. Selection is by final printed-image L2 -- never by\nEPE, which is the comparison metric -- matching this project's standing tuning\ndiscipline (configs/experiments/README.md).\n\nStage \"full\": each optimizer's selected configuration at full 2048^2\nresolution on case 3 (hardest) and case 6 (largest remaining EPE@3nm gap to\nthe paper), with an identical wall-clock budget (default 720 s, ~ the per-case\ncost of X-17's L-BFGS-100). Same cold start for every method (init_scale=0.5,\nmask_steepness=8.0, as X-14/X-16/X-17).\n\nResumable: each finished run writes its own JSON and is skipped on restart.\n\nUsage::\n\n    PYTHONPATH=src python scripts/optimizer_benchmark.py --stage all\n",
+  "grid": {
+    "adam": [
+      {
+        "step_size": 0.05
+      },
+      {
+        "step_size": 0.1
+      },
+      {
+        "step_size": 0.2
+      },
+      {
+        "step_size": 0.5
+      }
+    ],
+    "sf_adamw": [
+      {
+        "step_size": 0.05,
+        "sf_warmup_steps": 10
+      },
+      {
+        "step_size": 0.1,
+        "sf_warmup_steps": 10
+      },
+      {
+        "step_size": 0.2,
+        "sf_warmup_steps": 10
+      },
+      {
+        "step_size": 0.5,
+        "sf_warmup_steps": 10
+      }
+    ],
+    "muon": [
+      {
+        "step_size": 0.02
+      },
+      {
+        "step_size": 0.05
+      },
+      {
+        "step_size": 0.1
+      },
+      {
+        "step_size": 0.2
+      }
+    ],
+    "soap": [
+      {
+        "step_size": 0.05
+      },
+      {
+        "step_size": 0.1
+      },
+      {
+        "step_size": 0.2
+      },
+      {
+        "step_size": 0.5
+      }
+    ],
+    "lbfgs": [
+      {
+        "step_size": 1.0,
+        "lbfgs_history_size": 10
+      },
+      {
+        "step_size": 1.0,
+        "lbfgs_history_size": 30
+      },
+      {
+        "step_size": 0.5,
+        "lbfgs_history_size": 10
+      },
+      {
+        "step_size": 0.5,
+        "lbfgs_history_size": 30
+      }
+    ],
+    "gauss_newton": [
+      {
+        "gn_max_cg": 5
+      },
+      {
+        "gn_max_cg": 10
+      },
+      {
+        "gn_max_cg": 20
+      },
+      {
+        "gn_max_cg": 10,
+        "gn_damping_init": 0.1
+      }
+    ]
+  },
+  "common": {
+    "mask_steepness": 8.0,
+    "init_scale": 0.5,
+    "iterations": 100000
+  },
+  "args": {
+    "stage": "all",
+    "budget_tune": 32.0,
+    "budget_full": 720.0,
+    "cases": [
+      3,
+      6
+    ],
+    "threads": 4
+  },
+  "provenance": {
+    "git_commit": "0d33aa6d1b448243b3c3e8795e282acc0e18f439",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  }
+}
