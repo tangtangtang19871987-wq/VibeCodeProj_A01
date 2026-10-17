@@ -1437,3 +1437,91 @@ basis). Ranking agreement (0.83) is good but not the 0.99 two full solves
 reach. Untested: extrapolation beyond the snapshot range (here held-out
 settings mostly lie inside it), transfer of a POD basis to a different but
 similar layout, and full 2048^2 resolution.
+
+---
+
+## F-ROM-04 — Layout changes: the operator ROM does not fix transfer; one geometry-defined mode (uniform normal edge displacement) explains why POD transfers (X-24, X-25)
+
+**Severity: high (positive, with caveats).** Answers two questions: does a
+recipe-response basis survive a layout change, and is the snapshot-free
+operator ROM the better choice when the layout changes?
+
+### Setup
+
+`scripts/rom_layout_transfer.py` (X-24) uses three layouts besides case 3:
+- `mod_small`: the smallest shape moved by 4 px (16 nm);
+- `mod_large`: one shape removed and a new 15×70 px bar added. Edits are made by
+  connected-component label, with an assert that no shapes merge or split;
+- `case1`: a different ICCAD13 clip.
+
+Each layout gets its own 120 s reference solve, plus a 60 s warm truth for each
+of 6 recipes (threshold ×0.95/×1.05, dose 0.97/1.03, bias ±1 px). Translation
+needs no experiment: the optics is a circular convolution, so integer shifts
+commute with the model (checked to 7e-7) and a basis only has to be shifted.
+
+`scripts/rom_basis_physics.py` (X-25) runs the same 4 layouts × 6 recipes with
+Gauss-Newton on the full model, restricted to bases that need **no
+snapshots**:
+- `const`: P + c;
+- `normal`: δP ∝ |∇P_ref|, a uniform normal edge displacement of the level set,
+  1 dimension;
+- `const+normal`;
+- `lowfreq9`: the 9 lowest Fourier modes.
+
+These are compared with random controls (13 Gaussian or 13 band-limited
+fields) and with case 3's 13-snapshot POD.
+
+### Result (median recovery of the frozen → re-optimised L2 gap)
+
+X-24:
+
+| Layout | case-3 POD | case-3 family | own LOO POD | operator ROM r100 / r200 | warm GN 12 / 20 steps |
+|---|---:|---:|---:|---:|---:|
+| mod_small | 100% | 100% | 99% | 25% / 54% | 60% / 79% |
+| mod_large | 86% (worst 63%) | 85% | 98% | ~0% / diverges | 56% / 72% |
+| case1 | 94% | 91% | 96% | 22% / 56% | 54% / 75% |
+
+The operator ROM needs ~100 s offline per layout. It has no transfer problem by
+construction, but its ceiling stays around 50% and it diverges on mod_large.
+X-20/X-21 already showed it is bounded by the reference tangent subspace, and a
+layout change does not alter that. The case-3 POD basis transferred far better
+than expected, including to a different clip.
+
+X-25 (24 layout×recipe pairs):
+
+| Basis (dims) | case3 | mod_small | mod_large | case1 | threshold | dose | bias | **all** | worst | median s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| const (1) | 35% | 32% | 22% | 19% | 24% | 22% | 26% | 26% | 11% | 1.2 |
+| **normal (1)** | 88% | 86% | 68% | 88% | 88% | 88% | 68% | **87%** | 47% | **1.2** |
+| const+normal (2) | 93% | 89% | 49% | 92% | 91% | 90% | 73% | 89% | 43% | 1.6 |
+| lowfreq9 (9) | 43% | 43% | 31% | 33% | 39% | 39% | 37% | 39% | 26% | 5.4 |
+| random13 (13) | 22% | 15% | 9% | 12% | 13% | 12% | 16% | 14% | 4% | 7.3 |
+| rand_band13 (13) | 36% | 41% | 31% | 31% | 35% | 39% | 29% | 36% | 11% | 7.2 |
+| case-3 POD (13) | 100% | 100% | 86% | 94% | 98% | 99% | 95% | 98% | 63% | 7.2 |
+
+Only a median 2.9% of case 3's snapshot energy lies in the DC mode, and also
+2.9% in the 9 lowest modes. What transfers is therefore not a global bias: it
+is the edge-localised normal displacement.
+
+### Reading it
+
+To first order, a threshold or dose change asks every edge to move by roughly
+the same distance. In level-set terms that is δP ∝ |∇P|, a single field
+defined by the reference mask's own geometry. One Gauss-Newton dimension along
+it recovers a median 87% on every layout in about a second, with no snapshots
+and no learned quantity. This is the physical content that the case-3 POD
+carried to other layouts: its leading mode resembles a normal displacement,
+and that shape is generic. The remaining ~10% (which POD captures) is
+layout-specific, proximity-dependent correction.
+
+### Limits
+
+- Geometry recipes (bias, 68%) and the heavily edited layout (68%) are weaker,
+  with a worst case of 47%. Edge-dependent correction matters more there.
+- Adding `const` to `normal` sometimes hurts (mod_large 68% → 49%). The
+  problem is non-convex, and a larger span can lead GN to a worse local
+  minimum.
+- The scope is 512², one reference per layout, 6 recipes, and 60 s warm truths.
+
+A natural next step is a few more geometry-defined modes, such as normal
+displacement weighted by curvature or by local proximity / pattern density.

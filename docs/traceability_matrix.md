@@ -109,6 +109,8 @@ against an independent reference) / `BLOCKED`.
 | X-21 | Diagnostics: subspace vs linearisation | [C] | `scripts/rom_diagnostics.py` | `results/rom_diagnostics/` | **VERIF** -- reference tangent subspace is the bottleneck (projection onto full band range 38%); relinearising reaches 86% but costs ~280 s (F-ROM-02) |
 | X-22 | Warm-start convergence baseline | [C] | `scripts/rom_warmstart_curve.py` | `results/rom_warmstart/` | **VERIF** -- 20 full GN steps from the reference: 92% median recovery in 5.3 s (F-ROM-02) |
 | X-23 | Snapshot POD vs operator basis | [C] | `scripts/rom_pod_study.py` | `results/rom_pod/` | **VERIF** -- same-family POD (3-4 dims) + full-model GN: 95% median recovery in 2.8 s, Spearman 0.83; leave-one-out 99% (F-ROM-03) |
+| X-24 | Layout transfer of recipe bases (shift / small edit / large edit / other clip) | [C] | `scripts/rom_layout_transfer.py` | `results/rom_layout_transfer/` | **VERIF** -- case-3 POD transfers (100/86/94%); operator ROM capped ~50%, diverges on large edit; translation exact (F-ROM-04) |
+| X-25 | Snapshot-free geometry bases | [C] | `scripts/rom_basis_physics.py` | `results/rom_basis_physics/` | **VERIF** -- 1-dim uniform normal displacement dP ~ abs(grad P_ref): 87% median over 4 layouts x 6 recipes in 1.2 s; random controls 14-36% (F-ROM-04) |
 
 ## 8. Completeness check against the paper
 
