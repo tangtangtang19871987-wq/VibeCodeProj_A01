@@ -1376,3 +1376,64 @@ recipes' *actual* optimal changes would include the null-space components
 that D1 shows the operator basis misses, so it is the natural next test.
 A parameterisation that does not saturate (so the tangent space is not tied
 to the current edges) is the other untested direction.
+
+
+---
+
+## F-ROM-03 — Snapshot POD succeeds where the operator basis failed: 3–4 snapshots of a knob give ~95% recovery in 2.8 s (X-23)
+
+**Severity: high (positive result).** Directly tests the second method the
+user asked about. X-21 predicted it: the optimal change under a recipe change
+lies largely in `J`'s null space at the reference, which a tangent (operator)
+basis cannot represent but which *other recipes' actual optimal changes* do
+contain.
+
+### Setup
+
+`scripts/rom_pod_study.py`. Snapshots are the warm re-optimised changes
+`dP_i = P_warm_i - P0` for X-20's 13 recipes (produced by the exact solver,
+no external data; by model-reduction convention this is a snapshot method,
+reported separately from the operator-only results). For each recipe `h`:
+**leave-one-out** POD (basis from the other 12) and **same-family** POD
+(basis from the other 2–4 recipes of the same knob only — a one-knob sweep).
+Per basis: the projection of the true change (upper bound), and Gauss-Newton
+on the **full** model restricted to the POD span (`J U` recomputed each step,
+<= 12 JVPs). All masks printed with the full model.
+
+### Result
+
+| Method | Median recovery | Worst | Spearman vs truth (13 recipes) | Time per new recipe |
+|---|---:|---:|---:|---:|
+| frozen mask | 0% | — | +0.02 | 0 |
+| operator basis, once-linearised (X-20) | 25–33% | diverges | +0.1 – +0.17 | 0.3–12 s (+112 s offline) |
+| warm-start full GN, 12 / 20 steps (X-22) | 72% / 92% | 49% / 61% | +0.37 / +0.48 | 2.9 / 5.3 s |
+| **same-family POD (3–4 dims) + full-model GN** | **95%** | 74% | **+0.83** | **2.8 s** |
+| **leave-one-out POD (12 dims) + full-model GN** | **99%** | 93% | +0.71 | 8.4 s |
+| projection only, LOO / family | 95% / 71% | 43% / 29% | +0.64 / +0.48 | — |
+
+The POD span captures a median 85% (LOO) / 74% (family) of the held-out
+change's norm, versus 55–67% for the entire 1225-dim operator range at the
+reference (X-21). At equal wall-clock (~2.8 s), same-family POD recovers 95%
+where warm-starting recovers 72%, and ranks recipes far better (0.83 vs 0.37).
+The least favourable case is the smallest geometry change (bias +1 px: 80%
+family, 93% LOO).
+
+### Reading it
+
+What makes ILT's response to a recipe change low-dimensional is not the
+local curvature (X-20) but the *family of optimal changes itself*: three or
+four solved recipes of one knob span almost the whole response to a new
+setting of that knob, and a few-dimensional Gauss-Newton on the exact physics
+recovers the rest. The physics stays exact; only the search space is learned
+from the solver's own solutions. Cost model for a sweep of `N` recipes along
+one knob: `k` full solves (here 60 s each at 512^2) plus `N - k` reduced
+solves of ~3 s, instead of `N` full solves.
+
+### What this does NOT establish
+
+One clip, 512^2, 13 recipes, snapshots from 60 s warm solves (the truth used
+for scoring is of the same kind — the held-out recipe is never in its own
+basis). Ranking agreement (0.83) is good but not the 0.99 two full solves
+reach. Untested: extrapolation beyond the snapshot range (here held-out
+settings mostly lie inside it), transfer of a POD basis to a different but
+similar layout, and full 2048^2 resolution.
