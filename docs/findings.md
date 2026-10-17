@@ -1310,3 +1310,69 @@ current mask edges, so the linearised model cannot move an edge further than
 ~a pixel, while the true re-optimisation does so step by step. X-21
 (`scripts/rom_diagnostics.py`) separates "the subspace is wrong" from "the
 linearisation is wrong".
+
+
+---
+
+## F-ROM-02 — Why the reduced model fails (the reference subspace is in the wrong place), and what is actually fast (X-21, X-22)
+
+**Severity: high.** Follow-up to F-ROM-01: separates the candidate causes,
+then measures the baseline every shortcut has to beat.
+
+### X-21: the subspace, not the linearisation, is the bottleneck
+
+`scripts/rom_diagnostics.py`, 5 of X-20's recipes. Recovery = fraction of the
+frozen → re-optimised L2 gap closed; medians:
+
+| Diagnostic | Recovery |
+|---|---:|
+| D1: project the **true** optimal change onto the top 25 / 100 / 400 eigenvectors at `P0` | 19% / 20% / 24% |
+| D1: project it onto the whole 1225-dim band range at `P0` | **38%** |
+| D2: optimise inside the top-r subspace with the **full** model and a trust region (true-objective step acceptance) | 23–24% |
+| D4: re-linearise at the current point and re-solve, 1 / 2 / 3 times (r = 100) | 26% / 63% / **86%** (~280 s cumulative) |
+
+Even a perfect solver restricted to the reference's tangent subspace cannot
+do better than ~24–38%, and D2 reaches exactly that ceiling — so the
+linearisation *inside* the subspace is not what fails. Only 55–67% of the
+true optimal change's norm lies in the band range at `P0`; the rest is in
+`J`'s null space there, and that part carries most of the improvement once
+the sigmoid and binarisation act on it. The mechanism: with the saturated
+parameterisation `M = sigmoid(8P)`, `range(J^T) = s_m . {band-limited}` hugs
+the *current* mask edges, while re-optimisation moves edges into regions
+where `s_m(P0) ~ 0`. Re-linearising lets the subspace follow the edges (86%
+after 3 steps), but costs ~280 s — more than the 60 s warm re-optimisation
+used as truth.
+
+### X-22: a warm-started full-physics solve is the fast method
+
+`scripts/rom_warmstart_curve.py`: all 13 recipes, plain Gauss-Newton on the
+full model started from `P0`, snapshotted along the way.
+
+| GN steps from `P0` | Median recovery | Worst | Median time (512^2) | Spearman vs truth |
+|---:|---:|---:|---:|---:|
+| 1 | 16% | 10% | 0.3 s | +0.09 |
+| 5 | 40% | 29% | 1.2 s | +0.20 |
+| 12 | 72% | 49% | 2.9 s | +0.37 |
+| 20 | **92%** | 61% | **5.3 s** | +0.48 |
+| (cold start, 120 s) | — | — | 120 s | **+0.99** |
+
+Twenty full-model steps from the reference recover a median 92% of the gap
+in 5.3 s — about 23x faster than a cold start — far ahead of every reduced
+model tried (25–33%). Hardest are the geometry changes (bias ±2 px: 61% and
+78%), easiest small threshold/dose changes (>95%).
+
+**Ranking recipes is a harder target than recovering most of the gap.**
+Truth L2 values for the threshold and dose recipes differ by only 1–3%, so
+an 8% residual gap is enough to scramble their order (Spearman 0.48 at 20
+steps, vs 0.99 between two full runs). A recipe study that needs a *ranking*
+must run close to convergence; one that needs "is this recipe roughly as
+good as the reference" can stop after a few seconds.
+
+### What this does NOT establish
+
+One clip (case 3), 512^2, one reference, Gauss-Newton only. Snapshot-based
+POD has not been tested yet: unlike the operator basis, snapshots of other
+recipes' *actual* optimal changes would include the null-space components
+that D1 shows the operator basis misses, so it is the natural next test.
+A parameterisation that does not saturate (so the tangent space is not tied
+to the current edges) is the other untested direction.
