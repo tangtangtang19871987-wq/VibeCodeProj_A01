@@ -1,0 +1,13 @@
+{
+  "reference": {
+    "l2": 2975.0,
+    "pvb": 5592.0,
+    "epe@15nm": 6
+  },
+  "warm_same_recipe": {
+    "l2": 2982.0,
+    "pvb": 5569.0,
+    "epe@15nm": 6,
+    "xor_vs_warm": 87
+  }
+}
