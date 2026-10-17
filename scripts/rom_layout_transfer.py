@@ -20,6 +20,10 @@ truth = 60 s warm re-optimisation from that layout's reference. Candidates:
   own_loo        POD from this layout's own other 5 recipes (reference point:
                  what new snapshots on this layout would buy)
   warm12/warm20  12 / 20 full GN steps from the layout's reference
+  operator_r     the purely operator-based reduced model (X-20's ReducedILT),
+                 built at THIS layout's reference from its exact J^T J spectrum
+                 -- needs no snapshots, so it has no transfer problem by
+                 construction; the question is only its ceiling
 
 Usage::
 
@@ -39,7 +43,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import torch
 
 import rom_recipe_study as base
-from gril.ilt.gauss_newton import solve_levenberg_marquardt
+from gril.ilt.gauss_newton import ILTLeastSquares, solve_levenberg_marquardt
+from gril.ilt.reduced_order import ReducedILT, gn_spectrum
 from rom_pod_study import family, gn_in_span, pod_basis
 
 OUT = os.path.join(base.ROOT, "results/rom_layout_transfer")
@@ -93,10 +98,21 @@ def main() -> None:
         p_ref, _ = base.gn(litho, target, start, base.REF_BUDGET)
         ref_seconds = time.time() - t0
 
+        torch.save(p_ref, os.path.join(OUT, f"{name}_p_ref.pt"))
         truths = {}
         for rec in recipes:
             lm, tgt = base.recipe_setup(litho, target, rec)
             truths[rec["name"]], _ = base.gn(lm, tgt, p_ref, base.WARM_BUDGET)
+            torch.save(truths[rec["name"]], os.path.join(OUT, f"{name}_truth_{rec['name'].replace(' ', '_')}.pt"))
+
+        t0 = time.time()
+        model = ILTLeastSquares(target, litho, base.BETA)
+        spec = gn_spectrum(model, model.state(p_ref), batch=16)
+        with torch.no_grad():
+            i_ref = litho.aerial_nominal(torch.sigmoid(base.BETA * p_ref))
+        roms = {r: ReducedILT(spec, r, p_ref, i_ref, base.BASE.dose_nom, base.BETA) for r in (100, 200)}
+        del spec
+        operator_offline = time.time() - t0
 
         rows = []
         for rec in recipes:
@@ -123,6 +139,11 @@ def main() -> None:
                 p = gn_in_span(lm, tgt, p_ref, pod_basis(deltas))
                 record(key, p, time.time() - t0)
 
+            for r, rom in roms.items():
+                t0 = time.time()
+                a, _ = rom.solve(lm.cfg.target_density, lm.cfg.print_steepness, lm.cfg.dose_nom, tgt)
+                record(f"operator_r{r}", rom.params(a), time.time() - t0)
+
             snap = {}
             t0 = time.time()
             solve_levenberg_marquardt(tgt, lm, p_ref, iterations=20, beta=base.BETA, max_cg=10,
@@ -132,9 +153,11 @@ def main() -> None:
             rows.append(row)
             print(f"[{name:9s} {h:15s}] gap {gap:5.0f} | case3_pod {100 * row['case3_pod']['recovery']:5.0f}% "
                   f"case3_family {100 * row['case3_family']['recovery']:5.0f}% own_loo {100 * row['own_loo']['recovery']:5.0f}% "
+                  f"| operator r100/r200 {100 * row['operator_r100']['recovery']:4.0f}%/{100 * row['operator_r200']['recovery']:4.0f}% "
                   f"| warm12 {100 * row['warm12']['recovery']:4.0f}% warm20 {100 * row['warm20']['recovery']:4.0f}%",
                   flush=True)
-        json.dump({"layout": name, "reference_seconds": ref_seconds, "rows": rows, "protocol": __doc__,
+        json.dump({"layout": name, "reference_seconds": ref_seconds, "operator_offline_seconds": operator_offline,
+                   "rows": rows, "protocol": __doc__,
                    "provenance": base.provenance()}, open(path, "w"), indent=2)
 
 
