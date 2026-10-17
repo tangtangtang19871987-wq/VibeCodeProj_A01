@@ -1,0 +1,456 @@
+{
+  "layout": "case1",
+  "reference_seconds": 120.74377775192261,
+  "operator_offline_seconds": 99.52073884010315,
+  "rows": [
+    {
+      "recipe": {
+        "name": "threshold x0.95",
+        "threshold": 0.21375
+      },
+      "truth": {
+        "l2": 1824.0,
+        "pvb": 3292.0,
+        "epe@15nm": 4
+      },
+      "frozen": {
+        "l2": 2487.0,
+        "pvb": 3398.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 1683
+      },
+      "case3_pod": {
+        "l2": 1834.0,
+        "pvb": 3356.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 194,
+        "recovery": 0.9849170437405732,
+        "seconds": 9.068014144897461
+      },
+      "case3_family": {
+        "l2": 1836.0,
+        "pvb": 3347.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 202,
+        "recovery": 0.9819004524886877,
+        "seconds": 3.851980209350586
+      },
+      "own_loo": {
+        "l2": 1812.0,
+        "pvb": 3306.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 104,
+        "recovery": 1.0180995475113122,
+        "seconds": 4.188950061798096
+      },
+      "operator_r100": {
+        "l2": 2318.0,
+        "pvb": 3353.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 1408,
+        "recovery": 0.2549019607843137,
+        "seconds": 1.4883813858032227
+      },
+      "operator_r200": {
+        "l2": 2117.0,
+        "pvb": 3286.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 1041,
+        "recovery": 0.5580693815987934,
+        "seconds": 3.2946059703826904
+      },
+      "warm12": {
+        "l2": 2242.0,
+        "pvb": 3278.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 1204,
+        "recovery": 0.3695324283559578,
+        "seconds": 2.255192995071411
+      },
+      "warm20": {
+        "l2": 2027.0,
+        "pvb": 3265.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 773,
+        "recovery": 0.693815987933635,
+        "seconds": 3.8068220615386963
+      }
+    },
+    {
+      "recipe": {
+        "name": "threshold x1.05",
+        "threshold": 0.23625000000000002
+      },
+      "truth": {
+        "l2": 1761.0,
+        "pvb": 3428.0,
+        "epe@15nm": 4
+      },
+      "frozen": {
+        "l2": 2325.0,
+        "pvb": 3405.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 1546
+      },
+      "case3_pod": {
+        "l2": 1808.0,
+        "pvb": 3494.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 273,
+        "recovery": 0.9166666666666666,
+        "seconds": 9.753000736236572
+      },
+      "case3_family": {
+        "l2": 1828.0,
+        "pvb": 3460.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 299,
+        "recovery": 0.8812056737588653,
+        "seconds": 3.84722900390625
+      },
+      "own_loo": {
+        "l2": 1790.0,
+        "pvb": 3414.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 139,
+        "recovery": 0.9485815602836879,
+        "seconds": 3.935288429260254
+      },
+      "operator_r100": {
+        "l2": 2164.0,
+        "pvb": 3360.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 1281,
+        "recovery": 0.2854609929078014,
+        "seconds": 1.4779348373413086
+      },
+      "operator_r200": {
+        "l2": 1973.0,
+        "pvb": 3327.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 964,
+        "recovery": 0.624113475177305,
+        "seconds": 3.7769014835357666
+      },
+      "warm12": {
+        "l2": 1904.0,
+        "pvb": 3349.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 817,
+        "recovery": 0.7464539007092199,
+        "seconds": 3.330393075942993
+      },
+      "warm20": {
+        "l2": 1800.0,
+        "pvb": 3368.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 415,
+        "recovery": 0.9308510638297872,
+        "seconds": 5.370914936065674
+      }
+    },
+    {
+      "recipe": {
+        "name": "dose 0.97",
+        "dose": 0.97
+      },
+      "truth": {
+        "l2": 1798.0,
+        "pvb": 3391.0,
+        "epe@15nm": 4
+      },
+      "frozen": {
+        "l2": 2577.0,
+        "pvb": 3428.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 1895
+      },
+      "case3_pod": {
+        "l2": 1805.0,
+        "pvb": 3510.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 333,
+        "recovery": 0.9910141206675225,
+        "seconds": 10.28597617149353
+      },
+      "case3_family": {
+        "l2": 1797.0,
+        "pvb": 3500.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 415,
+        "recovery": 1.0012836970474968,
+        "seconds": 3.304936647415161
+      },
+      "own_loo": {
+        "l2": 1760.0,
+        "pvb": 3431.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 162,
+        "recovery": 1.048780487804878,
+        "seconds": 3.828540802001953
+      },
+      "operator_r100": {
+        "l2": 2402.0,
+        "pvb": 3446.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 1652,
+        "recovery": 0.2246469833119384,
+        "seconds": 1.3989019393920898
+      },
+      "operator_r200": {
+        "l2": 2125.0,
+        "pvb": 3380.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 1239,
+        "recovery": 0.5802310654685494,
+        "seconds": 3.2811124324798584
+      },
+      "warm12": {
+        "l2": 2128.0,
+        "pvb": 3417.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 1236,
+        "recovery": 0.576379974326059,
+        "seconds": 2.500880718231201
+      },
+      "warm20": {
+        "l2": 1848.0,
+        "pvb": 3393.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 600,
+        "recovery": 0.9358151476251605,
+        "seconds": 4.185215473175049
+      }
+    },
+    {
+      "recipe": {
+        "name": "dose 1.03",
+        "dose": 1.03
+      },
+      "truth": {
+        "l2": 1792.0,
+        "pvb": 3328.0,
+        "epe@15nm": 4
+      },
+      "frozen": {
+        "l2": 2629.0,
+        "pvb": 3428.0,
+        "epe@15nm": 7,
+        "xor_vs_warm": 1913
+      },
+      "case3_pod": {
+        "l2": 1834.0,
+        "pvb": 3349.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 202,
+        "recovery": 0.9498207885304659,
+        "seconds": 9.209114074707031
+      },
+      "case3_family": {
+        "l2": 1836.0,
+        "pvb": 3352.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 292,
+        "recovery": 0.9474313022700119,
+        "seconds": 3.3672192096710205
+      },
+      "own_loo": {
+        "l2": 1822.0,
+        "pvb": 3286.0,
+        "epe@15nm": 4,
+        "xor_vs_warm": 98,
+        "recovery": 0.96415770609319,
+        "seconds": 3.9731500148773193
+      },
+      "operator_r100": {
+        "l2": 2466.0,
+        "pvb": 3388.0,
+        "epe@15nm": 6,
+        "xor_vs_warm": 1646,
+        "recovery": 0.19474313022700118,
+        "seconds": 1.513568639755249
+      },
+      "operator_r200": {
+        "l2": 2237.0,
+        "pvb": 3297.0,
+        "epe@15nm": 6,
+        "xor_vs_warm": 1267,
+        "recovery": 0.46833930704898447,
+        "seconds": 3.195394992828369
+      },
+      "warm12": {
+        "l2": 2171.0,
+        "pvb": 3283.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 1127,
+        "recovery": 0.5471923536439666,
+        "seconds": 2.6345529556274414
+      },
+      "warm20": {
+        "l2": 1990.0,
+        "pvb": 3250.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 640,
+        "recovery": 0.7634408602150538,
+        "seconds": 4.573872804641724
+      }
+    },
+    {
+      "recipe": {
+        "name": "bias -1px",
+        "bias": -1
+      },
+      "truth": {
+        "l2": 1668.0,
+        "pvb": 3344.0,
+        "epe@15nm": 4
+      },
+      "frozen": {
+        "l2": 2318.0,
+        "pvb": 3371.0,
+        "epe@15nm": 6,
+        "xor_vs_warm": 1582
+      },
+      "case3_pod": {
+        "l2": 1712.0,
+        "pvb": 3360.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 344,
+        "recovery": 0.9323076923076923,
+        "seconds": 9.657376050949097
+      },
+      "case3_family": {
+        "l2": 1806.0,
+        "pvb": 3403.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 552,
+        "recovery": 0.7876923076923077,
+        "seconds": 3.3275909423828125
+      },
+      "own_loo": {
+        "l2": 1708.0,
+        "pvb": 3338.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 224,
+        "recovery": 0.9384615384615385,
+        "seconds": 4.225513935089111
+      },
+      "operator_r100": {
+        "l2": 2222.0,
+        "pvb": 3336.0,
+        "epe@15nm": 6,
+        "xor_vs_warm": 1440,
+        "recovery": 0.1476923076923077,
+        "seconds": 1.3998119831085205
+      },
+      "operator_r200": {
+        "l2": 2018.0,
+        "pvb": 3294.0,
+        "epe@15nm": 6,
+        "xor_vs_warm": 1120,
+        "recovery": 0.46153846153846156,
+        "seconds": 3.332751989364624
+      },
+      "warm12": {
+        "l2": 2067.0,
+        "pvb": 3351.0,
+        "epe@15nm": 6,
+        "xor_vs_warm": 1177,
+        "recovery": 0.3861538461538462,
+        "seconds": 2.298238754272461
+      },
+      "warm20": {
+        "l2": 1836.0,
+        "pvb": 3244.0,
+        "epe@15nm": 5,
+        "xor_vs_warm": 650,
+        "recovery": 0.7415384615384616,
+        "seconds": 4.402302026748657
+      }
+    },
+    {
+      "recipe": {
+        "name": "bias +1px",
+        "bias": 1
+      },
+      "truth": {
+        "l2": 1925.0,
+        "pvb": 3476.0,
+        "epe@15nm": 4
+      },
+      "frozen": {
+        "l2": 2536.0,
+        "pvb": 3371.0,
+        "epe@15nm": 1,
+        "xor_vs_warm": 1679
+      },
+      "case3_pod": {
+        "l2": 2012.0,
+        "pvb": 3476.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 497,
+        "recovery": 0.8576104746317512,
+        "seconds": 9.091686487197876
+      },
+      "case3_family": {
+        "l2": 2062.0,
+        "pvb": 3476.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 601,
+        "recovery": 0.7757774140752864,
+        "seconds": 3.331815481185913
+      },
+      "own_loo": {
+        "l2": 1957.0,
+        "pvb": 3430.0,
+        "epe@15nm": 3,
+        "xor_vs_warm": 226,
+        "recovery": 0.9476268412438625,
+        "seconds": 3.914419412612915
+      },
+      "operator_r100": {
+        "l2": 2409.0,
+        "pvb": 3378.0,
+        "epe@15nm": 1,
+        "xor_vs_warm": 1508,
+        "recovery": 0.2078559738134206,
+        "seconds": 1.7356011867523193
+      },
+      "operator_r200": {
+        "l2": 2187.0,
+        "pvb": 3347.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 1114,
+        "recovery": 0.5711947626841244,
+        "seconds": 3.1808695793151855
+      },
+      "warm12": {
+        "l2": 2208.0,
+        "pvb": 3434.0,
+        "epe@15nm": 1,
+        "xor_vs_warm": 1127,
+        "recovery": 0.5368248772504092,
+        "seconds": 2.5419399738311768
+      },
+      "warm20": {
+        "l2": 2087.0,
+        "pvb": 3407.0,
+        "epe@15nm": 2,
+        "xor_vs_warm": 734,
+        "recovery": 0.734860883797054,
+        "seconds": 4.078360319137573
+      }
+    }
+  ],
+  "protocol": "X-24: does a recipe-response POD basis transfer when the layout changes?\n\nX-23's POD basis was built from optimal mask changes on ICCAD13 case 3.\nIts vectors are pixel fields anchored to case 3's edges. This tests how far\nthat transfers:\n\n  translation   exact by construction -- the optics is a circular convolution,\n                so integer shifts commute with the model (checked numerically,\n                7e-7); the basis just has to be shifted with the layout.\n  mod_small     case 3 with one small shape moved by 4 px (16 nm)\n  mod_large     case 3 with one shape removed and a new one added elsewhere\n  case1         a different ICCAD13 clip\n\nFor each layout: a reference solve (modified layouts warm-start from case 3's\nP0, as one would after an ECO; case 1 starts cold), then 6 recipes with\ntruth = 60 s warm re-optimisation from that layout's reference. Candidates:\n  case3_pod      Gauss-Newton (full model) in the span of case 3's 13 snapshots\n  case3_family   same, case 3's same-knob snapshots only\n  own_loo        POD from this layout's own other 5 recipes (reference point:\n                 what new snapshots on this layout would buy)\n  warm12/warm20  12 / 20 full GN steps from the layout's reference\n  operator_r     the purely operator-based reduced model (X-20's ReducedILT),\n                 built at THIS layout's reference from its exact J^T J spectrum\n                 -- needs no snapshots, so it has no transfer problem by\n                 construction; the question is only its ceiling\n\nUsage::\n\n    PYTHONPATH=src python scripts/rom_layout_transfer.py\n",
+  "provenance": {
+    "git_commit": "577b5740395984e90f68fa6c4852ceb9754069d2",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  }
+}
