@@ -1,0 +1,321 @@
+{
+  "snapshot_dc_fraction": [
+    0.11110103130340576,
+    0.15018810331821442,
+    0.03305980935692787,
+    0.00034800259163603187,
+    0.012374728918075562,
+    0.0005065920413471758,
+    0.060502976179122925,
+    0.1528860181570053,
+    0.08603448420763016,
+    0.01749522052705288,
+    0.028870755806565285,
+    0.012239933013916016,
+    0.0009521545725874603
+  ],
+  "snapshot_lowfreq9_fraction": [
+    0.1115691289305687,
+    0.15224063396453857,
+    0.03783759847283363,
+    0.003729225369170308,
+    0.01598491333425045,
+    0.007487439084798098,
+    0.06753332167863846,
+    0.1552714705467224,
+    0.08744312822818756,
+    0.019293032586574554,
+    0.029334373772144318,
+    0.016534367576241493,
+    0.006355582736432552
+  ],
+  "case3": [
+    {
+      "recipe": "threshold x0.95",
+      "gap": 977.0,
+      "const": {
+        "recovery": 0.4247697031729785,
+        "l2": 3587.0,
+        "dims": 1,
+        "seconds": 1.5183653831481934
+      },
+      "normal": {
+        "recovery": 0.8945752302968271,
+        "l2": 3128.0,
+        "dims": 1,
+        "seconds": 1.278503656387329
+      },
+      "const+normal": {
+        "recovery": 0.9191402251791198,
+        "l2": 3104.0,
+        "dims": 2,
+        "seconds": 1.6009879112243652
+      },
+      "lowfreq9": {
+        "recovery": 0.43500511770726713,
+        "l2": 3577.0,
+        "dims": 9,
+        "seconds": 6.087094306945801
+      },
+      "random13": {
+        "recovery": 0.2896622313203685,
+        "l2": 3719.0,
+        "dims": 13,
+        "seconds": 8.756637573242188
+      },
+      "rand_band13": {
+        "recovery": 0.3029682702149437,
+        "l2": 3706.0,
+        "dims": 13,
+        "seconds": 8.509838104248047
+      },
+      "case3_pod": {
+        "recovery": 1.0010235414534288,
+        "l2": 3024.0,
+        "dims": 13,
+        "seconds": 8.851028680801392
+      }
+    },
+    {
+      "recipe": "threshold x1.05",
+      "gap": 700.0,
+      "const": {
+        "recovery": 0.18714285714285714,
+        "l2": 3506.0,
+        "dims": 1,
+        "seconds": 1.3884551525115967
+      },
+      "normal": {
+        "recovery": 0.8814285714285715,
+        "l2": 3020.0,
+        "dims": 1,
+        "seconds": 1.22119140625
+      },
+      "const+normal": {
+        "recovery": 0.9342857142857143,
+        "l2": 2983.0,
+        "dims": 2,
+        "seconds": 1.764723539352417
+      },
+      "lowfreq9": {
+        "recovery": 0.42857142857142855,
+        "l2": 3337.0,
+        "dims": 9,
+        "seconds": 6.0397069454193115
+      },
+      "random13": {
+        "recovery": 0.22285714285714286,
+        "l2": 3481.0,
+        "dims": 13,
+        "seconds": 9.02830719947815
+      },
+      "rand_band13": {
+        "recovery": 0.39571428571428574,
+        "l2": 3360.0,
+        "dims": 13,
+        "seconds": 9.315664529800415
+      },
+      "case3_pod": {
+        "recovery": 1.002857142857143,
+        "l2": 2935.0,
+        "dims": 13,
+        "seconds": 8.47872281074524
+      }
+    },
+    {
+      "recipe": "dose 0.97",
+      "gap": 1041.0,
+      "const": {
+        "recovery": 0.15946205571565802,
+        "l2": 3865.0,
+        "dims": 1,
+        "seconds": 1.4823830127716064
+      },
+      "normal": {
+        "recovery": 1.0288184438040346,
+        "l2": 2960.0,
+        "dims": 1,
+        "seconds": 1.3129611015319824
+      },
+      "const+normal": {
+        "recovery": 1.042267050912584,
+        "l2": 2946.0,
+        "dims": 2,
+        "seconds": 1.6126770973205566
+      },
+      "lowfreq9": {
+        "recovery": 0.4303554274735831,
+        "l2": 3583.0,
+        "dims": 9,
+        "seconds": 6.476253986358643
+      },
+      "random13": {
+        "recovery": 0.0893371757925072,
+        "l2": 3938.0,
+        "dims": 13,
+        "seconds": 8.99314260482788
+      },
+      "rand_band13": {
+        "recovery": 0.4024975984630163,
+        "l2": 3612.0,
+        "dims": 13,
+        "seconds": 8.064541101455688
+      },
+      "case3_pod": {
+        "recovery": 1.0038424591738713,
+        "l2": 2986.0,
+        "dims": 13,
+        "seconds": 8.796811580657959
+      }
+    },
+    {
+      "recipe": "dose 1.03",
+      "gap": 1332.0,
+      "const": {
+        "recovery": 0.4144144144144144,
+        "l2": 3759.0,
+        "dims": 1,
+        "seconds": 1.375993251800537
+      },
+      "normal": {
+        "recovery": 0.8858858858858859,
+        "l2": 3131.0,
+        "dims": 1,
+        "seconds": 1.3332996368408203
+      },
+      "const+normal": {
+        "recovery": 0.9046546546546547,
+        "l2": 3106.0,
+        "dims": 2,
+        "seconds": 1.7819397449493408
+      },
+      "lowfreq9": {
+        "recovery": 0.4009009009009009,
+        "l2": 3777.0,
+        "dims": 9,
+        "seconds": 7.399256944656372
+      },
+      "random13": {
+        "recovery": 0.21396396396396397,
+        "l2": 4026.0,
+        "dims": 13,
+        "seconds": 9.140665054321289
+      },
+      "rand_band13": {
+        "recovery": 0.30180180180180183,
+        "l2": 3909.0,
+        "dims": 13,
+        "seconds": 9.70237922668457
+      },
+      "case3_pod": {
+        "recovery": 1.0045045045045045,
+        "l2": 2973.0,
+        "dims": 13,
+        "seconds": 9.267707109451294
+      }
+    },
+    {
+      "recipe": "bias -1px",
+      "gap": 480.0,
+      "const": {
+        "recovery": 0.4083333333333333,
+        "l2": 3031.0,
+        "dims": 1,
+        "seconds": 1.1874125003814697
+      },
+      "normal": {
+        "recovery": 0.54375,
+        "l2": 2966.0,
+        "dims": 1,
+        "seconds": 1.198711633682251
+      },
+      "const+normal": {
+        "recovery": 0.7,
+        "l2": 2891.0,
+        "dims": 2,
+        "seconds": 1.6616113185882568
+      },
+      "lowfreq9": {
+        "recovery": 0.41875,
+        "l2": 3026.0,
+        "dims": 9,
+        "seconds": 6.521548509597778
+      },
+      "random13": {
+        "recovery": 0.42083333333333334,
+        "l2": 3025.0,
+        "dims": 13,
+        "seconds": 9.426174879074097
+      },
+      "rand_band13": {
+        "recovery": 0.36875,
+        "l2": 3050.0,
+        "dims": 13,
+        "seconds": 9.175595998764038
+      },
+      "case3_pod": {
+        "recovery": 0.9979166666666667,
+        "l2": 2748.0,
+        "dims": 13,
+        "seconds": 8.523639440536499
+      }
+    },
+    {
+      "recipe": "bias +1px",
+      "gap": 271.0,
+      "const": {
+        "recovery": 0.2952029520295203,
+        "l2": 3473.0,
+        "dims": 1,
+        "seconds": 1.2355310916900635
+      },
+      "normal": {
+        "recovery": 0.8819188191881919,
+        "l2": 3314.0,
+        "dims": 1,
+        "seconds": 1.221008062362671
+      },
+      "const+normal": {
+        "recovery": 1.0,
+        "l2": 3282.0,
+        "dims": 2,
+        "seconds": 1.719423532485962
+      },
+      "lowfreq9": {
+        "recovery": 0.4797047970479705,
+        "l2": 3423.0,
+        "dims": 9,
+        "seconds": 6.307107210159302
+      },
+      "random13": {
+        "recovery": 0.1881918819188192,
+        "l2": 3502.0,
+        "dims": 13,
+        "seconds": 10.01613163948059
+      },
+      "rand_band13": {
+        "recovery": 0.35793357933579334,
+        "l2": 3456.0,
+        "dims": 13,
+        "seconds": 9.09738540649414
+      },
+      "case3_pod": {
+        "recovery": 0.974169741697417,
+        "l2": 3289.0,
+        "dims": 13,
+        "seconds": 9.213233947753906
+      }
+    }
+  ],
+  "protocol": "X-25: why does case 3's recipe-response POD basis transfer to other layouts?\n\nX-24 found the case-3 POD basis recovers a median 94% on a *different* clip\n(case 1), contradicting the expectation that pixel fields anchored to case 3's\nedges would be useless elsewhere. Hypothesis: what transfers is a global,\ngeometry-independent component -- e.g. a uniform shift of the level-set P,\ni.e. a uniform mask bias. This tests snapshot-FREE bases defined from physics\nor geometry at each layout's own reference, against random controls:\n\n  const          P + c                          (1 dim)  uniform level-set offset\n  normal         P + c |grad P_ref|             (1 dim)  uniform normal edge displacement\n  const+normal                                  (2 dims)\n  lowfreq9       the 9 lowest real Fourier modes (|k| <= 1 per axis): slowly varying bias\n  random13       13 i.i.d. Gaussian fields                 (control)\n  rand_band13    13 random band-limited fields             (control)\n  case3_pod      case 3's 13 snapshots (as in X-24, for reference)\n\nOn case 3 itself and X-24's three layouts, 6 recipes each, Gauss-Newton on the\nfull model restricted to each span; recovery vs the same 60 s warm truths.\n\nUsage::\n\n    PYTHONPATH=src python scripts/rom_basis_physics.py\n",
+  "provenance": {
+    "git_commit": "2818254bbc55989b8e2093ee9afbf9eda4fb99db",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  }
+}
