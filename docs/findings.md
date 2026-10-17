@@ -1442,7 +1442,7 @@ similar layout, and full 2048^2 resolution.
 
 ## F-ROM-04 — Layout changes: the operator ROM does not fix transfer; one geometry-defined mode (uniform normal edge displacement) explains why POD transfers (X-24, X-25)
 
-**Severity: high (positive, with caveats).** Answers two questions: does a
+**Severity: medium.** The normal-displacement result is expected rather than new: a uniform normal edge displacement is a global edge bias, which is what process-window retargeting / rule-based bias already applies for threshold and dose shifts. Its value here is diagnostic (it explains the POD transfer). The open part is the layout-specific residual (~10% for threshold/dose, ~30% for bias). Answers two questions: does a
 recipe-response basis survive a layout change, and is the snapshot-free
 operator ROM the better choice when the layout changes?
 
