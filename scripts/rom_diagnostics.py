@@ -45,10 +45,9 @@ PICK = ["threshold x0.95", "threshold x1.05", "dose 0.97", "bias -1px", "bias +1
 RANKS = [25, 100, 400]
 
 
-def chord_rom(lm, tgt, spec, p0, r, iterations=20, damping=1.0):
+def chord_rom(lm, tgt, v, k, p0, iterations=20, damping=1.0):
     """Frozen K_r, but true residual and true-objective step acceptance."""
-    v = spec.vectors(r)
-    k = spec.k_reduced(r)
+    r = v.shape[1]
     model = ILTLeastSquares(tgt, lm, base.BETA)
     scale = (lm.cfg.dose_nom / base.BASE.dose_nom) ** 2
     a = torch.zeros(r)
@@ -82,6 +81,8 @@ def main() -> None:
     model0 = ILTLeastSquares(target, litho, base.BETA)
     spec0 = gn_spectrum(model0, model0.state(p0), batch=16)
     q_all = spec0.vectors(spec0.eigenvalues.numel())
+    vk = {r: (spec0.vectors(r), spec0.k_reduced(r)) for r in RANKS}
+    del spec0  # keep only what is used, so D4's fresh spectra fit in memory
 
     for rec in [r for r in base.RECIPES if r["name"] in PICK]:
         path = os.path.join(OUT, f"{rec['name'].replace(' ', '_')}.json")
@@ -95,7 +96,7 @@ def main() -> None:
         delta = (p_warm - p0).reshape(-1)
 
         for r in RANKS + ["band"]:
-            q = q_all if r == "band" else spec0.vectors(r)
+            q = q_all if r == "band" else vk[r][0]
             proj = q @ (q.T @ delta)
             s, _ = base.score(lm, tgt, (p0.reshape(-1) + proj).reshape(p0.shape), warm_print)
             s["captured_norm_fraction"] = float(proj.norm() / delta.norm())
@@ -103,7 +104,7 @@ def main() -> None:
 
         for r in RANKS:
             t0 = time.time()
-            p = chord_rom(lm, tgt, spec0, p0, r)
+            p = chord_rom(lm, tgt, *vk[r], p0)
             s, _ = base.score(lm, tgt, p, warm_print)
             s["seconds"] = time.time() - t0
             row[f"D2_chord_{r}"] = s
@@ -119,6 +120,7 @@ def main() -> None:
             rom = ReducedILT(spec, 100, p, i_cur, lm.cfg.dose_nom, base.BETA)
             a, _ = rom.solve(lm.cfg.target_density, lm.cfg.print_steepness, lm.cfg.dose_nom, tgt)
             p = rom.params(a)
+            del spec, rom  # each spectrum is ~2.6 GB at 512^2; never hold two at once
             t_total += time.time() - t0
             s, _ = base.score(lm, tgt, p, warm_print)
             s["cumulative_seconds"] = t_total

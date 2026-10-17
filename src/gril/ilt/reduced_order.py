@@ -119,20 +119,28 @@ def gn_spectrum(model: ILTLeastSquares, st: _GNState, half: int = 17, batch: int
     f = band_basis(h, w, half, dtype=st.p.dtype)
     m = f.shape[0]
     w_mat = (st.s_m.unsqueeze(0) * f).reshape(m, -1)            # (m, N)
-    k_rows = []
+    del f
+    k_mat = torch.empty_like(w_mat)
     for i in range(0, m, batch):
-        k_rows.append(intensity_jvp_batch(model, st, w_mat[i:i + batch].view(-1, h, w)).reshape(-1, h * w))
-    k_mat = torch.cat(k_rows).T.contiguous()                      # (N, m)
+        k_mat[i:i + batch] = intensity_jvp_batch(model, st, w_mat[i:i + batch].view(-1, h, w)).reshape(-1, h * w)
+    k_mat = k_mat.T.contiguous()                                  # (N, m)
     w_mat = w_mat.T.contiguous()                                  # (N, m)
     s_z = st.s_z.reshape(-1)
-    j_mat = s_z.unsqueeze(1) * k_mat                              # (N, m)
 
-    gram_w = (w_mat.T.double() @ w_mat.double())
+    # Gram matrices accumulated in float64 over row chunks: full float64
+    # accuracy (the whitening amplifies float32 rounding in the spectrum's
+    # tail) without ever holding an (N, m) float64 copy (~10 GB at 512^2).
+    gram_w = torch.zeros(m, m, dtype=torch.float64)
+    gram_j = torch.zeros(m, m, dtype=torch.float64)
+    for i in range(0, w_mat.shape[0], 16384):
+        wc = w_mat[i:i + 16384].double()
+        jc = (s_z[i:i + 16384].unsqueeze(1) * k_mat[i:i + 16384]).double()
+        gram_w += wc.T @ wc
+        gram_j += jc.T @ jc
     lw, uw = torch.linalg.eigh(gram_w)
     keep = lw > rel_tol * lw.max()
     t = uw[:, keep] / lw[keep].sqrt()                             # whitening: (W t)^T (W t) = I
-    jt = j_mat.double() @ t
-    lam, y = torch.linalg.eigh(jt.T @ jt)
+    lam, y = torch.linalg.eigh(t.T @ gram_j @ t)
     order = torch.argsort(lam, descending=True)
     coeffs = (t @ y[:, order]).to(st.p.dtype)
     return GNSpectrum(eigenvalues=lam[order].clamp_min(0), basis_coeffs=coeffs, w_mat=w_mat,
