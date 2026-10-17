@@ -1,0 +1,87 @@
+{
+  "recipe": {
+    "name": "bias +1px",
+    "bias": 1
+  },
+  "warm": {
+    "l2": 3289.0,
+    "pvb": 5988.0,
+    "epe@15nm": 7
+  },
+  "frozen": {
+    "l2": 3553.0,
+    "pvb": 5592.0,
+    "epe@15nm": 5,
+    "xor_vs_warm": 1980
+  },
+  "D1_project_25": {
+    "l2": 3473.0,
+    "pvb": 5578.0,
+    "epe@15nm": 3,
+    "xor_vs_warm": 1770,
+    "captured_norm_fraction": 0.08516773581504822
+  },
+  "D1_project_100": {
+    "l2": 3478.0,
+    "pvb": 5601.0,
+    "epe@15nm": 3,
+    "xor_vs_warm": 1779,
+    "captured_norm_fraction": 0.16719527542591095
+  },
+  "D1_project_400": {
+    "l2": 3479.0,
+    "pvb": 5598.0,
+    "epe@15nm": 3,
+    "xor_vs_warm": 1776,
+    "captured_norm_fraction": 0.3287734389305115
+  },
+  "D1_project_band": {
+    "l2": 3434.0,
+    "pvb": 5642.0,
+    "epe@15nm": 6,
+    "xor_vs_warm": 1523,
+    "captured_norm_fraction": 0.5563531517982483
+  },
+  "D2_chord_25": {
+    "l2": 3458.0,
+    "pvb": 5609.0,
+    "epe@15nm": 3,
+    "xor_vs_warm": 1719,
+    "seconds": 1.2670283317565918
+  },
+  "D2_chord_100": {
+    "l2": 3453.0,
+    "pvb": 5604.0,
+    "epe@15nm": 3,
+    "xor_vs_warm": 1716,
+    "seconds": 2.0573837757110596
+  },
+  "D2_chord_400": {
+    "l2": 3453.0,
+    "pvb": 5604.0,
+    "epe@15nm": 3,
+    "xor_vs_warm": 1716,
+    "seconds": 8.337746381759644
+  },
+  "D4_iterated_1": {
+    "l2": 3485.0,
+    "pvb": 5635.0,
+    "epe@15nm": 5,
+    "xor_vs_warm": 1752,
+    "cumulative_seconds": 97.97325825691223
+  },
+  "D4_iterated_2": {
+    "l2": 3417.0,
+    "pvb": 5846.0,
+    "epe@15nm": 10,
+    "xor_vs_warm": 1064,
+    "cumulative_seconds": 189.69088888168335
+  },
+  "D4_iterated_3": {
+    "l2": 3363.0,
+    "pvb": 5913.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 936,
+    "cumulative_seconds": 281.2968068122864
+  }
+}
