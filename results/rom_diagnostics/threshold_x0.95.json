@@ -1,0 +1,87 @@
+{
+  "recipe": {
+    "name": "threshold x0.95",
+    "threshold": 0.21375
+  },
+  "warm": {
+    "l2": 3025.0,
+    "pvb": 5448.0,
+    "epe@15nm": 6
+  },
+  "frozen": {
+    "l2": 4002.0,
+    "pvb": 6108.0,
+    "epe@15nm": 30,
+    "xor_vs_warm": 2931
+  },
+  "D1_project_25": {
+    "l2": 3821.0,
+    "pvb": 6028.0,
+    "epe@15nm": 28,
+    "xor_vs_warm": 2590,
+    "captured_norm_fraction": 0.148959681391716
+  },
+  "D1_project_100": {
+    "l2": 3808.0,
+    "pvb": 6005.0,
+    "epe@15nm": 27,
+    "xor_vs_warm": 2555,
+    "captured_norm_fraction": 0.3126318156719208
+  },
+  "D1_project_400": {
+    "l2": 3767.0,
+    "pvb": 5982.0,
+    "epe@15nm": 26,
+    "xor_vs_warm": 2450,
+    "captured_norm_fraction": 0.4242156445980072
+  },
+  "D1_project_band": {
+    "l2": 3648.0,
+    "pvb": 5892.0,
+    "epe@15nm": 23,
+    "xor_vs_warm": 2177,
+    "captured_norm_fraction": 0.6662262678146362
+  },
+  "D2_chord_25": {
+    "l2": 3784.0,
+    "pvb": 6002.0,
+    "epe@15nm": 27,
+    "xor_vs_warm": 2513,
+    "seconds": 1.174133539199829
+  },
+  "D2_chord_100": {
+    "l2": 3784.0,
+    "pvb": 6009.0,
+    "epe@15nm": 27,
+    "xor_vs_warm": 2519,
+    "seconds": 1.970677137374878
+  },
+  "D2_chord_400": {
+    "l2": 3776.0,
+    "pvb": 6003.0,
+    "epe@15nm": 27,
+    "xor_vs_warm": 2503,
+    "seconds": 8.672315120697021
+  },
+  "D4_iterated_1": {
+    "l2": 3762.0,
+    "pvb": 5968.0,
+    "epe@15nm": 27,
+    "xor_vs_warm": 2411,
+    "cumulative_seconds": 98.176194190979
+  },
+  "D4_iterated_2": {
+    "l2": 3388.0,
+    "pvb": 5685.0,
+    "epe@15nm": 19,
+    "xor_vs_warm": 1445,
+    "cumulative_seconds": 196.95838379859924
+  },
+  "D4_iterated_3": {
+    "l2": 3121.0,
+    "pvb": 5600.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 776,
+    "cumulative_seconds": 293.2641637325287
+  }
+}
