@@ -1,0 +1,74 @@
+{
+  "protocol": "X-20: physics-based reduced-order model for fast ILT recipe evaluation.\n\nQuestion: after one full ILT run at a reference recipe, can the optimised\nresult for a *changed* recipe (resist threshold, dose, target bias) be\npredicted from an exact-physics reduced model, without re-running ILT?\n\nSetup (fixed before any result): ICCAD13 case 3 at 512^2 (4 nm pixels; the\noptics is resolution-independent). Reference P0 = Gauss-Newton cold start,\n120 s, nominal recipe. 13 recipe perturbations. For each, candidate masks:\n\n  frozen      P0 unchanged, printed under the new recipe (no re-optimisation)\n  one_step    one full-space Gauss-Newton step from P0 under the new recipe\n              (= first-order implicit-function sensitivity of the optimum)\n  rom_r       ReducedILT with the top-r eigenvectors of J^T J at P0, optics\n              linearised once, recipe physics exact; online = matvecs only\n  warm        full GN re-optimisation from P0, 60 s           (reference truth)\n  cold        full GN from scratch under the new recipe, 120 s (what a fresh\n              ILT run would give; warm-vs-cold spread = irreducible ambiguity)\n\nEvery candidate is binarised and printed with the FULL forward model; the\nreduced model is never used to score itself.\n\nUsage::\n\n    PYTHONPATH=src python scripts/rom_recipe_study.py\n",
+  "recipes": [
+    {
+      "name": "threshold x0.95",
+      "threshold": 0.21375
+    },
+    {
+      "name": "threshold x0.98",
+      "threshold": 0.2205
+    },
+    {
+      "name": "threshold x1.02",
+      "threshold": 0.2295
+    },
+    {
+      "name": "threshold x1.05",
+      "threshold": 0.23625000000000002
+    },
+    {
+      "name": "threshold x1.1",
+      "threshold": 0.24750000000000003
+    },
+    {
+      "name": "dose 0.97",
+      "dose": 0.97
+    },
+    {
+      "name": "dose 0.99",
+      "dose": 0.99
+    },
+    {
+      "name": "dose 1.01",
+      "dose": 1.01
+    },
+    {
+      "name": "dose 1.03",
+      "dose": 1.03
+    },
+    {
+      "name": "bias -2px",
+      "bias": -2
+    },
+    {
+      "name": "bias -1px",
+      "bias": -1
+    },
+    {
+      "name": "bias +1px",
+      "bias": 1
+    },
+    {
+      "name": "bias +2px",
+      "bias": 2
+    }
+  ],
+  "ranks": [
+    25,
+    50,
+    100,
+    200,
+    400
+  ],
+  "provenance": {
+    "git_commit": "f8254707461ba634b2fd34a8c8e12c868493bd41",
+    "torch": "2.9.1+cu128",
+    "cuda_available": false,
+    "device": "cpu",
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+    "cpu_count": 4,
+    "threads": 4
+  }
+}

@@ -1239,3 +1239,74 @@ total wall-clock than X-17 (7712 s vs 7615 s). That cannot explain the gap:
 F-LBFGS-03's scan shows L-BFGS gains only ~0.5% L2 from 50% more time at this
 point (case 3, 100 → 150 iterations), so 1.3% more time is worth roughly
 0.01–0.1%, against a 2.3% mean difference that holds on every case.
+
+
+---
+
+## F-ROM-01 — ILT is exactly low-rank locally, but the optimum moves nonlinearly with the recipe: a once-linearised reduced model cannot validate recipes (X-20)
+
+**Severity: high (negative result for the method as first designed; positive
+structural result).** User-directed: build a *physics-based* (no machine
+learning, no data fitting) reduced-order model so that ILT recipe changes can
+be evaluated without a full ILT run, accepting that it only needs to work on
+the current or similar layouts.
+
+### The exact structure (positive)
+
+The nominal-residual Jacobian factorises as `J = S_z . A . B . S_m`, where
+`B` projects a mask perturbation onto the pupil band. Every SOCS kernel
+occupies the same 35x35 block of low frequencies, so **`rank(J) <= 35^2 =
+1225` exactly** — against 262,144 parameters at 512^2 (4.2M at 2048^2) — and
+`range(J^T) = s_m . {band-limited images}`. `gril.ilt.reduced_order.gn_spectrum`
+uses this to compute the *exact* nonzero spectrum of `J^T J` from 1225
+analytic basis vectors (no Lanczos, no sampling). Verified to machine
+precision (`tests_gril/unit/test_reduced_order.py`): `J^T J x` lies in that
+subspace (5e-15), the complementary ~96% of a random direction is invisible
+to the image (5e-15), eigenpairs exact (4e-15).
+
+At the converged case-3 reference (512^2, Gauss-Newton 120 s; a same-recipe
+control confirms it is converged: L2 2975 → 2982 after 60 s more),
+**90% / 99% / 99.9% of the Gauss-Newton trace lies in the top 30 / 64 / 164
+eigenvectors** — a ~1600x reduction at 99%. Offline cost: 112 s.
+
+### The reduced model and the test
+
+`ReducedILT`: `P = P0 + V_r a`, optics linearised once at `P0`
+(`I ~ I0 + K_r a`), recipe physics kept exact (threshold and target are
+pointwise; dose scales intensity exactly as dose^2). Online solve is matrix-
+vector products only. `scripts/rom_recipe_study.py` tested 13 recipe changes
+(threshold x0.95..x1.10, dose 0.97..1.03, target bias ±1/±2 px = ±4/±8 nm)
+against full Gauss-Newton re-optimisation; every candidate mask was printed
+with the full model.
+
+### Result (negative)
+
+"Recovery" = fraction of the frozen-mask → re-optimised L2 gap closed.
+
+| Method | Median recovery | Spearman (recipe ranking vs truth) | Online time |
+|---|---:|---:|---:|
+| frozen mask | 0% | +0.09 | 0 |
+| one Gauss-Newton step | 16% | +0.09 | 0.2 s |
+| reduced r = 25 / 100 / 200 | 25% / 26% / 33% | +0.17 / +0.09 / +0.15 | 0.3–3 s |
+| reduced r = 400 | 22%, **diverges on all four bias recipes** (e.g. L2 10591 vs frozen 4027) | −0.01 | 12 s |
+| full re-optimisation, cold start | 100% | **+0.99** | 120 s |
+
+As a recipe-validation tool the once-linearised reduced model **fails**: it
+barely ranks recipes better than not re-optimising at all, while full ILT
+from two different starts agrees with itself (ρ = 0.99), so the target being
+predicted is well defined. Recovery is best for the smallest perturbations
+(57–70% for threshold x0.98 and dose 0.99/1.01) and worst for geometry
+changes. More dimensions do not help and eventually hurt: with no trust
+region, a larger subspace lets the linearised model extrapolate further into
+where the linearisation is invalid.
+
+### Reading it
+
+The two findings are consistent: **the local curvature is low-dimensional,
+but the path of the optimum as the recipe changes is strongly nonlinear**,
+even for 2% recipe changes. The leading hypothesis is the saturated mask
+parameterisation (`M = sigmoid(8P)`): at `P0`, `s_m` is negligible except at
+current mask edges, so the linearised model cannot move an edge further than
+~a pixel, while the true re-optimisation does so step by step. X-21
+(`scripts/rom_diagnostics.py`) separates "the subspace is wrong" from "the
+linearisation is wrong".
