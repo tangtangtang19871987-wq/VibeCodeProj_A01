@@ -137,13 +137,16 @@ def solve_levenberg_marquardt(
     damping_init: float = 1.0,
     time_budget_s: float = 0.0,
     progress: bool = False,
+    on_iteration=None,
 ) -> tuple[torch.Tensor, list[float], int, int, list[float]]:
     """Run LM on one (H,W) problem.
 
     Returns ``(params, loss_history, outer_iterations, work_units, time_history)``
     where ``work_units = n_fwd + (n_jvp + n_vjp) / 2``, i.e. measured in
     forward+backward-equivalents (see module docstring); wall-clock in
-    ``time_history`` is the fair cross-optimizer unit.
+    ``time_history`` is the fair cross-optimizer unit. ``on_iteration``, if
+    given, is called as ``on_iteration(outer_iteration, params, elapsed_s)``
+    after every outer step (for convergence curves).
     """
     model = ILTLeastSquares(target, litho, beta, weight_nominal)
     wn = model.wn
@@ -180,6 +183,8 @@ def solve_levenberg_marquardt(
             ran = it + 1
             history.append(st.f)
             times.append(time.time() - start)
+            if on_iteration is not None:
+                on_iteration(ran, st.p, times[-1])
             if progress and it % 5 == 0:
                 print(f"    LM iter {it:3d}  loss {st.f:.1f}  lam {lam:.3g}  rho {rho:.3f}", flush=True)
     work = model.n_fwd + (model.n_jvp + model.n_vjp) // 2

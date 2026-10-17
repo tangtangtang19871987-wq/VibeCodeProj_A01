@@ -1,0 +1,87 @@
+{
+  "recipe": {
+    "name": "dose 0.97",
+    "dose": 0.97
+  },
+  "warm": {
+    "l2": 3001.0,
+    "pvb": 5619.0,
+    "epe@15nm": 6
+  },
+  "frozen": {
+    "l2": 4031.0,
+    "pvb": 5742.0,
+    "epe@15nm": 12,
+    "xor_vs_warm": 3046
+  },
+  "D1_project_25": {
+    "l2": 3895.0,
+    "pvb": 5676.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 2848,
+    "captured_norm_fraction": 0.16241455078125
+  },
+  "D1_project_100": {
+    "l2": 3819.0,
+    "pvb": 5664.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 2754,
+    "captured_norm_fraction": 0.27376440167427063
+  },
+  "D1_project_400": {
+    "l2": 3803.0,
+    "pvb": 5647.0,
+    "epe@15nm": 9,
+    "xor_vs_warm": 2708,
+    "captured_norm_fraction": 0.3740169405937195
+  },
+  "D1_project_band": {
+    "l2": 3632.0,
+    "pvb": 5525.0,
+    "epe@15nm": 8,
+    "xor_vs_warm": 2421,
+    "captured_norm_fraction": 0.5899367928504944
+  },
+  "D2_chord_25": {
+    "l2": 3822.0,
+    "pvb": 5629.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 2737,
+    "seconds": 1.1017768383026123
+  },
+  "D2_chord_100": {
+    "l2": 3823.0,
+    "pvb": 5631.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 2736,
+    "seconds": 1.788738489151001
+  },
+  "D2_chord_400": {
+    "l2": 3823.0,
+    "pvb": 5632.0,
+    "epe@15nm": 11,
+    "xor_vs_warm": 2736,
+    "seconds": 8.099853754043579
+  },
+  "D4_iterated_1": {
+    "l2": 3683.0,
+    "pvb": 5714.0,
+    "epe@15nm": 9,
+    "xor_vs_warm": 2478,
+    "cumulative_seconds": 95.35999846458435
+  },
+  "D4_iterated_2": {
+    "l2": 3378.0,
+    "pvb": 5613.0,
+    "epe@15nm": 7,
+    "xor_vs_warm": 1761,
+    "cumulative_seconds": 190.33939385414124
+  },
+  "D4_iterated_3": {
+    "l2": 3125.0,
+    "pvb": 5597.0,
+    "epe@15nm": 7,
+    "xor_vs_warm": 1090,
+    "cumulative_seconds": 278.1448976993561
+  }
+}
