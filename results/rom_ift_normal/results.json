@@ -280,11 +280,292 @@
         "l2": 3857.0,
         "seconds": 11.134174108505249
       }
+    },
+    {
+      "recipe": "threshold x1.05",
+      "gap": 700.0,
+      "proj_global": {
+        "recovery": 0.1442857142857143,
+        "l2": 3536.0,
+        "seconds": null,
+        "dims": 1,
+        "captured": 0.1771402359008789
+      },
+      "field_global": {
+        "1": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 0.33517932891845703
+        },
+        "2": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 0.796520471572876
+        },
+        "3": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 1.066864013671875
+        },
+        "5": {
+          "recovery": 0.10714285714285714,
+          "l2": 3562.0,
+          "seconds": 1.680511474609375
+        },
+        "8": {
+          "recovery": 0.8657142857142858,
+          "l2": 3031.0,
+          "seconds": 2.680751085281372
+        },
+        "12": {
+          "recovery": 0.8814285714285715,
+          "l2": 3020.0,
+          "seconds": 3.88633394241333
+        },
+        "20": {
+          "recovery": 0.8814285714285715,
+          "l2": 3020.0,
+          "seconds": 6.333409309387207
+        }
+      },
+      "proj_64": {
+        "recovery": 0.1457142857142857,
+        "l2": 3535.0,
+        "seconds": null,
+        "dims": 81,
+        "captured": 0.19372577965259552
+      },
+      "field_64": {
+        "1": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 0.4203369617462158
+        },
+        "2": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 1.148707389831543
+        },
+        "3": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 1.449387788772583
+        },
+        "5": {
+          "recovery": 0.16142857142857142,
+          "l2": 3524.0,
+          "seconds": 2.3187813758850098
+        },
+        "8": {
+          "recovery": 0.9542857142857143,
+          "l2": 2969.0,
+          "seconds": 4.1578919887542725
+        },
+        "12": {
+          "recovery": 0.8571428571428571,
+          "l2": 3037.0,
+          "seconds": 10.901809692382812
+        },
+        "20": {
+          "recovery": 0.8557142857142858,
+          "l2": 3038.0,
+          "seconds": 25.18355393409729
+        }
+      },
+      "proj_32": {
+        "recovery": 0.1457142857142857,
+        "l2": 3535.0,
+        "seconds": null,
+        "dims": 289,
+        "captured": 0.21007554233074188
+      },
+      "field_32": {
+        "1": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 0.43189287185668945
+        },
+        "2": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 1.0098395347595215
+        },
+        "3": {
+          "recovery": 0.48,
+          "l2": 3301.0,
+          "seconds": 1.3712499141693115
+        },
+        "5": {
+          "recovery": 0.9714285714285714,
+          "l2": 2957.0,
+          "seconds": 3.2985239028930664
+        },
+        "8": {
+          "recovery": 0.8614285714285714,
+          "l2": 3034.0,
+          "seconds": 6.944658517837524
+        },
+        "12": {
+          "recovery": 0.8414285714285714,
+          "l2": 3048.0,
+          "seconds": 13.678292989730835
+        },
+        "20": {
+          "recovery": 0.8357142857142857,
+          "l2": 3052.0,
+          "seconds": 28.0111563205719
+        }
+      },
+      "proj_16": {
+        "recovery": 0.1742857142857143,
+        "l2": 3515.0,
+        "seconds": null,
+        "dims": 1089,
+        "captured": 0.2805739641189575
+      },
+      "field_16": {
+        "1": {
+          "recovery": 0.0,
+          "l2": 3637.0,
+          "seconds": 0.38494253158569336
+        },
+        "2": {
+          "recovery": 0.5928571428571429,
+          "l2": 3222.0,
+          "seconds": 0.8658537864685059
+        },
+        "3": {
+          "recovery": 0.5928571428571429,
+          "l2": 3222.0,
+          "seconds": 1.9872698783874512
+        },
+        "5": {
+          "recovery": 0.8457142857142858,
+          "l2": 3045.0,
+          "seconds": 3.489875316619873
+        },
+        "8": {
+          "recovery": 0.8971428571428571,
+          "l2": 3009.0,
+          "seconds": 7.272974491119385
+        },
+        "12": {
+          "recovery": 0.8671428571428571,
+          "l2": 3030.0,
+          "seconds": 13.889883995056152
+        },
+        "20": {
+          "recovery": 0.9057142857142857,
+          "l2": 3003.0,
+          "seconds": 27.717055559158325
+        }
+      },
+      "proj_8": {
+        "recovery": 0.3057142857142857,
+        "l2": 3423.0,
+        "seconds": null,
+        "dims": 4225,
+        "captured": 0.42373520135879517
+      },
+      "field_8": {
+        "1": {
+          "recovery": 0.4742857142857143,
+          "l2": 3305.0,
+          "seconds": 0.2759106159210205
+        },
+        "2": {
+          "recovery": 0.94,
+          "l2": 2979.0,
+          "seconds": 1.2690908908843994
+        },
+        "3": {
+          "recovery": 0.9542857142857143,
+          "l2": 2969.0,
+          "seconds": 1.9953598976135254
+        },
+        "5": {
+          "recovery": 0.9814285714285714,
+          "l2": 2950.0,
+          "seconds": 4.788577556610107
+        },
+        "8": {
+          "recovery": 0.9471428571428572,
+          "l2": 2974.0,
+          "seconds": 9.624250411987305
+        },
+        "12": {
+          "recovery": 0.9371428571428572,
+          "l2": 2981.0,
+          "seconds": 16.72421908378601
+        },
+        "20": {
+          "recovery": 0.9357142857142857,
+          "l2": 2982.0,
+          "seconds": 31.012670278549194
+        }
+      },
+      "warm_full": {
+        "1": {
+          "recovery": 0.15285714285714286,
+          "l2": 3530.0,
+          "seconds": 0.3040335178375244
+        },
+        "2": {
+          "recovery": 0.22714285714285715,
+          "l2": 3478.0,
+          "seconds": 0.6131436824798584
+        },
+        "3": {
+          "recovery": 0.2757142857142857,
+          "l2": 3444.0,
+          "seconds": 0.8642196655273438
+        },
+        "5": {
+          "recovery": 0.4014285714285714,
+          "l2": 3356.0,
+          "seconds": 1.375990629196167
+        },
+        "8": {
+          "recovery": 0.5685714285714286,
+          "l2": 3239.0,
+          "seconds": 2.3652420043945312
+        },
+        "12": {
+          "recovery": 0.7214285714285714,
+          "l2": 3132.0,
+          "seconds": 3.729764938354492
+        },
+        "20": {
+          "recovery": 0.9328571428571428,
+          "l2": 2984.0,
+          "seconds": 6.954376697540283
+        }
+      },
+      "ift_gn": {
+        "recovery": 0.42428571428571427,
+        "l2": 3340.0,
+        "seconds": 4.006656885147095
+      },
+      "ift_full": {
+        "recovery": 0.4014285714285714,
+        "l2": 3356.0,
+        "seconds": 7.687307596206665
+      },
+      "newton_full_1": {
+        "recovery": 0.23857142857142857,
+        "l2": 3470.0,
+        "seconds": 5.22886848449707
+      },
+      "newton_full_3": {
+        "recovery": 0.23857142857142857,
+        "l2": 3470.0,
+        "seconds": 8.018744230270386
+      }
     }
   ],
   "protocol": "X-26: two snapshot-free routes to the recipe response, tested separately.\n\nThe literature review found no ILT/OPC work on either of these. Both use only\nthe reference solution and the exact model -- no snapshots of other recipes.\n\nRoute A -- implicit-function-theorem (IFT) / Newton predictor.\n  The reference P* satisfies grad F(P*; theta0) = 0. To first order the new\n  optimum is  P*(theta) = P* - H^-1 [grad F(P*; theta) - grad F(P*; theta0)].\n  X-21's operator ROM failed because the optimal change lies largely in J's\n  null space at P*, where the Gauss-Newton matrix J^T J is zero. The FULL\n  Hessian adds the residual-curvature term sum_i r_i grad^2 r_i, which is not\n  confined to range(J^T); the hypothesis is that it supplies the missing\n  null-space motion. Variants (Hessian-vector products by double backward,\n  validated against finite differences to 1e-8):\n    ift_gn       H = 2 J^T J at (P*, theta0), rhs = grad difference\n    ift_full     H = full Hessian at (P*, theta0), rhs = grad difference\n    newton_full  H = full Hessian at (P*, theta), rhs = grad F(P*; theta);\n                 1 and 3 steps (the 3-step version is a corrector)\n  Each linear solve is CG on (H + lam I), stopping at negative curvature,\n  with lam from {0.1, 1, 10} and step length from {0.25, ..., 4} chosen by\n  the NEW recipe's own objective (never by the truth).\n\nRoute B -- spatially varying normal edge displacement.\n  In level-set terms an edge moved by b(x) along its normal is\n  dP = b(x) |grad P*|. X-25's single mode was b = const (87%). Here b is a\n  bilinear field on a coarse grid of spacing s (px at 512^2, 4 nm/px):\n  s = global (1 dim), 64, 32, 16, 8 px (81 ... 4225 dims). Gauss-Newton on the\n  full model in that span (matrix-free CG in b-space, cost per CG step\n  independent of the dimension), with recovery checkpoints at 1..20 steps,\n  against full-space warm GN at the same steps. Also the projection ceiling:\n  the best b-field fit to the true change.\n\nSame 24 (layout, recipe) pairs, truths and recovery metric as X-25.\n\nUsage::\n\n    PYTHONPATH=src python scripts/rom_ift_normal_field.py\n",
   "provenance": {
-    "git_commit": "6de7b8c959c23fde9e66483e53ffeee9f687a1c6",
+    "git_commit": "bfedfcd97419f8f5fe57b98e87f490c8b2a6ebf9",
     "torch": "2.9.1+cu128",
     "cuda_available": false,
     "device": "cpu",

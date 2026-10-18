@@ -1,1 +1,2 @@
 [case3     threshold x0.95] IFT gn   46% full   41% newton1   14% newton3   15% (11s) | field@5/20: global:  11%/  89% 64:  16%/  89% 32:  81%/  94% 16:  95%/  92% 8:  98%/ 100% | warm   37%/  82% | proj global:  15% 64:  15% 32:  14% 16:  16% 8:  27%
+[case3     threshold x1.05] IFT gn   42% full   40% newton1   24% newton3   24% (8s) | field@5/20: global:  11%/  88% 64:  16%/  86% 32:  97%/  84% 16:  85%/  91% 8:  98%/  94% | warm   40%/  93% | proj global:  14% 64:  15% 32:  15% 16:  17% 8:  31%
