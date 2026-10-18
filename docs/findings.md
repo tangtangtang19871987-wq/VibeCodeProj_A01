@@ -1525,3 +1525,92 @@ layout-specific, proximity-dependent correction.
 
 A natural next step is a few more geometry-defined modes, such as normal
 displacement weighted by curvature or by local proximity / pattern density.
+
+---
+
+## F-ROM-05 — Two snapshot-free routes tested: the IFT/Newton predictor fails (~30%); a coarse normal-displacement field reaches POD-level recovery (95–99%) without snapshots (X-26)
+
+**Severity: high.** Both routes came out of the literature review
+(`reports/计算光刻与光学降阶方法综述.md`), which found no ILT/OPC work on
+either. Both use only the reference solution and the exact model.
+
+### Setup
+
+`scripts/rom_ift_normal_field.py` uses the same 24 (layout, recipe) pairs,
+truths (60 s warm GN) and recovery metric as X-25.
+
+**Route A — implicit-function / Newton predictor.** Full Hessian-vector
+products come from double backward; they were checked against finite
+differences to 1e-8. Each linear solve is CG on (H + λI), stopping at negative
+curvature, with λ and the step length chosen by the new recipe's own
+objective. Variants:
+- `ift_gn`: Gauss-Newton Hessian, right-hand side is the gradient difference;
+- `ift_full`: full Hessian at (P*, θ0);
+- `newton_full`: full Hessian at (P*, θ), 1 and 3 steps.
+
+**Route B — spatially varying normal edge displacement.** The update is
+dP = b(x)|∇P*|, with b bilinear on a grid of spacing s:
+- s = global gives 1 dimension;
+- 64 / 32 / 16 / 8 px give 81 / 289 / 1089 / 4225 dimensions (at 4 nm/px).
+
+Levenberg-Marquardt runs on the full model in b-space, using matrix-free CG.
+It is compared with full-space warm GN at the same step counts. The projection
+ceiling is the best b-field fit to the true mask change.
+
+### Result (median recovery over 24 pairs; worst; median wall-clock)
+
+| Method | median | worst | threshold / dose / bias | s |
+|---|---:|---:|---|---:|
+| ift_gn | 31% | 24% | 32 / 28 / 33% | 3.4 |
+| ift_full | 30% | 21% | 29 / 27 / 33% | 7.0 |
+| newton_full, 1 / 3 steps | 21% / 29% | 7% / 11% | — | 6.5 / 10.0 |
+| warm full GN, 3 / 5 / 8 / 12 / 20 steps | 18 / 28 / 43 / 57 / 79% | 67% @20 | — | 0.9 / 1.4 / 2.3 / 3.6 / 6.4 |
+| field global, 20 steps | 87% | 47% | 88 / 88 / 68% | 6.3 |
+| field 64 px, 8 steps | 87% | 68% | 90 / 91 / 74% | 4.4 |
+| field 32 px, 8 steps | 89% | 55% | 91 / 93 / 84% | 5.2 |
+| **field 16 px, 5 steps** | **95%** | 71% | 95 / 95 / 90% | **4.3** |
+| field 16 px, 20 steps | 96% | 80% | 95 / 96 / 96% | 29 |
+| **field 8 px, 3 / 5 steps** | **91% / 96%** | 61% / 66% | 93 / 95 / 84%, 96 / 99 / 91% | **1.9 / 4.2** |
+| field 8 px, 20 steps | 99% | 74% | 98 / 100 / 98% | 31 |
+| projection ceiling, 16 / 8 px | 23% / 48% | — | — | — |
+
+By layout, the 8 px field at 5 steps gives case3 98%, mod_small 100%,
+mod_large 91% and case1 96%. The 16 px field at 20 steps gives mod_large 98%.
+X-25's weak cases (bias 68%, mod_large 68%) are resolved.
+
+### Reading it
+
+1. **Route A is falsified.** The full Hessian performs no better than
+   Gauss-Newton (30% vs 31%), and Newton steps on the new recipe do worse.
+   Whatever residual curvature exists does not supply the null-space motion
+   that the optimal change needs. A one-step linear predictor around P* is
+   capped near the operator-ROM level (X-20/X-21). The response is not a
+   small perturbation around P*: it needs the mask-sigmoid linearisation to
+   move, as X-21's relinearisation already showed.
+2. **Route B works, and the needed resolution is physical.** Recovery jumps
+   between 32 px (128 nm) and 16 px (64 nm) of b-field resolution, which is the
+   optical resolution scale λ/(2NA) ≈ 71 nm. Coarser fields cannot express
+   proximity-dependent edge moves (≤ 91%); fields at or below that scale reach
+   95–99% on every layout and recipe family. At equal wall-clock (~2–4 s) the
+   field beats full-space warm GN by a wide margin (91–95% vs 43–57%). It
+   matches X-23's snapshot POD (95% in 2.8 s) without any snapshots.
+3. **It does not reproduce the truth mask; it finds an equally good one.**
+   The projection ceilings are low (23% / 48%): the true re-optimised mask is
+   mostly not a normal-displacement field. The b-field span instead contains
+   different masks that print as well (sometimes better: some recoveries
+   exceed 100%, because the truth is a finite-budget solve). ILT's
+   non-uniqueness is what makes a low-dimensional geometric span sufficient.
+
+### Limits
+
+- Same scope as X-25: 512², one reference per layout, 6 recipes.
+- Per-step cost in b-space is about 3× a full-space step, because CG converges
+  more slowly in b-coordinates; the 20-step times (≈30 s) are therefore not
+  competitive. A diagonal preconditioner is the obvious engineering fix and
+  was not tried.
+- Recovery is not monotone in steps for every pair (soft-residual objective
+  vs hard-print metric).
+- Worst cases (61–80%) remain.
+- Level-set ILT itself is known (Shen, Wong & Lam 2009/2011). The new part is
+  using a coarse, optics-resolution normal-velocity field as the reduced space
+  for recipe re-optimisation, and the measured resolution threshold.

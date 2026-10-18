@@ -111,6 +111,7 @@ against an independent reference) / `BLOCKED`.
 | X-23 | Snapshot POD vs operator basis | [C] | `scripts/rom_pod_study.py` | `results/rom_pod/` | **VERIF** -- same-family POD (3-4 dims) + full-model GN: 95% median recovery in 2.8 s, Spearman 0.83; leave-one-out 99% (F-ROM-03) |
 | X-24 | Layout transfer of recipe bases (shift / small edit / large edit / other clip) | [C] | `scripts/rom_layout_transfer.py` | `results/rom_layout_transfer/` | **VERIF** -- case-3 POD transfers (100/86/94%); operator ROM capped ~50%, diverges on large edit; translation exact (F-ROM-04) |
 | X-25 | Snapshot-free geometry bases | [C] | `scripts/rom_basis_physics.py` | `results/rom_basis_physics/` | **VERIF** -- 1-dim uniform normal displacement dP ~ abs(grad P_ref): 87% median over 4 layouts x 6 recipes in 1.2 s; random controls 14-36% (F-ROM-04) |
+| X-26 | Snapshot-free routes: IFT/Newton predictor vs coarse normal-displacement field | [C] | `scripts/rom_ift_normal_field.py` | `results/rom_ift_normal/` | **VERIF** -- IFT/Newton (full Hessian) ~30% median, falsified; b-field at 16/8 px (~optical resolution): 95%/96% median in ~4 s, 99% at 20 steps, no snapshots (F-ROM-05) |
 
 ## 8. Completeness check against the paper
 
