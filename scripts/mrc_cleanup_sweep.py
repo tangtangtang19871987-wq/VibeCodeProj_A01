@@ -34,10 +34,11 @@ from gril.experiments.run_iccad13 import provenance
 from gril.ilt.solver import morphological_open
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import epe_violations, l2_loss
+from gril.paths import bench_dir, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+BENCH_DIR = bench_dir()
+KERNEL_DIR = kernel_dir()
 BASELINE_DIR = os.path.join(ROOT, "results/iccad13_ilt")
 CASES = list(range(1, 11))
 OPEN_SIZES = [0, 3, 5, 7, 9]

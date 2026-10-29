@@ -28,10 +28,11 @@ from gril.experiments.run_iccad13 import provenance
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import evaluate
+from gril.paths import bench_dir, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+BENCH_DIR = bench_dir()
+KERNEL_DIR = kernel_dir()
 
 CASES = [1, 3, 9]
 WEIGHTS = [0.0, 0.001, 0.01, 0.05, 0.1, 0.5, 1.0]

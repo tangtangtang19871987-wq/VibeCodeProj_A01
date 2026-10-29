@@ -40,10 +40,11 @@ from gril.experiments.run_iccad13 import provenance
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import epe_violations, l2_loss, pv_band
+from gril.paths import bench_dir, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+BENCH_DIR = bench_dir()
+KERNEL_DIR = kernel_dir()
 OUT = os.path.join(ROOT, "results/optimizer_benchmark")
 COMMON = dict(mask_steepness=8.0, init_scale=0.5, iterations=100_000)
 

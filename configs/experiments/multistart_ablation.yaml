@@ -16,7 +16,7 @@
 experiment_id: multistart_ablation
 paper_reference: "Fig. 1c, Sec. 3.3.2 -- tests whether a LEARNED sampler beats dumb random multi-start, which neither the paper nor this project's earlier experiments isolate"
 seed: 0
-kernel_dir: /home/user/openopc/openilt/kernel
+kernel_dir: auto   # resolved by gril.paths (data/ via scripts/fetch_data.sh, or GRIL_KERNEL_DIR)
 
 canvas: 256
 pixel_nm: 8.0

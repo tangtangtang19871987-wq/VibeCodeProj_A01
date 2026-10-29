@@ -206,11 +206,12 @@ def fig3_mask_visualization(case: int = 1):
 
     from gril.data.glp import Design
     from gril.litho.resist import LithoModel, ProcessConfig
+    from gril.paths import find_bench_dir, find_kernel_dir
 
     mask_path = os.path.join(ROOT, f"results/iccad13_ilt/mask{case}.pt")
-    glp_path = f"/home/user/openopc/openilt/benchmark/ICCAD2013/M1_test{case}.glp"
-    kernel_dir = "/home/user/openopc/openilt/kernel"
-    if not (os.path.exists(mask_path) and os.path.exists(glp_path)):
+    bench, kernel_dir = find_bench_dir(), find_kernel_dir()
+    glp_path = os.path.join(bench or "", f"M1_test{case}.glp")
+    if not (os.path.exists(mask_path) and bench and kernel_dir):
         print(f"skip fig3: mask{case}.pt or the GLP benchmark file is not present")
         return
 

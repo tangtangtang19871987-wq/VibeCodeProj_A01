@@ -50,6 +50,7 @@ from gril.experiments.infer import low_res_refine
 from gril.experiments.run_iccad13 import provenance
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import epe_violations
+from gril.paths import kernel_dir
 
 
 def _diversity(masks: torch.Tensor) -> float:
@@ -83,7 +84,7 @@ def run(config_path: str) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     torch.manual_seed(cfg["seed"])
 
-    litho = LithoModel(cfg["kernel_dir"], ProcessConfig())
+    litho = LithoModel(kernel_dir(cfg["kernel_dir"]), ProcessConfig())
     size, pixel_nm = cfg["canvas"], cfg["pixel_nm"]
     K = cfg["group_size"]
     tol = cfg["epe_tolerance"]

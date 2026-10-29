@@ -6,7 +6,7 @@ experiment_id: abl_grpo_teacher_relative
 paper_reference: "Sec. 3.3 (Eqs. 5-10), Sec. 4.1 configuration; Table 2 PT vs PT+RL"
 seed: 0
 threads: 1
-kernel_dir: /home/user/openopc/openilt/kernel
+kernel_dir: auto   # resolved by gril.paths (data/ via scripts/fetch_data.sh, or GRIL_KERNEL_DIR)
 
 canvas: 256          # 256 px x 8 nm = 2048 nm, the same physical field as the paper
 pixel_nm: 8.0

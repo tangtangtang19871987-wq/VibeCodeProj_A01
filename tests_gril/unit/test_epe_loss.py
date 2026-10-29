@@ -98,10 +98,12 @@ def test_exact_violation_count_matches_metric_on_real_iccad13_mask():
     import os
 
     from gril.data.glp import Design
+    from gril.paths import find_bench_dir
 
     mask_path = "results/iccad13_ilt/mask1.pt"
-    glp_path = "/home/user/openopc/openilt/benchmark/ICCAD2013/M1_test1.glp"
-    if not (os.path.exists(mask_path) and os.path.exists(glp_path)):
+    bench = find_bench_dir()
+    glp_path = os.path.join(bench or "", "M1_test1.glp")
+    if not (os.path.exists(mask_path) and bench):
         pytest.skip("ICCAD13 result / benchmark assets not present in this environment")
 
     printed = torch.load(mask_path, weights_only=False).float()

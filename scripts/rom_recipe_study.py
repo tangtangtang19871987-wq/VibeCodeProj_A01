@@ -28,8 +28,6 @@ Usage::
 
 from __future__ import annotations
 
-import copy
-import dataclasses
 import json
 import os
 import sys
@@ -43,13 +41,14 @@ import torch.nn.functional as F
 from gril.data.glp import Design
 from gril.experiments.run_iccad13 import provenance
 from gril.ilt.gauss_newton import ILTLeastSquares, solve_levenberg_marquardt
+from gril.ilt.recipe_rom import apply_recipe
 from gril.ilt.reduced_order import ReducedILT, gn_spectrum
-from gril.litho.resist import LithoModel, ProcessConfig, resist
+from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import epe_violations, l2_loss, pv_band
+from gril.paths import glp_path, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+KERNEL_DIR = kernel_dir()
 OUT = os.path.join(ROOT, "results/rom_study")
 CASE, DOWNSAMPLE, PIXEL_NM = 3, 4, 4.0
 BETA, INIT_SCALE = 8.0, 0.5
@@ -64,20 +63,16 @@ RECIPES = (
 )
 
 
-def biased(target: torch.Tensor, b: int) -> torch.Tensor:
-    t = target[None, None]
-    for _ in range(abs(b)):
-        t = F.max_pool2d(t, 3, 1, 1) if b > 0 else -F.max_pool2d(-t, 3, 1, 1)
-    return t[0, 0]
+def load_target(case: int) -> torch.Tensor:
+    """ICCAD13 ``case`` rasterised at 2048^2, area-downsampled by DOWNSAMPLE and re-binarised."""
+    full = torch.tensor(Design.from_glp(glp_path(case)).centred_raster(2048))
+    return (F.avg_pool2d(full[None, None].float(), DOWNSAMPLE)[0, 0] > 0.5).float()
 
 
 def recipe_setup(litho: LithoModel, target: torch.Tensor, rec: dict):
-    d = rec.get("dose", 1.0)
-    cfg = dataclasses.replace(BASE, target_density=rec.get("threshold", BASE.target_density),
-                              dose_nom=d * BASE.dose_nom, dose_max=d * BASE.dose_max, dose_min=d * BASE.dose_min)
-    lm = copy.copy(litho)
-    lm.cfg = cfg
-    return lm, biased(target, rec.get("bias", 0))
+    """(litho, target) for one entry of RECIPES, relative to the nominal BASE process."""
+    return apply_recipe(litho, target, BASE, threshold=rec.get("threshold"), dose=rec.get("dose", 1.0),
+                        bias=rec.get("bias", 0))
 
 
 def score(lm: LithoModel, target: torch.Tensor, params: torch.Tensor, ref_print=None) -> dict:
@@ -101,8 +96,7 @@ def main() -> None:
     torch.set_num_threads(4)
     os.makedirs(OUT, exist_ok=True)
     litho = LithoModel(KERNEL_DIR, BASE)
-    full = torch.tensor(Design.from_glp(f"{BENCH_DIR}/M1_test{CASE}.glp").centred_raster(2048))
-    target = (F.avg_pool2d(full[None, None].float(), DOWNSAMPLE)[0, 0] > 0.5).float()
+    target = load_target(CASE)
 
     p0_path = os.path.join(OUT, "p0.pt")
     if os.path.exists(p0_path):

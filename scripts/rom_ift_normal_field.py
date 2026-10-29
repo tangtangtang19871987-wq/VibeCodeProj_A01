@@ -49,12 +49,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
-import torch.nn.functional as F
 
 import rom_recipe_study as base
-from gril.ilt.gauss_newton import ILTLeastSquares, _cg, solve_levenberg_marquardt
+from gril.ilt.gauss_newton import ILTLeastSquares, solve_levenberg_marquardt
+from gril.ilt.recipe_rom import NormalDisplacementField, solve_in_normal_field
 from gril.litho.socs import convolve
-from rom_basis_physics import grad_mag
 from rom_layout_transfer import PICK, layouts, load_target
 
 OUT = os.path.join(base.ROOT, "results/rom_ift_normal")
@@ -148,63 +147,10 @@ def route_a(model_old, model_new, p_ref):
 
 # ---------------------------------------------------------------- route B
 
-class NormalField:
-    """dP = b(x) |grad P_ref| with b bilinear on a grid of the given spacing."""
-
-    def __init__(self, p_ref: torch.Tensor, spacing):
-        self.g = grad_mag(p_ref)
-        self.hw = p_ref.shape
-        self.n = (1, 1) if spacing == "global" else tuple(s // spacing + 1 for s in self.hw)
-
-    @property
-    def dims(self):
-        return self.n[0] * self.n[1]
-
-    def up(self, c):
-        if self.n == (1, 1):
-            return c.reshape(()) * self.g
-        return F.interpolate(c[None, None], size=self.hw, mode="bilinear", align_corners=True)[0, 0] * self.g
-
-    def up_t(self, v):
-        c = torch.zeros(self.n, requires_grad=True)
-        with torch.enable_grad():
-            return torch.autograd.grad((self.up(c) * v).sum(), c)[0]
-
-    def project(self, delta, iters=300):
-        """argmin_b || up(b) - delta || by CG on the normal equations."""
-        b = self.up_t(delta)
-        x = cg(lambda d: self.up_t(self.up(d)), b, 0.0, iters)
-        return self.up(x)
-
-
-def lm_in_field(lm, tgt, p_ref, nf: NormalField, iterations=max(CHECKPOINTS)):
+def lm_in_field(lm, tgt, p_ref, nf: NormalDisplacementField, iterations=max(CHECKPOINTS)):
     """Levenberg-Marquardt in b-space; returns {step: (p, seconds)}."""
-    model = ILTLeastSquares(tgt, lm, base.BETA)
-    c = torch.zeros(nf.n)
-    st = model.state(p_ref)
-    lam, nu, snaps, t0 = 1.0, 2.0, {}, time.time()
-    with torch.no_grad():
-        for it in range(1, iterations + 1):
-            jtr = nf.up_t(model.vjp(st, st.r))
-
-            def apply_a(d, st=st, lam=lam):
-                jd = model.jvp(st, nf.up(d))
-                return nf.up_t(model.vjp(st, jd)) + lam * d, jd
-
-            delta, j_delta = _cg(apply_a, -jtr, 10, 0.1, lambda x: model.jvp(st, nf.up(x)))
-            pred = -2.0 * float((jtr * delta).sum()) - float((j_delta * j_delta).sum())
-            trial = model.state(p_ref + nf.up(c + delta))
-            rho = (st.f - trial.f) / pred if pred > 0 else -1.0
-            if rho > 1e-4:
-                c, st = c + delta, trial
-                lam *= max(1 / 3, 1 - (2 * rho - 1) ** 3)
-                nu = 2.0
-            else:
-                lam *= nu
-                nu *= 2.0
-            if it in CHECKPOINTS:
-                snaps[it] = (st.p.clone(), time.time() - t0)
-    return snaps
+    return solve_in_normal_field(tgt, lm, p_ref, nf, beta=base.BETA, iterations=iterations,
+                                 checkpoints=CHECKPOINTS)[1]
 
 
 # ---------------------------------------------------------------- driver
@@ -224,7 +170,7 @@ def main() -> None:
 
     for name, (target, p_ref, truth_paths) in layout_set.items():
         model_old = ILTLeastSquares(target, litho, base.BETA)
-        fields = {s: NormalField(p_ref, s) for s in SPACINGS}
+        fields = {s: NormalDisplacementField(p_ref, s) for s in SPACINGS}
         rows = results.setdefault(name, [])
         done = {r["recipe"] for r in rows}
         for rec in [r for r in base.RECIPES if r["name"] in PICK and r["name"] not in done]:

@@ -27,10 +27,11 @@ from gril.data.glp import Design
 from gril.experiments.run_iccad13 import provenance, score_mask
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
+from gril.paths import bench_dir, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+BENCH_DIR = bench_dir()
+KERNEL_DIR = kernel_dir()
 REF_DIR = os.path.join(ROOT, "results/iccad13_ilt_lbfgs100")
 OUT = os.path.join(ROOT, "results/iccad13_ilt_gn")
 ILT = dict(optimizer="gauss_newton", gn_max_cg=10, mask_steepness=8.0, init_scale=0.5,

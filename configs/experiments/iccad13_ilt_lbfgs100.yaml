@@ -21,8 +21,8 @@ paper_reference: "Table 1, ICCAD13 rows -- X-16 with a properly-tuned iteration 
 seed: 0
 threads: 4
 canvas: 2048
-kernel_dir: /home/user/openopc/openilt/kernel
-bench_dir: /home/user/openopc/openilt/benchmark/ICCAD2013
+kernel_dir: auto   # resolved by gril.paths (data/ via scripts/fetch_data.sh, or GRIL_KERNEL_DIR)
+bench_dir: auto    # resolved by gril.paths (or GRIL_BENCH_DIR)
 cases: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 epe_tolerances: [15, 3]
 process:

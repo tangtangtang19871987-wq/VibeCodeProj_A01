@@ -32,7 +32,6 @@ import time
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 from gril.config.schema import TrainingExperimentSchema, load_and_validate
 from gril.data.synthetic import layout_dataset
@@ -44,6 +43,7 @@ from gril.metrics.core import epe_violations
 from gril.models.generator import Discriminator, GeneratorConfig, StyleAwareGenerator
 from gril.train.grpo import GRPOConfig, finetune_step
 from gril.train.pretrain import PretrainConfig, critic_step, generator_step
+from gril.paths import kernel_dir
 
 
 def build_ground_truth(layouts: np.ndarray, litho: LithoModel, iters: int, cache: str) -> torch.Tensor:
@@ -105,7 +105,7 @@ def run(config_path: str) -> dict:
     torch.manual_seed(cfg["seed"])
     torch.set_num_threads(cfg.get("threads", 4))
 
-    litho = LithoModel(cfg["kernel_dir"], ProcessConfig())
+    litho = LithoModel(kernel_dir(cfg["kernel_dir"]), ProcessConfig())
     size, pixel_nm = cfg["canvas"], cfg["pixel_nm"]
 
     layouts = layout_dataset(cfg["n_train"] + cfg["n_val"], seed=cfg["seed"], size=size, pixel_nm=pixel_nm)

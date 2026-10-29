@@ -25,6 +25,7 @@ from gril.data.glp import Design
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import epe_violations, l2_loss, pv_band
+from gril.paths import glp_path, kernel_dir
 
 
 def _git_commit() -> str:
@@ -78,7 +79,7 @@ def run(config_path: str) -> dict:
     torch.manual_seed(cfg.get("seed", 0))
     torch.set_num_threads(cfg.get("threads", os.cpu_count() or 4))
 
-    litho = LithoModel(cfg["kernel_dir"], ProcessConfig(**cfg.get("process", {})))
+    litho = LithoModel(kernel_dir(cfg["kernel_dir"]), ProcessConfig(**cfg.get("process", {})))
     ilt_raw = dict(cfg.get("ilt", {}))
     if "checkpoints" in ilt_raw:
         ilt_raw["checkpoints"] = tuple(ilt_raw["checkpoints"])
@@ -94,7 +95,7 @@ def run(config_path: str) -> dict:
             print(f"[case {case}] cached", flush=True)
             continue
 
-        glp = os.path.join(cfg["bench_dir"], f"M1_test{case}.glp")
+        glp = glp_path(case, cfg["bench_dir"])
         target = torch.tensor(Design.from_glp(glp).centred_raster(canvas))
 
         t0 = time.time()

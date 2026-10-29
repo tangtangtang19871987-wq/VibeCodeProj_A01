@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-import os
-
 import pytest
 import torch
 
 from gril.ilt.gauss_newton import ILTLeastSquares
 from gril.ilt.reduced_order import ReducedILT, band_basis, gn_spectrum
 from gril.litho.resist import LithoModel, ProcessConfig
+from gril.paths import find_kernel_dir
 
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
-pytestmark = pytest.mark.skipif(not os.path.isdir(KERNEL_DIR), reason="ICCAD13 kernels not present")
+KERNEL_DIR = find_kernel_dir()
+pytestmark = pytest.mark.skipif(KERNEL_DIR is None, reason="ICCAD13 kernels not present; run scripts/fetch_data.sh")
 H = 96
 
 

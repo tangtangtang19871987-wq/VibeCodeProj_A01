@@ -52,9 +52,7 @@ POD_DIR = os.path.join(base.ROOT, "results/rom_pod")
 PICK = ["threshold x0.95", "threshold x1.05", "dose 0.97", "dose 1.03", "bias -1px", "bias +1px"]
 
 
-def load_target(case: int) -> torch.Tensor:
-    full = torch.tensor(base.Design.from_glp(f"{base.BENCH_DIR}/M1_test{case}.glp").centred_raster(2048))
-    return (base.F.avg_pool2d(full[None, None].float(), base.DOWNSAMPLE)[0, 0] > 0.5).float()
+load_target = base.load_target
 
 
 def layouts(case3: torch.Tensor) -> dict[str, torch.Tensor]:

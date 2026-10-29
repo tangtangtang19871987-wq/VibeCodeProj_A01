@@ -46,6 +46,7 @@ from gril.data.glp import Design
 from gril.experiments.run_iccad13 import provenance, score_mask
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
+from gril.paths import glp_path, kernel_dir
 
 
 def run(config_path: str) -> dict:
@@ -58,14 +59,14 @@ def run(config_path: str) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     torch.set_num_threads(cfg.get("threads", os.cpu_count() or 4))
 
-    litho = LithoModel(cfg["kernel_dir"], ProcessConfig(**cfg.get("process", {})))
+    litho = LithoModel(kernel_dir(cfg["kernel_dir"]), ProcessConfig(**cfg.get("process", {})))
     tolerances = cfg.get("epe_tolerances", [15, 3])
     canvas = cfg.get("canvas", 2048)
     shared = cfg["shared_ilt"]  # init_scale, mask_steepness: identical for every optimizer
 
     results: dict[str, dict] = {}
     for case in cfg["cases"]:
-        glp = os.path.join(cfg["bench_dir"], f"M1_test{case}.glp")
+        glp = glp_path(case, cfg["bench_dir"])
         target = torch.tensor(Design.from_glp(glp).centred_raster(canvas))
 
         for opt_name, opt_overrides in cfg["optimizers"].items():

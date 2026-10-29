@@ -2,7 +2,7 @@
 import pytest
 import torch
 
-from gril.ilt.solver import ILTConfig, ILTResult, morphological_open, solve
+from gril.ilt.solver import ILTConfig, morphological_open, solve
 from gril.litho.resist import LithoModel, ProcessConfig
 
 

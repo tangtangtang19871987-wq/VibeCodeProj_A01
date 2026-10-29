@@ -37,7 +37,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import torch
 
 import rom_recipe_study as base
-from gril.ilt.gauss_newton import ILTLeastSquares
+from gril.ilt.recipe_rom import pod_basis, solve_in_subspace
 
 OUT = os.path.join(base.ROOT, "results/rom_pod")
 
@@ -46,43 +46,16 @@ def family(name: str) -> str:
     return name.split()[0]
 
 
-def pod_basis(deltas: list[torch.Tensor]) -> torch.Tensor:
-    s = torch.stack([d.reshape(-1) for d in deltas], dim=1)
-    u, sv, _ = torch.linalg.svd(s, full_matrices=False)
-    return u[:, sv > 1e-6 * sv[0]]
-
-
 def gn_in_span(lm, tgt, p0, u, iterations=15, damping=1.0):
     """Levenberg-Marquardt over P = P0 + U a with the FULL model and J U refreshed each step."""
-    model = ILTLeastSquares(tgt, lm, base.BETA)
-    k = u.shape[1]
-    a = torch.zeros(k)
-    st = model.state(p0)
-    lam, nu = damping, 2.0
-    eye = torch.eye(k)
-    for _ in range(iterations):
-        ju = torch.stack([model.jvp(st, u[:, j].view(p0.shape)).reshape(-1) for j in range(k)], dim=1)
-        g = ju.T @ st.r.reshape(-1)
-        step = torch.linalg.solve(ju.T @ ju + lam * eye, -g)
-        pred = -(2 * float(g @ step) + float((ju @ step).pow(2).sum()))
-        trial = model.state((p0.reshape(-1) + u @ (a + step)).reshape(p0.shape))
-        rho = (st.f - trial.f) / pred if pred > 0 else -1.0
-        if rho > 1e-4:
-            a, st = a + step, trial
-            lam *= max(1 / 3, 1 - (2 * rho - 1) ** 3)
-            nu = 2.0
-        else:
-            lam *= nu
-            nu *= 2.0
-    return st.p
+    return solve_in_subspace(tgt, lm, p0, u, beta=base.BETA, iterations=iterations, damping=damping)
 
 
 def main() -> None:
     torch.set_num_threads(4)
     os.makedirs(OUT, exist_ok=True)
     litho = base.LithoModel(base.KERNEL_DIR, base.BASE)
-    full = torch.tensor(base.Design.from_glp(f"{base.BENCH_DIR}/M1_test{base.CASE}.glp").centred_raster(2048))
-    target = (base.F.avg_pool2d(full[None, None].float(), base.DOWNSAMPLE)[0, 0] > 0.5).float()
+    target = base.load_target(base.CASE)
     p0 = torch.load(os.path.join(base.OUT, "p0.pt"))
 
     warm = {}

@@ -36,8 +36,7 @@ def main() -> None:
     torch.set_num_threads(4)
     os.makedirs(OUT, exist_ok=True)
     litho = base.LithoModel(base.KERNEL_DIR, base.BASE)
-    full = torch.tensor(base.Design.from_glp(f"{base.BENCH_DIR}/M1_test{base.CASE}.glp").centred_raster(2048))
-    target = (base.F.avg_pool2d(full[None, None].float(), base.DOWNSAMPLE)[0, 0] > 0.5).float()
+    target = base.load_target(base.CASE)
     p0 = torch.load(os.path.join(base.OUT, "p0.pt"))
 
     rows = []

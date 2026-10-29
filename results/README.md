@@ -24,6 +24,9 @@ command.
 
 ## Reproducing
 
+Assets come from `bash scripts/fetch_data.sh` (or `GRIL_KERNEL_DIR` / `GRIL_BENCH_DIR`);
+configs use `kernel_dir: auto`. Per-script dependencies and runtimes: `scripts/README.md`.
+
 ```bash
 PYTHONPATH=src python -m gril.experiments.run_iccad13 --config configs/experiments/iccad13_ilt.yaml
 PYTHONPATH=src python -m gril.experiments.run_training --config configs/experiments/train_scaled.yaml
@@ -37,6 +40,14 @@ PYTHONPATH=src python scripts/gn_full_baseline.py                  # -> results/
 PYTHONPATH=src python scripts/pvb_weight_sweep.py          # -> results/pvb_sweep/summary.json (F-PVB-01)
 PYTHONPATH=src python scripts/epe_weight_calibration.py    # -> results/epe_aware_case3/summary.json (F-EPE-01)
 PYTHONPATH=src python scripts/mrc_cleanup_sweep.py          # -> results/mrc_sweep/summary.json (F-MRC-01)
+# Reduced-order recipe study (X-20 .. X-26) -- run in this order; each step reuses the previous outputs
+PYTHONPATH=src python scripts/rom_recipe_study.py       # -> results/rom_study/ (X-20, F-ROM-01; writes p0.pt)
+PYTHONPATH=src python scripts/rom_diagnostics.py        # -> results/rom_diagnostics/ (X-21, F-ROM-02; ~8 GB peak)
+PYTHONPATH=src python scripts/rom_warmstart_curve.py    # -> results/rom_warmstart/ (X-22, F-ROM-02)
+PYTHONPATH=src python scripts/rom_pod_study.py          # -> results/rom_pod/ (X-23, F-ROM-03; writes the case-3 truths)
+PYTHONPATH=src python scripts/rom_layout_transfer.py    # -> results/rom_layout_transfer/ (X-24, F-ROM-04)
+PYTHONPATH=src python scripts/rom_basis_physics.py      # -> results/rom_basis_physics/ (X-25, F-ROM-04)
+PYTHONPATH=src python scripts/rom_ift_normal_field.py   # -> results/rom_ift_normal/ (X-26, F-ROM-05)
 python scripts/make_report.py     # -> REPRODUCTION_REPORT.md
 python scripts/make_figures.py    # -> figures/*.png
 ```

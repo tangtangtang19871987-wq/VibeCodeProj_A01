@@ -9,25 +9,15 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 
 
 def _kernel_dir() -> str | None:
-    for cand in (
-        os.environ.get("GRIL_KERNEL_DIR"),
-        os.path.join(ROOT, "data", "kernel"),
-        "/home/user/openopc/openilt/kernel",
-    ):
-        if cand and os.path.isdir(os.path.join(cand, "kernels")):
-            return cand
-    return None
+    from gril.paths import find_kernel_dir
+
+    return find_kernel_dir()
 
 
 def _bench_dir() -> str | None:
-    for cand in (
-        os.environ.get("GRIL_BENCH_DIR"),
-        os.path.join(ROOT, "data", "benchmark", "ICCAD2013"),
-        "/home/user/openopc/openilt/benchmark/ICCAD2013",
-    ):
-        if cand and os.path.isfile(os.path.join(cand, "M1_test1.glp")):
-            return cand
-    return None
+    from gril.paths import find_bench_dir
+
+    return find_bench_dir()
 
 
 requires_assets = pytest.mark.skipif(

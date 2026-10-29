@@ -31,10 +31,11 @@ from gril.ilt.epe_loss import build_epe_sites, soft_epe_loss
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig, resist
 from gril.metrics.core import epe_violations, l2_loss
+from gril.paths import bench_dir, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+BENCH_DIR = bench_dir()
+KERNEL_DIR = kernel_dir()
 CASE = 3
 INIT_SCALE = 2.0
 MASK_STEEPNESS = 8.0

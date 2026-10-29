@@ -37,6 +37,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import torch
 
 import rom_recipe_study as base
+from gril.ilt.recipe_rom import grad_mag
 from gril.ilt.reduced_order import band_basis
 from rom_layout_transfer import PICK, layouts, load_target
 from rom_pod_study import gn_in_span, pod_basis
@@ -44,11 +45,6 @@ from rom_pod_study import gn_in_span, pod_basis
 OUT = os.path.join(base.ROOT, "results/rom_basis_physics")
 POD_DIR = os.path.join(base.ROOT, "results/rom_pod")
 LT_DIR = os.path.join(base.ROOT, "results/rom_layout_transfer")
-
-
-def grad_mag(p: torch.Tensor) -> torch.Tensor:
-    gy, gx = torch.gradient(p)
-    return (gx * gx + gy * gy).sqrt()
 
 
 def bases_for(p_ref: torch.Tensor, case3_snaps: list[torch.Tensor]) -> dict[str, list[torch.Tensor]]:

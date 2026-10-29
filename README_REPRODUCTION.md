@@ -11,7 +11,7 @@ with an explicit account of what could and could not be reproduced here.
 
 | Tier | What it means | Status |
 |---|---|---|
-| **L1 — mathematical** | Forward model, adjoint, ILT, generator, GRPO objective all correct and tested | **Done.** 90+ tests; physics verified to machine precision |
+| **L1 — mathematical** | Forward model, adjoint, ILT, generator, GRPO objective all correct and tested | **Done.** 206 tests, all passing; physics verified to machine precision |
 | **L2 — experimental** | The paper's tables reproduced within a tolerance | **Partial, and bounded by the environment.** Our independent ILT baseline on ICCAD13 is measured and compared per case; the paper's *"Ours"* rows need LithoBench + 8× A100 and are **not reproduced** |
 | **L3 — engineering** | Clean-env install, config-driven runs, checksums, one command | **Done.** |
 
@@ -68,11 +68,36 @@ Written up in `docs/findings.md`:
 | mean PV Band (nm²) | 37476 | 42794 | 39080.7 |
 
 8 of 10 cases match the paper's EPE@15nm exactly (cases 1, 2, 4, 6, 7, 8, 9, 10
-all match; only cases 3 and 5 differ). This is with an **independently reimplemented
+all match; only cases 3 and 5 differ). This Adam baseline is kept unchanged as
+the reference; later solver work improved on it (next section). This is with an **independently reimplemented
 solver** never tuned against the paper's numbers (G-015: the paper does not
 specify its own solver). Full per-case breakdown and the PV-Band caveat (our
 solver does not optimise the process window, G-015) are in
 `REPRODUCTION_REPORT.md`.
+
+## Later results (solver and reduced-order work)
+
+| Run | mean L2 | mean EPE@15nm | mean EPE@3nm | Finding |
+|---|---:|---:|---:|---|
+| Adam baseline (above) | 25065 | 2.6 | 55.4 | — |
+| L-BFGS, 50 it (X-16) | 23445 | **1.6 = paper, on 10/10 cases** | 55.5 | F-LBFGS-02 |
+| L-BFGS, 100 it (X-17) | 21139 | 1.0 | 46.6 | F-LBFGS-03 |
+| Gauss-Newton / LM, wall-clock matched (X-19) | **20661** | **0.9** | 45.3 | F-OPT-01 |
+| Paper | — | 1.6 | 25.2–32.8 | — |
+
+Controls the paper does not run: a diversity-matched random multi-start equals
+single-start ILT exactly, and both trained-generator arms are worse at this
+project's (much smaller) training scale (F-MULTISTART-01, F-RL-01).
+
+Physics-based reduced-order models for fast **recipe** re-evaluation (X-20 to
+X-26, `gril.ilt.reduced_order`, `gril.ilt.recipe_rom`; F-ROM-01 to F-ROM-05):
+a once-linearised operator ROM and implicit-function / Newton predictors cap at
+~30–50% of the re-optimisation gain. A snapshot POD basis reaches ~95% in ~3 s,
+and a snapshot-free normal-edge-displacement field at optical-resolution
+spacing reaches 95–99% in ~4 s on every layout tested.
+
+Full summary (Chinese): `docs/PROJECT_SUMMARY_zh.md`. Developer guide:
+`docs/DEVELOPER_GUIDE.md`. Experiment index and run order: `scripts/README.md`.
 
 ## Quick start
 
@@ -101,11 +126,15 @@ src/gril/
   litho/        SOCS kernels, Hopkins forward model + exact adjoint, resist, corners
   data/         ICCAD13 GLP parsing; seeded synthetic layouts
   metrics/      L2, PV Band, EPE  (bit-exact vs the contest checker)
-  ilt/          gradient ILT solver, morphological MRC, iteration checkpoints
+  paths.py      locates the ICCAD13 assets (data/, GRIL_*_DIR env vars)
+  ilt/          ILT solver (Adam/L-BFGS/Gauss-Newton/SOTA optimizers), MRC,
+                EPE loss, reduced-order models, recipe re-optimisation
   models/       style-aware generator (Fig. 3, Eq. 4) + WGAN-GP critic
   train/        Eq. 5 pretraining; Eqs. 6-10 GRPO finetuning
   experiments/  config-driven runners, sampling + selection
 tests_gril/     physics / unit / regression
+scripts/        one script per X-nn experiment (index: scripts/README.md)
+configs/        YAML configs for the gril.experiments runners
 docs/           paper summary, source inventory, gap ledger, traceability, findings, tiers
 REPRODUCTION_SPEC.md     the spec, written before the code
 REPRODUCTION_REPORT.md   generated: our numbers vs the paper's tables
@@ -121,6 +150,10 @@ REPRODUCTION_REPORT.md   generated: our numbers vs the paper's tables
 | `docs/findings.md` | Bugs and physics issues found during validation, with root causes |
 | `docs/REPRODUCTION_TIERS.md` | Per-claim map of reproducible vs not, and why |
 | `REPRODUCTION_SPEC.md` | Physics conventions: FFT normalisation, units, corners, tolerances |
+| `docs/DEVELOPER_GUIDE.md` | Setup, package map, numerical conventions, how to add an experiment (Chinese) |
+| `docs/PROJECT_SUMMARY_zh.md` | All results and lessons of the project (Chinese) |
+| `scripts/README.md` | Experiment index: command, outputs, dependencies, finding, runtime (Chinese) |
+| `reports/计算光刻与光学降阶方法综述.md` | Literature review of reduced-order methods in computational lithography/optics, 2010– |
 
 ## Relationship to the pre-existing repository contents
 

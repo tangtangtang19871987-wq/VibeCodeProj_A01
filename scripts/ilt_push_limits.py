@@ -41,10 +41,11 @@ from gril.data.glp import Design
 from gril.ilt.solver import ILTConfig, solve
 from gril.litho.resist import LithoModel, ProcessConfig
 from gril.metrics.core import epe_violations, l2_loss
+from gril.paths import bench_dir, kernel_dir
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BENCH_DIR = "/home/user/openopc/openilt/benchmark/ICCAD2013"
-KERNEL_DIR = "/home/user/openopc/openilt/kernel"
+BENCH_DIR = bench_dir()
+KERNEL_DIR = kernel_dir()
 BASE_LBFGS = dict(mask_steepness=8.0, init_scale=0.5, optimizer="lbfgs",
                    lbfgs_max_iter_per_step=1, lbfgs_history_size=10, lbfgs_line_search="strong_wolfe")
 
