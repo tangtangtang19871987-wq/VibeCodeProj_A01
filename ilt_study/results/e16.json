@@ -831,5 +831,66 @@
    }
   ]
  },
- "ilt": []
+ "ilt": [
+  {
+   "variant": "binary, leaf source (baseline)",
+   "seed": 1,
+   "n_hot": 5,
+   "n_hot_sites": 4,
+   "n_bridge_all": 0,
+   "n_pinch_all": 4,
+   "topo_bridge": 1,
+   "topo_open": 0,
+   "min_bridge_all": 1.0,
+   "min_pinch_all": -1.5,
+   "n_pinch": 0,
+   "n_bridge": 0,
+   "n_t2t": 0,
+   "n_diag": 0,
+   "n_lend": 4,
+   "sraf_print": 1,
+   "zone_bridge": 53,
+   "zone_pinch": 20
+  },
+  {
+   "variant": "binary, leaf source (baseline)",
+   "seed": 2,
+   "n_hot": 7,
+   "n_hot_sites": 5,
+   "n_bridge_all": 0,
+   "n_pinch_all": 5,
+   "topo_bridge": 2,
+   "topo_open": 0,
+   "min_bridge_all": 0.5,
+   "min_pinch_all": -0.5,
+   "n_pinch": 1,
+   "n_bridge": 0,
+   "n_t2t": 0,
+   "n_diag": 0,
+   "n_lend": 4,
+   "sraf_print": 0,
+   "zone_bridge": 46,
+   "zone_pinch": 26
+  },
+  {
+   "variant": "binary, leaf source (baseline)",
+   "seed": 3,
+   "n_hot": 4,
+   "n_hot_sites": 3,
+   "n_bridge_all": 0,
+   "n_pinch_all": 3,
+   "topo_bridge": 1,
+   "topo_open": 0,
+   "min_bridge_all": 1.0,
+   "min_pinch_all": -0.5,
+   "n_pinch": 0,
+   "n_bridge": 0,
+   "n_t2t": 0,
+   "n_diag": 0,
+   "n_lend": 3,
+   "sraf_print": 1,
+   "zone_bridge": 55,
+   "zone_pinch": 17
+  }
+ ]
 }
