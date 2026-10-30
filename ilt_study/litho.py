@@ -40,6 +40,11 @@ class Optics:
     src_step: float = 0.035          # source sampling step in sigma units
     blur_nm: float = 5.0             # resist acid-diffusion sigma
     focus_list: tuple = (0.0, -40.0, 40.0)
+    # if set: keep only source points where the 0th AND one 1st order of this
+    # pitch both pass the pupil (no background-only points)
+    two_beam_pitch: float | None = None
+    # attenuated PSM: intensity transmission of the dark area (phase pi); 0 = binary
+    att_T: float = 0.0
 
 
 @dataclass
@@ -63,7 +68,11 @@ def source_points(op: Optics):
         for sy in s:
             if sx * sx + sy * sy > 1.0:
                 continue
-            if abs(sx) >= op.sx_in and abs(sy) <= op.sy_max:
+            if op.two_beam_pitch is not None:
+                shift = op.wavelength / (op.two_beam_pitch * op.na)
+                if (abs(sx) - shift) ** 2 + sy * sy <= 1.0:
+                    pts.append((sx, sy))
+            elif abs(sx) >= op.sx_in and abs(sy) <= op.sy_max:
                 pts.append((sx, sy))
     pts = np.array(pts)
     w = np.ones(len(pts)) / len(pts)
@@ -125,6 +134,9 @@ class Imager:
 
     def aerial(self, mask: torch.Tensor, focus_idx=None) -> torch.Tensor:
         """mask [..., N, N] real -> aerial image [..., F, N, N]."""
+        if self.op.att_T:
+            t = -math.sqrt(self.op.att_T)                 # pi-phase background amplitude
+            mask = t + (1 - t) * mask
         M = torch.fft.fft2(mask.to(CDTYPE))
         fsel = slice(None) if focus_idx is None else list(focus_idx)
         Kr, Ev = self.kernels[fsel], self.eig[fsel]
