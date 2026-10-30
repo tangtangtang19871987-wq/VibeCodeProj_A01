@@ -1,0 +1,1514 @@
+[
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.08191002905368805,
+  "m_bridge": 80.96205139160156,
+  "m_pinch": 0.9916400909423828,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.9248118996620178,
+  "m_bridge": 80.96205139160156,
+  "m_pinch": 6.989709854125977,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.5249481797218323,
+  "m_bridge": 35.5,
+  "m_pinch": 3.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.4433528482913971,
+  "m_bridge": 35.5,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6892194747924805,
+  "m_bridge": 5.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6613367795944214,
+  "m_bridge": 5.0,
+  "m_pinch": 4.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.7936484813690186,
+  "m_bridge": 5.5,
+  "m_pinch": 7.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6942160129547119,
+  "m_bridge": 5.5,
+  "m_pinch": 1.3120574951171875,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6857404112815857,
+  "m_bridge": 4.0,
+  "m_pinch": 2.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.7344711422920227,
+  "m_bridge": 4.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6789896488189697,
+  "m_bridge": 4.0,
+  "m_pinch": -1.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.5867272615432739,
+  "m_bridge": 4.0,
+  "m_pinch": 6.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6969594359397888,
+  "m_bridge": 5.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6718693375587463,
+  "m_bridge": 5.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.5892601609230042,
+  "m_bridge": 57.0,
+  "m_pinch": 11.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.1502515822649002,
+  "m_bridge": 57.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.7705145478248596,
+  "m_bridge": 32.95252990722656,
+  "m_pinch": -0.5576400756835938,
+  "status": "violated"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.18698257207870483,
+  "m_bridge": 32.95252990722656,
+  "m_pinch": 91.72473907470703,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.44923117756843567,
+  "m_bridge": 51.795509338378906,
+  "m_pinch": 3.8687782287597656,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.5256666541099548,
+  "m_bridge": 51.795509338378906,
+  "m_pinch": 41.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6134361624717712,
+  "m_bridge": 52.5,
+  "m_pinch": 36.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.17429053783416748,
+  "m_bridge": 52.5,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.3810144364833832,
+  "m_bridge": 76.23441314697266,
+  "m_pinch": 0.8823528289794922,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6629738807678223,
+  "m_bridge": 76.23441314697266,
+  "m_pinch": 24.276016235351562,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6269642114639282,
+  "m_bridge": 16.5,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "t2t/line-end",
+  "cos": -0.6612163782119751,
+  "m_bridge": 16.5,
+  "m_pinch": 7.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.4502228796482086,
+  "m_bridge": 4.0,
+  "m_pinch": 15.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.5962013602256775,
+  "m_bridge": 5.5,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.7129889130592346,
+  "m_bridge": 4.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.6322712898254395,
+  "m_bridge": 10.5,
+  "m_pinch": 3.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.5208489298820496,
+  "m_bridge": 1.5,
+  "m_pinch": 12.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.5431393980979919,
+  "m_bridge": 2.5,
+  "m_pinch": 7.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.08759178221225739,
+  "m_bridge": 3.0,
+  "m_pinch": 8.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.3415925204753876,
+  "m_bridge": 3.5,
+  "m_pinch": 4.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.47609731554985046,
+  "m_bridge": 4.0,
+  "m_pinch": 5.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.29635122418403625,
+  "m_bridge": 3.0,
+  "m_pinch": 11.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.37442547082901,
+  "m_bridge": 5.5,
+  "m_pinch": 5.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.5311262607574463,
+  "m_bridge": 5.0,
+  "m_pinch": 6.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.09766583144664764,
+  "m_bridge": 3.0,
+  "m_pinch": 11.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.24345412850379944,
+  "m_bridge": 5.0,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.1713903397321701,
+  "m_bridge": 3.5,
+  "m_pinch": 6.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.3966762125492096,
+  "m_bridge": 2.5,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.3180159330368042,
+  "m_bridge": 3.5,
+  "m_pinch": 9.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.42174211144447327,
+  "m_bridge": 1.0,
+  "m_pinch": 1.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.45284897089004517,
+  "m_bridge": 1.5,
+  "m_pinch": 8.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.5167481899261475,
+  "m_bridge": 8.0,
+  "m_pinch": 6.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.4946483075618744,
+  "m_bridge": 5.5,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.41481301188468933,
+  "m_bridge": 2.0,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand1",
+  "type": "lateral",
+  "cos": -0.5661351680755615,
+  "m_bridge": 6.0,
+  "m_pinch": 11.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.579933226108551,
+  "m_bridge": 33.0,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.670417308807373,
+  "m_bridge": 33.0,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.6682084798812866,
+  "m_bridge": 4.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.6561803221702576,
+  "m_bridge": 4.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7209276556968689,
+  "m_bridge": 25.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.8791975378990173,
+  "m_bridge": 25.0,
+  "m_pinch": 6.773050308227539,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.44452551007270813,
+  "m_bridge": 70.35765075683594,
+  "m_pinch": 82.35804748535156,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.5713651180267334,
+  "m_bridge": 70.35765075683594,
+  "m_pinch": 23.435955047607422,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7470653057098389,
+  "m_bridge": 62.5,
+  "m_pinch": 13.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.3745478093624115,
+  "m_bridge": 62.5,
+  "m_pinch": 39.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.5468446016311646,
+  "m_bridge": 57.780548095703125,
+  "m_pinch": 32.23981857299805,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.41874948143959045,
+  "m_bridge": 57.780548095703125,
+  "m_pinch": 3.8687782287597656,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.804608166217804,
+  "m_bridge": 4.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7631786465644836,
+  "m_bridge": 4.0,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": 0.047889403998851776,
+  "m_bridge": 79.0,
+  "m_pinch": 2.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.8230383992195129,
+  "m_bridge": 79.0,
+  "m_pinch": 14.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.6381603479385376,
+  "m_bridge": 3.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.6308609843254089,
+  "m_bridge": 3.0,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7654270529747009,
+  "m_bridge": 2.0,
+  "m_pinch": 22.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.861411988735199,
+  "m_bridge": 2.0,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7362485527992249,
+  "m_bridge": 4.356849670410156,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.5790666937828064,
+  "m_bridge": 4.356849670410156,
+  "m_pinch": 0.3191490173339844,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.84249347448349,
+  "m_bridge": 21.0,
+  "m_pinch": 6.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.08128851652145386,
+  "m_bridge": 21.0,
+  "m_pinch": 53.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.43976259231567383,
+  "m_bridge": 31.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.5360093712806702,
+  "m_bridge": 31.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7197695374488831,
+  "m_bridge": 65.88862609863281,
+  "m_pinch": 99.66717529296875,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": 0.1790452003479004,
+  "m_bridge": 65.88862609863281,
+  "m_pinch": 1.928110122680664,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.7142724990844727,
+  "m_bridge": 4.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.70628422498703,
+  "m_bridge": 4.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.5870019197463989,
+  "m_bridge": 13.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "t2t/line-end",
+  "cos": -0.6510812044143677,
+  "m_bridge": 13.0,
+  "m_pinch": 76.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.06682758778333664,
+  "m_bridge": 1.5,
+  "m_pinch": 7.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.3147805333137512,
+  "m_bridge": 5.0,
+  "m_pinch": 14.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.19024565815925598,
+  "m_bridge": 5.5,
+  "m_pinch": 10.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.37769100069999695,
+  "m_bridge": 4.0,
+  "m_pinch": 19.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.42981070280075073,
+  "m_bridge": 3.5,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.13063570857048035,
+  "m_bridge": 3.0,
+  "m_pinch": 10.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.26347458362579346,
+  "m_bridge": 4.0,
+  "m_pinch": 11.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.5326011776924133,
+  "m_bridge": 1.0,
+  "m_pinch": 7.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.06985194981098175,
+  "m_bridge": 1.5,
+  "m_pinch": 15.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.4874999225139618,
+  "m_bridge": 1.5,
+  "m_pinch": 7.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.4773394763469696,
+  "m_bridge": 1.5,
+  "m_pinch": 21.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.6367422938346863,
+  "m_bridge": 2.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.40167850255966187,
+  "m_bridge": 3.5,
+  "m_pinch": 9.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.26754555106163025,
+  "m_bridge": 2.0,
+  "m_pinch": 6.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.24703381955623627,
+  "m_bridge": 5.0,
+  "m_pinch": 14.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.2980766296386719,
+  "m_bridge": 2.5,
+  "m_pinch": 6.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.431565523147583,
+  "m_bridge": 3.0,
+  "m_pinch": 16.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.4302377998828888,
+  "m_bridge": 1.5,
+  "m_pinch": 23.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.6254196166992188,
+  "m_bridge": 6.0,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.08230073750019073,
+  "m_bridge": 1.5,
+  "m_pinch": 19.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.4808943271636963,
+  "m_bridge": 4.5,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.5710909366607666,
+  "m_bridge": 2.5,
+  "m_pinch": 12.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand2",
+  "type": "lateral",
+  "cos": -0.2849887013435364,
+  "m_bridge": 2.5,
+  "m_pinch": 12.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7810889482498169,
+  "m_bridge": 5.837104797363281,
+  "m_pinch": 2.2900772094726562,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.5816486477851868,
+  "m_bridge": 5.837104797363281,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7297600507736206,
+  "m_bridge": 13.303169250488281,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.5610096454620361,
+  "m_bridge": 13.303169250488281,
+  "m_pinch": 1.2977104187011719,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.626757025718689,
+  "m_bridge": 4.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.47585171461105347,
+  "m_bridge": 4.0,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7589752674102783,
+  "m_bridge": 3.5,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.43507787585258484,
+  "m_bridge": 3.5,
+  "m_pinch": 61.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.8025184869766235,
+  "m_bridge": 5.0,
+  "m_pinch": -0.5,
+  "status": "violated"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7716768980026245,
+  "m_bridge": 5.0,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.6052152514457703,
+  "m_bridge": 26.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.8223596811294556,
+  "m_bridge": 26.0,
+  "m_pinch": 15.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7319098114967346,
+  "m_bridge": 39.0,
+  "m_pinch": 9.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.4327162504196167,
+  "m_bridge": 39.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.516650915145874,
+  "m_bridge": 6.5,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.778826892375946,
+  "m_bridge": 6.5,
+  "m_pinch": 17.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.4999099671840668,
+  "m_bridge": 9.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7720648646354675,
+  "m_bridge": 9.0,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.6635839343070984,
+  "m_bridge": 45.47587585449219,
+  "m_pinch": 4.4437713623046875,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.5227504968643188,
+  "m_bridge": 45.47587585449219,
+  "m_pinch": 12.927570343017578,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.6991275548934937,
+  "m_bridge": 5.0,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7018992900848389,
+  "m_bridge": 5.0,
+  "m_pinch": 3.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7272974252700806,
+  "m_bridge": 31.0,
+  "m_pinch": 67.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.7237934470176697,
+  "m_bridge": 31.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.36029747128486633,
+  "m_bridge": 56.5,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.6316017508506775,
+  "m_bridge": 56.5,
+  "m_pinch": 35.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.5390446186065674,
+  "m_bridge": 49.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.3734307587146759,
+  "m_bridge": 49.0,
+  "m_pinch": 27.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.6810417175292969,
+  "m_bridge": 5.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "t2t/line-end",
+  "cos": -0.6963703036308289,
+  "m_bridge": 5.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.0932597890496254,
+  "m_bridge": 3.5,
+  "m_pinch": 7.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.37264031171798706,
+  "m_bridge": 3.0,
+  "m_pinch": 12.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.4518427848815918,
+  "m_bridge": 9.0,
+  "m_pinch": 8.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": 0.24992360174655914,
+  "m_bridge": 5.0,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.22871938347816467,
+  "m_bridge": 4.0,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.4330747723579407,
+  "m_bridge": 2.0,
+  "m_pinch": 14.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.454384446144104,
+  "m_bridge": 4.0,
+  "m_pinch": 15.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.07733126729726791,
+  "m_bridge": 2.5,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.005096935201436281,
+  "m_bridge": 2.0,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.69651859998703,
+  "m_bridge": 5.0,
+  "m_pinch": 5.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.396200954914093,
+  "m_bridge": 3.5,
+  "m_pinch": 8.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.5223206877708435,
+  "m_bridge": 2.0,
+  "m_pinch": 23.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.23076754808425903,
+  "m_bridge": 3.0,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.2822810411453247,
+  "m_bridge": 1.5,
+  "m_pinch": 7.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.7042900919914246,
+  "m_bridge": 5.5,
+  "m_pinch": 4.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.45199406147003174,
+  "m_bridge": 1.0,
+  "m_pinch": 9.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.4202154874801636,
+  "m_bridge": 2.5,
+  "m_pinch": 2.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.12727952003479004,
+  "m_bridge": 1.5,
+  "m_pinch": 18.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.00025717829703353345,
+  "m_bridge": 5.0,
+  "m_pinch": 7.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.7045106887817383,
+  "m_bridge": 4.0,
+  "m_pinch": 3.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.7096242308616638,
+  "m_bridge": 5.0,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.42884841561317444,
+  "m_bridge": 6.0,
+  "m_pinch": 3.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.592805802822113,
+  "m_bridge": 3.5,
+  "m_pinch": 3.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "rand3",
+  "type": "lateral",
+  "cos": -0.34086528420448303,
+  "m_bridge": 2.0,
+  "m_pinch": 0.5,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "t2t/line-end",
+  "cos": -0.6541846990585327,
+  "m_bridge": 3.5,
+  "m_pinch": 0.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "t2t/line-end",
+  "cos": -0.6998298168182373,
+  "m_bridge": 3.5,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "t2t/line-end",
+  "cos": -0.7168813347816467,
+  "m_bridge": 8.5,
+  "m_pinch": 11.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "t2t/line-end",
+  "cos": -0.5950555205345154,
+  "m_bridge": 8.5,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "t2t/line-end",
+  "cos": -0.35172039270401,
+  "m_bridge": 267.0,
+  "m_pinch": 12.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "t2t/line-end",
+  "cos": -0.46788668632507324,
+  "m_bridge": 267.0,
+  "m_pinch": 5.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.6300608515739441,
+  "m_bridge": 3.5,
+  "m_pinch": 6.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.3275260329246521,
+  "m_bridge": 2.5,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.03198922425508499,
+  "m_bridge": 4.0,
+  "m_pinch": 11.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.644670307636261,
+  "m_bridge": 6.5,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.56451416015625,
+  "m_bridge": 5.5,
+  "m_pinch": 2.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": 0.32945677638053894,
+  "m_bridge": 4.0,
+  "m_pinch": 6.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.08194953203201294,
+  "m_bridge": 5.0,
+  "m_pinch": 9.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.657196581363678,
+  "m_bridge": 5.5,
+  "m_pinch": 5.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.5837477445602417,
+  "m_bridge": 3.5,
+  "m_pinch": 6.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.44687601923942566,
+  "m_bridge": 2.0,
+  "m_pinch": 10.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.6130631566047668,
+  "m_bridge": 4.5,
+  "m_pinch": 1.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": 0.12036080658435822,
+  "m_bridge": 6.0,
+  "m_pinch": 3.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.1271846741437912,
+  "m_bridge": 6.5,
+  "m_pinch": 8.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.6010313630104065,
+  "m_bridge": 4.0,
+  "m_pinch": 2.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": 0.024058742448687553,
+  "m_bridge": 5.5,
+  "m_pinch": 10.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.2811046242713928,
+  "m_bridge": 3.0,
+  "m_pinch": 4.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.42409247159957886,
+  "m_bridge": 6.0,
+  "m_pinch": 3.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.26747316122055054,
+  "m_bridge": 5.5,
+  "m_pinch": 4.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": 0.13596846163272858,
+  "m_bridge": 5.0,
+  "m_pinch": 4.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.6852379441261292,
+  "m_bridge": 4.0,
+  "m_pinch": 2.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.5301968455314636,
+  "m_bridge": 2.5,
+  "m_pinch": 8.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.41840940713882446,
+  "m_bridge": 2.0,
+  "m_pinch": 8.5,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.6485190391540527,
+  "m_bridge": 5.0,
+  "m_pinch": 1.0,
+  "status": "tight (<1.5 nm)"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.4463147819042206,
+  "m_bridge": 4.0,
+  "m_pinch": 7.0,
+  "status": "comfortable"
+ },
+ {
+  "clip": "conflict_g50",
+  "type": "lateral",
+  "cos": -0.6006667017936707,
+  "m_bridge": 2.0,
+  "m_pinch": 14.5,
+  "status": "comfortable"
+ }
+]
