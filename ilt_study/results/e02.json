@@ -1,0 +1,608 @@
+{
+ "seed1": {
+  "bias": [
+   {
+    "b": -4.0,
+    "lateral_bridge": 9.0,
+    "lateral_pinch": -28.0,
+    "along-track_bridge": 44.5,
+    "along-track_pinch": -25.0
+   },
+   {
+    "b": -3.5,
+    "lateral_bridge": 8.5,
+    "lateral_pinch": -28.0,
+    "along-track_bridge": 41.0,
+    "along-track_pinch": -25.0
+   },
+   {
+    "b": -3.0,
+    "lateral_bridge": 7.5,
+    "lateral_pinch": -28.0,
+    "along-track_bridge": 36.5,
+    "along-track_pinch": -25.0
+   },
+   {
+    "b": -2.5,
+    "lateral_bridge": 6.5,
+    "lateral_pinch": -15.0,
+    "along-track_bridge": 32.5,
+    "along-track_pinch": -16.02117347717285
+   },
+   {
+    "b": -2.0,
+    "lateral_bridge": 5.5,
+    "lateral_pinch": -9.5,
+    "along-track_bridge": 27.0,
+    "along-track_pinch": -10.5
+   },
+   {
+    "b": -1.5,
+    "lateral_bridge": 4.5,
+    "lateral_pinch": -6.5,
+    "along-track_bridge": 22.0,
+    "along-track_pinch": -8.0
+   },
+   {
+    "b": -1.0,
+    "lateral_bridge": 3.5,
+    "lateral_pinch": -4.0,
+    "along-track_bridge": 16.5,
+    "along-track_pinch": -5.5
+   },
+   {
+    "b": -0.5,
+    "lateral_bridge": 2.0,
+    "lateral_pinch": -1.5,
+    "along-track_bridge": 10.5,
+    "along-track_pinch": -3.5
+   },
+   {
+    "b": 0.0,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": 0.5,
+    "along-track_bridge": 4.0,
+    "along-track_pinch": -1.5
+   },
+   {
+    "b": 0.5,
+    "lateral_bridge": -0.5,
+    "lateral_pinch": 2.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 1.0
+   },
+   {
+    "b": 1.0,
+    "lateral_bridge": -2.5,
+    "lateral_pinch": 4.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 2.990995407104492
+   },
+   {
+    "b": 1.5,
+    "lateral_bridge": -4.5,
+    "lateral_pinch": 5.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 4.490512847900391
+   },
+   {
+    "b": 2.0,
+    "lateral_bridge": -6.5,
+    "lateral_pinch": 7.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 5.490192413330078
+   },
+   {
+    "b": 2.5,
+    "lateral_bridge": -8.5,
+    "lateral_pinch": 9.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 6.489870071411133
+   },
+   {
+    "b": 3.0,
+    "lateral_bridge": -11.0,
+    "lateral_pinch": 11.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 7.4895477294921875
+   },
+   {
+    "b": 3.5,
+    "lateral_bridge": -14.5,
+    "lateral_pinch": 12.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 7.989387512207031
+   },
+   {
+    "b": 4.0,
+    "lateral_bridge": -19.0,
+    "lateral_pinch": 13.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 8.989067077636719
+   }
+  ],
+  "dose": [
+   {
+    "dc": 0.95,
+    "lateral_bridge": 2.5,
+    "lateral_pinch": -3.0,
+    "along-track_bridge": 13.5,
+    "along-track_pinch": -4.5
+   },
+   {
+    "dc": 0.96,
+    "lateral_bridge": 2.0,
+    "lateral_pinch": -2.0,
+    "along-track_bridge": 11.5,
+    "along-track_pinch": -4.0
+   },
+   {
+    "dc": 0.97,
+    "lateral_bridge": 2.0,
+    "lateral_pinch": -1.5,
+    "along-track_bridge": 9.5,
+    "along-track_pinch": -3.5
+   },
+   {
+    "dc": 0.98,
+    "lateral_bridge": 2.0,
+    "lateral_pinch": -1.0,
+    "along-track_bridge": 8.0,
+    "along-track_pinch": -2.5
+   },
+   {
+    "dc": 0.99,
+    "lateral_bridge": 1.5,
+    "lateral_pinch": 0.0,
+    "along-track_bridge": 6.0,
+    "along-track_pinch": -2.0
+   },
+   {
+    "dc": 1.0,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": 0.5,
+    "along-track_bridge": 4.0,
+    "along-track_pinch": -1.5
+   },
+   {
+    "dc": 1.01,
+    "lateral_bridge": 0.5,
+    "lateral_pinch": 1.0,
+    "along-track_bridge": -1.0,
+    "along-track_pinch": -0.5
+   },
+   {
+    "dc": 1.02,
+    "lateral_bridge": 0.5,
+    "lateral_pinch": 1.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 0.0
+   },
+   {
+    "dc": 1.03,
+    "lateral_bridge": 0.0,
+    "lateral_pinch": 2.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 0.5
+   },
+   {
+    "dc": 1.04,
+    "lateral_bridge": -0.5,
+    "lateral_pinch": 2.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 1.5
+   },
+   {
+    "dc": 1.05,
+    "lateral_bridge": -0.5,
+    "lateral_pinch": 3.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 2.0
+   }
+  ]
+ },
+ "seed3": {
+  "bias": [
+   {
+    "b": -4.0,
+    "lateral_bridge": 8.5,
+    "lateral_pinch": -28.0,
+    "along-track_bridge": 43.5,
+    "along-track_pinch": -25.0
+   },
+   {
+    "b": -3.5,
+    "lateral_bridge": 8.0,
+    "lateral_pinch": -28.0,
+    "along-track_bridge": 40.5,
+    "along-track_pinch": -25.0
+   },
+   {
+    "b": -3.0,
+    "lateral_bridge": 7.0,
+    "lateral_pinch": -17.0,
+    "along-track_bridge": 36.0,
+    "along-track_pinch": -19.0
+   },
+   {
+    "b": -2.5,
+    "lateral_bridge": 6.5,
+    "lateral_pinch": -13.5,
+    "along-track_bridge": 31.0,
+    "along-track_pinch": -16.5
+   },
+   {
+    "b": -2.0,
+    "lateral_bridge": 5.5,
+    "lateral_pinch": -10.5,
+    "along-track_bridge": 26.0,
+    "along-track_pinch": -13.5
+   },
+   {
+    "b": -1.5,
+    "lateral_bridge": 4.5,
+    "lateral_pinch": -7.5,
+    "along-track_bridge": 21.0,
+    "along-track_pinch": -10.0
+   },
+   {
+    "b": -1.0,
+    "lateral_bridge": 3.5,
+    "lateral_pinch": -4.0,
+    "along-track_bridge": 16.5,
+    "along-track_pinch": -7.0
+   },
+   {
+    "b": -0.5,
+    "lateral_bridge": 2.5,
+    "lateral_pinch": -1.0,
+    "along-track_bridge": 10.5,
+    "along-track_pinch": -4.0
+   },
+   {
+    "b": 0.0,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": 0.5,
+    "along-track_bridge": 3.5,
+    "along-track_pinch": -0.5
+   },
+   {
+    "b": 0.5,
+    "lateral_bridge": -0.5,
+    "lateral_pinch": 2.5,
+    "along-track_bridge": -14.0,
+    "along-track_pinch": 1.5
+   },
+   {
+    "b": 1.0,
+    "lateral_bridge": -2.0,
+    "lateral_pinch": 3.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 3.0
+   },
+   {
+    "b": 1.5,
+    "lateral_bridge": -3.5,
+    "lateral_pinch": 5.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 4.5
+   },
+   {
+    "b": 2.0,
+    "lateral_bridge": -4.5,
+    "lateral_pinch": 7.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 5.5
+   },
+   {
+    "b": 2.5,
+    "lateral_bridge": -6.5,
+    "lateral_pinch": 8.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 7.0
+   },
+   {
+    "b": 3.0,
+    "lateral_bridge": -8.5,
+    "lateral_pinch": 10.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 8.5
+   },
+   {
+    "b": 3.5,
+    "lateral_bridge": -11.5,
+    "lateral_pinch": 11.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 9.0
+   },
+   {
+    "b": 4.0,
+    "lateral_bridge": -14.5,
+    "lateral_pinch": 12.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 10.0
+   }
+  ],
+  "dose": [
+   {
+    "dc": 0.95,
+    "lateral_bridge": 3.0,
+    "lateral_pinch": -2.0,
+    "along-track_bridge": 13.0,
+    "along-track_pinch": -5.0
+   },
+   {
+    "dc": 0.96,
+    "lateral_bridge": 2.5,
+    "lateral_pinch": -2.0,
+    "along-track_bridge": 11.5,
+    "along-track_pinch": -4.0
+   },
+   {
+    "dc": 0.97,
+    "lateral_bridge": 2.0,
+    "lateral_pinch": -1.0,
+    "along-track_bridge": 9.5,
+    "along-track_pinch": -3.5
+   },
+   {
+    "dc": 0.98,
+    "lateral_bridge": 1.5,
+    "lateral_pinch": -1.0,
+    "along-track_bridge": 8.0,
+    "along-track_pinch": -2.5
+   },
+   {
+    "dc": 0.99,
+    "lateral_bridge": 1.5,
+    "lateral_pinch": 0.0,
+    "along-track_bridge": 6.0,
+    "along-track_pinch": -1.5
+   },
+   {
+    "dc": 1.0,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": 0.5,
+    "along-track_bridge": 3.5,
+    "along-track_pinch": -0.5
+   },
+   {
+    "dc": 1.01,
+    "lateral_bridge": 0.5,
+    "lateral_pinch": 1.0,
+    "along-track_bridge": 0.5,
+    "along-track_pinch": 0.0
+   },
+   {
+    "dc": 1.02,
+    "lateral_bridge": 0.5,
+    "lateral_pinch": 1.5,
+    "along-track_bridge": -3.0,
+    "along-track_pinch": 0.5
+   },
+   {
+    "dc": 1.03,
+    "lateral_bridge": 0.0,
+    "lateral_pinch": 2.0,
+    "along-track_bridge": -7.0,
+    "along-track_pinch": 1.0
+   },
+   {
+    "dc": 1.04,
+    "lateral_bridge": -0.5,
+    "lateral_pinch": 2.5,
+    "along-track_bridge": -11.5,
+    "along-track_pinch": 1.5
+   },
+   {
+    "dc": 1.05,
+    "lateral_bridge": -1.0,
+    "lateral_pinch": 3.0,
+    "along-track_bridge": -19.0,
+    "along-track_pinch": 2.0
+   }
+  ]
+ },
+ "seed5": {
+  "bias": [
+   {
+    "b": -4.0,
+    "lateral_bridge": 8.0,
+    "lateral_pinch": -28.0,
+    "along-track_bridge": 45.5,
+    "along-track_pinch": -19.0
+   },
+   {
+    "b": -3.5,
+    "lateral_bridge": 7.5,
+    "lateral_pinch": -18.5,
+    "along-track_bridge": 42.0,
+    "along-track_pinch": -16.5
+   },
+   {
+    "b": -3.0,
+    "lateral_bridge": 6.5,
+    "lateral_pinch": -14.5,
+    "along-track_bridge": 37.5,
+    "along-track_pinch": -13.5
+   },
+   {
+    "b": -2.5,
+    "lateral_bridge": 5.5,
+    "lateral_pinch": -11.5,
+    "along-track_bridge": 32.5,
+    "along-track_pinch": -12.5
+   },
+   {
+    "b": -2.0,
+    "lateral_bridge": 4.5,
+    "lateral_pinch": -10.0,
+    "along-track_bridge": 27.0,
+    "along-track_pinch": -11.5
+   },
+   {
+    "b": -1.5,
+    "lateral_bridge": 3.5,
+    "lateral_pinch": -8.5,
+    "along-track_bridge": 21.5,
+    "along-track_pinch": -10.0
+   },
+   {
+    "b": -1.0,
+    "lateral_bridge": 2.5,
+    "lateral_pinch": -5.5,
+    "along-track_bridge": 16.5,
+    "along-track_pinch": -8.0
+   },
+   {
+    "b": -0.5,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": -2.5,
+    "along-track_bridge": 10.0,
+    "along-track_pinch": -6.5
+   },
+   {
+    "b": 0.0,
+    "lateral_bridge": 0.0,
+    "lateral_pinch": -0.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -4.5
+   },
+   {
+    "b": 0.5,
+    "lateral_bridge": -1.5,
+    "lateral_pinch": 1.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -2.5
+   },
+   {
+    "b": 1.0,
+    "lateral_bridge": -4.0,
+    "lateral_pinch": 2.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -1.0
+   },
+   {
+    "b": 1.5,
+    "lateral_bridge": -7.0,
+    "lateral_pinch": 4.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 1.0
+   },
+   {
+    "b": 2.0,
+    "lateral_bridge": -10.0,
+    "lateral_pinch": 6.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 3.0
+   },
+   {
+    "b": 2.5,
+    "lateral_bridge": -13.0,
+    "lateral_pinch": 7.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 5.0
+   },
+   {
+    "b": 3.0,
+    "lateral_bridge": -18.0,
+    "lateral_pinch": 9.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 7.0
+   },
+   {
+    "b": 3.5,
+    "lateral_bridge": -28.0,
+    "lateral_pinch": 10.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 8.5
+   },
+   {
+    "b": 4.0,
+    "lateral_bridge": -28.0,
+    "lateral_pinch": 11.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": 9.5
+   }
+  ],
+  "dose": [
+   {
+    "dc": 0.95,
+    "lateral_bridge": 2.0,
+    "lateral_pinch": -3.5,
+    "along-track_bridge": 12.5,
+    "along-track_pinch": -7.0
+   },
+   {
+    "dc": 0.96,
+    "lateral_bridge": 1.5,
+    "lateral_pinch": -2.5,
+    "along-track_bridge": 10.0,
+    "along-track_pinch": -6.5
+   },
+   {
+    "dc": 0.97,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": -2.5,
+    "along-track_bridge": -5.5,
+    "along-track_pinch": -6.0
+   },
+   {
+    "dc": 0.98,
+    "lateral_bridge": 1.0,
+    "lateral_pinch": -1.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -5.5
+   },
+   {
+    "dc": 0.99,
+    "lateral_bridge": 0.5,
+    "lateral_pinch": -1.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -5.0
+   },
+   {
+    "dc": 1.0,
+    "lateral_bridge": 0.0,
+    "lateral_pinch": -0.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -4.5
+   },
+   {
+    "dc": 1.01,
+    "lateral_bridge": 0.0,
+    "lateral_pinch": -0.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -4.0
+   },
+   {
+    "dc": 1.02,
+    "lateral_bridge": -0.5,
+    "lateral_pinch": 0.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -3.5
+   },
+   {
+    "dc": 1.03,
+    "lateral_bridge": -1.0,
+    "lateral_pinch": 1.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -3.0
+   },
+   {
+    "dc": 1.04,
+    "lateral_bridge": -1.0,
+    "lateral_pinch": 1.5,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -2.5
+   },
+   {
+    "dc": 1.05,
+    "lateral_bridge": -1.5,
+    "lateral_pinch": 2.0,
+    "along-track_bridge": -30.0,
+    "along-track_pinch": -2.0
+   }
+  ]
+ }
+}

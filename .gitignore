@@ -50,3 +50,4 @@ htmlcov/
 *.tmp
 *.bak
 *.log
+ilt_study/results/cache_*.pt
