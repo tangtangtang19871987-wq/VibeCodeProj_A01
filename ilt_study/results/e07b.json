@@ -1,0 +1,22 @@
+[
+ {
+  "seed": 1,
+  "config": "band 8 nm",
+  "n_hot": 21,
+  "n_hot_sites": 20,
+  "n_bridge_all": 4,
+  "n_pinch_all": 16,
+  "topo_bridge": 1,
+  "topo_open": 0,
+  "min_bridge_all": -14.5,
+  "min_pinch_all": -8.5,
+  "n_pinch": 6,
+  "n_bridge": 0,
+  "n_t2t": 4,
+  "n_diag": 0,
+  "n_lend": 10,
+  "sraf_print": 0,
+  "zone_bridge": 52,
+  "zone_pinch": 30
+ }
+]
