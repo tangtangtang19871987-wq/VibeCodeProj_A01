@@ -42,7 +42,7 @@ for seed in (1, 2, 3, 4, 5, 6):
     Pfull = Problem(clip)
     Psingle = Problem(clip, sites=make_sites(clip, t2t_offsets=(0.0,)), imager=Pfull.im)
     for name, PP in (("cost: single central t2t cut", Psingle), ("cost: three parallel t2t cuts", Pfull)):
-        _, rho, _, _ = PP.run(Recipe(**GOOD))
+        _, rho, _ = PP.run(Recipe(**GOOD))
         rr = Pfull.evaluate(rho)
         out["cuts"].append(dict(seed=seed, config=name, **summarize(rr)))
         log(seed, name, {k: out["cuts"][-1][k] for k in ("n_hot", "n_t2t", "topo_bridge")})
