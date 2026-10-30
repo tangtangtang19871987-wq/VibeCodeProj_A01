@@ -59,7 +59,7 @@ for gap in [60, 50, 44, 38, 32]:
         mt, ml = float(r["margin"][t2t].min()), float(r["margin"][lend].min())
         out["gap_scan"].append(dict(gap=gap, w_bridge=wb, t2t=mt, lend=ml))
         log(f"gap {gap} wb {wb}: t2t margin {mt:+.1f}  lend margin {ml:+.1f}")
-        best = max(best or -1e9, min(mt, ml))
+        best = min(mt, ml) if best is None else max(best, min(mt, ml))
     if best < 0 and chosen is None:
         chosen = gap
 log("first infeasible gap:", chosen)

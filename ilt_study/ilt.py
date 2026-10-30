@@ -154,6 +154,7 @@ class Recipe:
     hinge: bool | str = True          # True hinge^2 | False quadratic tracking | 'linear' push
     site_weights: np.ndarray | None = None   # per-site multipliers
     cap: float | None = None          # cap per-site violation (nm)
+    cap_sites: list | None = None     # if set, the cap applies only to these site ids
     balance_sites: list | None = None # groups of site ids to minimax-balance
     corners_opt: list | None = None   # (dose, fidx, bias); None => default set
     freeze: np.ndarray | None = None  # bool [n,n] True = frozen pixel
@@ -323,7 +324,11 @@ class Problem:
                 else:
                     v = F.relu(viol) if rc.hinge else viol
                     if rc.cap is not None:
-                        v = torch.clamp(v, max=rc.cap)
+                        if rc.cap_sites is None:
+                            v = torch.clamp(v, max=rc.cap)
+                        else:
+                            cm = torch.zeros_like(v, dtype=torch.bool); cm[list(rc.cap_sites)] = True
+                            v = torch.where(cm, torch.clamp(v, max=rc.cap), v)
                     pen = v ** 2 * sw
                 if rc.balance_sites is not None:
                     # replace each group's sum by its max (minimax balancing): the
