@@ -1,0 +1,50 @@
+[
+ {
+  "seed": 2,
+  "config": "band 14 nm",
+  "n_islands": 0,
+  "island_area": 0.0,
+  "attached_extra_area": 55058.04638671875,
+  "n_hot_sites": 14
+ },
+ {
+  "seed": 2,
+  "config": "band 40 nm",
+  "n_islands": 3,
+  "island_area": 764.243408203125,
+  "attached_extra_area": 60928.086181640625,
+  "n_hot_sites": 7
+ },
+ {
+  "seed": 2,
+  "config": "free",
+  "n_islands": 0,
+  "island_area": 0.0,
+  "attached_extra_area": 65237.1181640625,
+  "n_hot_sites": 5
+ },
+ {
+  "seed": 3,
+  "config": "band 14 nm",
+  "n_islands": 0,
+  "island_area": 0.0,
+  "attached_extra_area": 54917.1220703125,
+  "n_hot_sites": 14
+ },
+ {
+  "seed": 3,
+  "config": "band 40 nm",
+  "n_islands": 1,
+  "island_area": 254.747802734375,
+  "attached_extra_area": 58781.700439453125,
+  "n_hot_sites": 3
+ },
+ {
+  "seed": 3,
+  "config": "free",
+  "n_islands": 1,
+  "island_area": 2959.41064453125,
+  "attached_extra_area": 56797.919677734375,
+  "n_hot_sites": 3
+ }
+]

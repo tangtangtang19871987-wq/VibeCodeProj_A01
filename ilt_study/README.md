@@ -40,6 +40,7 @@ The model is held fixed on purpose: the question is what the recipe
 pip install torch numpy matplotlib
 python3 experiments/e01_cosine_limit.py      # each experiment is standalone
 ./run_pipeline.sh                            # E5..E14 in sequence
+# follow-ups: e05b, e07b, e07c, e15 (run_pipeline2..6.sh)
 ```
 Results land in `results/*.json` (+ logs), figures in `figures/`.
 A full run of all experiments takes ~2.5 h on 4 CPU cores.
