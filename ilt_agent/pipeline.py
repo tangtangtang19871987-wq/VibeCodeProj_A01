@@ -83,6 +83,33 @@ def offline_report(an: Analyzer, title="ILT clip analysis", tile_nm=150.0):
         md.append(f"worst width {d['worst_width_nm']} nm, worst space {d['worst_space_nm']} nm "
                   f"(spec {d['spec']}); mask outside target {d['mask_outside_target_frac']}; "
                   f"edge ILS {d.get('edge_ils_per_nm', 'n/a')}\n\n![]({rel(d['png'])})\n")
+    # ---- layout reading (deterministic geometry toolkit)
+    from .layout import LayoutModel
+    lm = LayoutModel(an.b, an.spec)
+    ls = lm.layout_structure()
+    ws = lm.width_space_statistics()
+    md.append("\n## 8. Layout reading (geometry toolkit)\n")
+    md.append(f"Orientation {ls['orientation']} (purity {ls['orientation_purity']}), pitch {ls['pitch_nm']} nm, "
+              f"tracks {ls['tracks_used']}, line widths {ls['line_width_nm']['values']} nm, {ls['n_line_ends']} line "
+              f"ends ({ls['line_end_gap_kinds']}), polygon classes {ls['classes']}; source: {ls['source']}.\n\n")
+    md.append(_table([{"measure": k, **v} for k, v in ws.items()], ["measure", "n", "min", "p5", "median", "max"]))
+    le = lm.list_line_ends(limit=10)["line_ends"]
+    md.append("\nTightest line ends:\n\n" + _table(le, ["poly", "x_nm", "y_nm", "facing", "width_nm", "gap_nm",
+                                                            "gap_kind", "context"]))
+    corr = lm.mask_target_correspondence()
+    md.append(f"\nMask: {len(corr['detached'])} detached assists, {len(corr['merging'])} mask shapes joining "
+              f"different targets:\n\n" + _table(corr["merging"], ["targets", "x_nm", "y_nm", "neck_width_nm",
+                                                                       "target_gap_nm"]))
+    bias = lm.mask_bias_statistics()
+    md.append(f"\nMask bias along target normals: {bias.get('bias_nm')}\n")
+    gt = lm.gauge_cd_table(limit=8)
+    md.append(f"\nGauges ({gt['by_kind']}), worst margin first:\n\n" +
+              _table(gt["gauges"], ["id", "kind", "ref_nm", "design_nm", "nominal_cd", "min_cd", "worst_condition",
+                                    "margin_to_spec_nm", "dCD_per_1pct_dose_nm", "MEEF"]))
+    pb = lm.line_end_pullback(8)
+    md.append("\nLine-end pull-back (worst first):\n\n" +
+              _table(pb["line_ends"], ["poly", "x_nm", "y_nm", "facing", "gap_nm", "max_pullback_nm",
+                                       "min_pullback_nm", "worst_condition"]))
     path = os.path.join(an.outdir, "report.md")
     with open(path, "w") as fh:
         fh.write("\n".join(md))

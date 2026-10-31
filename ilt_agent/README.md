@@ -26,6 +26,28 @@ images, and writes the interpretation.
 | `agent.py` | system prompt with the analysis protocol (global → regional → anomalies → pattern classes → close-ups → mask rules → report, facts separated from interpretation) and `run_agent()` returning the answer and the tool trace |
 | `pipeline.py` | the same analyses in a fixed order without any LLM → `report.md` + figures (offline / CI / evidence pack to check the agent against) |
 
+## Deterministic layout-reading and geometry toolkit (`layout/`, 25 tools)
+
+Vector polygon layers (exact pixel-edge polygonization, or the drawn polygons from
+`bundle.meta["target_polygons"]`) with an STRtree index, edges decomposed per ring, and
+DRC-style edge-pair measurement by ray casting. Every tool returns JSON in nm.
+
+| group | tools | what they extract |
+|---|---|---|
+| structure | `layout_structure`, `list_polygons`, `describe_polygon`, `list_line_ends`, `pattern_context` | polygon classes (line / L / T / cross / pad / island / complex), dominant direction, pitch (robust to empty tracks), track index, widths/lengths, every line end with facing direction, gap and gap type, dense / semi-isolated / isolated context, multi-radius density |
+| drc | `width_space_statistics`, `design_rule_check`, `corner_to_corner_spacing` | width per edge, spaces typed side-side / end-end (tip-to-tip) / end-side / notch, corner-to-corner diagonal spacing, rule violations (width, space, T2T, E2S, C2C, area, edge length) |
+| patterns | `pattern_catalog`, `find_similar_patterns` | D4-invariant (rotation + mirror) fingerprints of line-end / corner contexts, number of distinct contexts, FFT search for every copy of a window |
+| mask | `mask_target_correspondence`, `mask_bias_statistics`, `line_end_treatment`, `assist_features`, `mask_complexity` | mask<->target mapping, detached assists (size, width, distance), attached appendages beyond a band, mask shapes joining different targets (neck width, target gap), bias along edge normals, hammerhead extension/width ratio per line end, VSB shot proxy, vertices, curvature |
+| contours | `gauge_cd_table`, `process_window`, `line_end_pullback`, `corner_rounding`, `edge_epe` | automatic width / space / tip-to-tip gauges measured on every condition (condition names parsed into dose / focus / mask bias): nominal, min, worst condition, margin to spec, dCD per 1 % dose, MEEF, focus tilt/curvature; pull-back per end and condition; corner rounding radius; EPE per drawn edge |
+| query | `features_in_region`, `nearest_features`, `measure_distance`, `cutline_profile` | everything in a box, nearest polygons / ends, point or polygon-polygon distance with closest points, target / mask / printed edge crossings and image log-slope along any cutline |
+
+Validated by `tests/test_layout_tools.py` on a scene with known geometry (pitch 60, width 30,
+space 30, tip-to-tip 40, mask bias +2, hammerheads, a 6 nm assist bar, a 5 nm mask join, 5 nm
+pull-back, dose/mask CD steps giving 0.8 nm per 1 % dose and MEEF 1, 8 nm corner rounding,
+rotated-L pattern identity). On the ILT demo clip it reads pitch 74.51 nm, widths 30/37/44 nm,
+tip-to-tip gaps 50/60/140 nm (the generator's values), 3 mask shapes joining different targets,
+and the 17.6 nm worst line-end pull-back (spec 15 nm).
+
 ## Use
 
 ```bash
@@ -53,7 +75,7 @@ simulator is converted.
 
 ## Validation
 
-* `tests/` (10 tests, `cd ilt_agent && pytest`): synthetic ground truth for bridge / pinch /
+* `tests/` (21 tests, `cd ilt_agent && pytest`): synthetic ground truth for bridge / pinch /
   printed-without-target location and size, EPE sign and magnitude, local width, MRC
   islands, anomaly localisation, bundle round-trip, rendering; the real `create_agent`
   graph driven by a scripted chat model (tool calls → tool results → answer); and the

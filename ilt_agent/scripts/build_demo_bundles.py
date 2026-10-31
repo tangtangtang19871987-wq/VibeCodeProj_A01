@@ -39,7 +39,21 @@ def bundle_from(P, rho, meta):
     meta = {**meta, "spec": {"w_min_nm": P.spec.w_min, "s_min_nm": P.spec.s_min, "epe_tol_nm": 5.0},
             "simulator": "ilt_study scalar SOCS, 193i NA1.35, leaf X-dipole, pitch 74.5 nm",
             "note": "periodic clip; analysis treats the frame as non-periodic"}
+    meta["target_polygons"] = clip_rectangles(P.clip)
     return LayoutBundle(P.T.numpy() > 0.5, P.hard_mask(rho).numpy(), printed, P.g.dx, nominal, inten, meta)
+
+
+def clip_rectangles(clip):
+    """Exact drawn rectangles (nm) of a periodic clip, split where a segment wraps in y."""
+    rects = []
+    for s in clip.segs:
+        x0, x1 = clip.xc(s.track) - s.width / 2, clip.xc(s.track) + s.width / 2
+        y0, y1 = s.y0, s.y0 + s.length
+        pieces = [(y0, min(y1, clip.L))] + ([(0.0, y1 - clip.L)] if y1 > clip.L else [])
+        for a, b in pieces:
+            if b - a > 1e-6:
+                rects.append([[x0, a], [x1, a], [x1, b], [x0, b]])
+    return rects
 
 
 def main():

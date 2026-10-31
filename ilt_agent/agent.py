@@ -6,6 +6,8 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from .analysis import Analyzer
 from .llm import make_chat_model, text_of
+from .layout import LayoutModel
+from .layout_tools import build_layout_tools
 from .tools import build_tools
 
 SYSTEM_PROMPT = """You are a computational-lithography analyst. You examine one ILT clip: the design
@@ -23,6 +25,24 @@ How to work:
    would settle a question, use visual_inspect_region (if available) or render_region.
 5. Check the mask itself with check_mask_rules and analyze_epe / analyze_pv_band for margins.
 
+Reading the layout (deterministic geometry tools; use them to ground every statement):
+- layout_structure / list_polygons / describe_polygon / list_line_ends / pattern_context: what is
+  drawn -- direction, pitch, tracks, widths, line ends and their gaps, local density and context.
+- width_space_statistics / design_rule_check / corner_to_corner_spacing: DRC-style measurements
+  of the target (is the drawn layout itself tight here?).
+- pattern_catalog / find_similar_patterns: how many distinct contexts exist and where else the
+  geometry of a hotspot repeats (does the same context fail everywhere?).
+- mask_target_correspondence / mask_bias_statistics / line_end_treatment / assist_features /
+  mask_complexity: what the ILT did to the mask -- bias, hammerheads, assists, mask shapes joining
+  two targets, complexity.
+- gauge_cd_table / process_window / line_end_pullback / corner_rounding / edge_epe: printed CDs on
+  every condition, sensitivities (dose, focus, MEEF), pull-back, rounding, per-edge EPE.
+- features_in_region / nearest_features / measure_distance / cutline_profile: targeted queries.
+Typical chain for one hotspot: inspect_region -> features_in_region -> describe_polygon of the
+polygons involved -> cutline_profile across the problem -> process_window of the nearest gauge ->
+line_end_treatment / mask_target_correspondence to see what the mask does there ->
+find_similar_patterns to see whether the same context fails elsewhere.
+
 What to report: for every important problem give its location in nm, type (bridge, pinch, open,
 line-end pull-back, EPE, assist printing, mask-rule issue, unusual region), the process conditions
 where it fails, the measured value against the spec, the pattern class it belongs to, and the most
@@ -39,6 +59,7 @@ def build_agent(analyzer: Analyzer, model=None, vision_model=None, use_vision=Tr
     chat = model or make_chat_model()
     vision = vision_model if vision_model is not None else (chat if (use_vision and model is None) else None)
     tools = build_tools(analyzer, vision_chat=vision)
+    tools += build_layout_tools(LayoutModel(analyzer.b, analyzer.spec), analyzer)
     return create_agent(chat, tools=tools, system_prompt=SYSTEM_PROMPT)
 
 
